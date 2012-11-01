@@ -14,7 +14,7 @@ def recursefs(d):
             recursefs(d+"/"+f)
 
 for game in games:
-    ofile = open(STATIC_DIR+game+"/filelist.html", "w")
+    ofile = open(STATIC_DIR+game+"/filelist"+FEXT, "w")
     ofile.write("""
 <h2>Pokemon %s Internal Filelist</h2>
 <table>\n"""%game.title())
