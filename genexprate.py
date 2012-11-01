@@ -6,7 +6,7 @@ FNAME = "exprate"+FEXT
 
 for game in games:
     fmt = "I"*101
-    ofile = open(STATIC_DIR+game+FORMAT_SUBDIR+FNAME, "w")
+    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
     ofile.write("""
 <h2>Pokemon %s Experience/Growth Table Format</h2>
 <p>Structure Size: %d bytes</p>\n<p>4 bytes * 101 entries</p>\n"""%(game.title(), struct.calcsize(fmt)))

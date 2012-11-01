@@ -6,7 +6,7 @@ FNAME = "levelmoves"+FEXT
 
 for game in games:
     fmt = movefmt[game].pop(0)
-    ofile = open(STATIC_DIR+game+FORMAT_SUBDIR+FNAME, "w")
+    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
     ofile.write("""
 <h2>Pokemon %s Level-Up Move Format</h2>
 <p>Structure Size: %d bytes</p>

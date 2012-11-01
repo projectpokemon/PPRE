@@ -7,7 +7,7 @@ FNAME = "baseevo"+FEXT
 for game in games:
     fmt = "H"
     fmtsize = struct.calcsize(fmt)
-    ofile = open(STATIC_DIR+game+FORMAT_SUBDIR+FNAME, "w")
+    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
     ofile.write("""
 <h2>Pokemon %s Base Evolution/Baby Lookup</h2>
 <p>Structure Size: %d bytes</p>\n<p>2 bytes * POKEMON</p>\n"""%(game.title(), fmtsize))

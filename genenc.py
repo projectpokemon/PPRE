@@ -9,7 +9,7 @@ datafmt = encfmt
 for game in games:
     fmt = datafmt[game].pop(0)
     fmtsize = struct.calcsize(fmt)
-    ofile = open(STATIC_DIR+game+FORMAT_SUBDIR+FNAME, "w")
+    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
     ofile.write("""
 <h2>Pokemon %s Encounter Format</h2>
 <p>Structure Size: %d bytes</p>

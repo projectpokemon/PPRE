@@ -6,7 +6,7 @@ FNAME = "evo"+FEXT
 
 for game in games:
     fmt = evofmt[game].pop(0)
-    ofile = open(STATIC_DIR+game+FORMAT_SUBDIR+FNAME, "w")
+    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
     ofile.write("""
 <h2>Pokemon %s Evolution Format</h2>
 <p>Structure Size: %d bytes</p>

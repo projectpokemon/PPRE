@@ -234,7 +234,7 @@ encfmt = {
 
 DATA_DIR = "local/data/"
 STATIC_DIR = "static/"
-FORMAT_SUBDIR = "/formats/"
+FORMAT_SUBDIR = "formats/"
 
 POKEDEX_FILE = {
     "diamond":"/poketool/personal/personal.narc",
@@ -295,3 +295,7 @@ def writefmt(ofile, fmt, datafmt):
         ofs += struct.calcsize(fmt[0])
         fmt = fmt[1:]
         i += 1
+        
+if __name__ == "__main__":
+    import genbaseevo, genenc, genevo, genexprate, genmoves, genpokedex, gentrdata
+    import genfilelist
