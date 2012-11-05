@@ -143,7 +143,7 @@ for game in games:
     alg = textfmt[game][1]
     getlen = textfmt[game][2]
     ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
-    ofile.write("<code>\n")
+    ofile.write("<code class='preservewhite'>\n")
     for line in alg.split("\n"):
         ofile.write("<p>%s</p>\n"%line)
     ofile.write("</code>\n")
