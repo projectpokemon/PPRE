@@ -268,6 +268,10 @@ ENC_FILE = {
     "diamond":"/fielddata/encountdata/d_enc_data.narc",
 }
 
+MSG_FILE = {
+    "diamond":"/msgdata/msg.narc",
+}
+
 for game in games:
     if not os.path.exists(STATIC_DIR+game):
         os.mkdir(STATIC_DIR+game)
