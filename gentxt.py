@@ -135,7 +135,8 @@ def gen4get(f):
     
 
 textfmt = {
-    "diamond":[gen4get, gen4alg, len]
+    "diamond":[gen4get, gen4alg, len],
+    "platinum":[gen4get, gen4alg, len]
 }
 
 for game in games:
