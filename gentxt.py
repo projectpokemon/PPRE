@@ -173,5 +173,6 @@ for game in games:
         for k, text in enumerate(texts):
             mfile.write("<p><a href='#entry%i' name='entry%i'># %s</a> %s</p>\n"%(k, k, text[0], text[1].encode("utf-8")))
         mfile.close()
+    ofile.write("</table>\n")
     ofile.close()
     
