@@ -17,6 +17,7 @@ fs = {
         "/poketool/personal/pms.narc":"<a href='baseevo"+FEXT+"'>Base Evolutions/Baby Pokemon</a>",
         "/poketool/trainer/trdata.narc":"<a href='trdata"+FEXT+"'>Trainer data</a>",
         "/fielddata/encountdata/d_enc_data.narc":"<a href='enc"+FEXT+"'>Encounter Data</a>",
+        "/msgdata/msg.narc":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
         },
 }
 
@@ -301,5 +302,5 @@ def writefmt(ofile, fmt, datafmt):
         i += 1
         
 if __name__ == "__main__":
-    import genbaseevo, genenc, genevo, genexprate, genmoves, genpokedex, gentrdata
+    import genbaseevo, genenc, genevo, genexprate, genmoves, genpokedex, gentrdata, gentxt
     import genfilelist
