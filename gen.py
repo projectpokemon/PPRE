@@ -24,6 +24,7 @@ fs = {
         "/poketool/personal/pms.narc":"<a href='baseevo"+FEXT+"'>Base Evolutions/Baby Pokemon</a>",
         "/poketool/trainer/trdata.narc":"<a href='trdata"+FEXT+"'>Trainer data</a>",
         "/fielddata/encountdata/d_enc_data.narc":"<a href='enc"+FEXT+"'>Encounter Data</a>",
+        "/fielddata/encountdata/p_enc_data.narc":"Pearl Encounter Data",
         "/msgdata/msg.narc":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
         },
     "platinum":{
@@ -35,6 +36,12 @@ fs = {
         "/poketool/trainer/trdata.narc":"<a href='trdata"+FEXT+"'>Trainer data</a>",
         "/fielddata/encountdata/pl_enc_data.narc":"<a href='enc"+FEXT+"'>Encounter Data</a>",
         "/msgdata/pl_msg.narc":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
+        
+        "/poketool/personal/personal.narc":"DP Pokemon Data",
+        "/poketool/personal/growtbl.narc":"DP Experience Table",
+        "/fielddata/encountdata/d_enc_data.narc":"Diamond Encounter Data",
+        "/fielddata/encountdata/p_enc_data.narc":"Pearl Encounter Data",
+        "/msgdata/msg.narc":"DP Message Files",
         },
 }
 
