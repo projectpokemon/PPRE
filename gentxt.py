@@ -136,7 +136,8 @@ def gen4get(f):
 
 textfmt = {
     "diamond":[gen4get, gen4alg, len],
-    "platinum":[gen4get, gen4alg, len]
+    "platinum":[gen4get, gen4alg, len],
+    "heartgold":[gen4get, gen4alg, len]
 }
 
 for game in games:
@@ -172,7 +173,7 @@ for game in games:
 <p><a href="../%s">Message File Index</a></p>
 """%(game.title(), j, MSG_FILE[game], j, FORMAT_SUBDIR, FNAME, FNAME))
         for k, text in enumerate(texts):
-            mfile.write("<p><a href='#entry%i' name='entry%i'># %s</a> %s</p>\n"%(k, k, text[0], text[1].encode("utf-8")))
+            mfile.write("<p><a href='#entry%i' name='entry%i'># %s</a> %s</p>\n"%(k, k, text[0], "<br>".join("<br>".join(text[1].encode("utf-8").split("\\n")).split("\\r"))))
         mfile.close()
     ofile.write("</table>\n")
     ofile.close()

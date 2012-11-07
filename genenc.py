@@ -7,6 +7,8 @@ GAMEFILE = ENC_FILE
 datafmt = encfmt
 
 for game in games:
+    if not game in datafmt:
+        continue
     fmt = datafmt[game].pop(0)
     fmtsize = struct.calcsize(fmt)
     ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")

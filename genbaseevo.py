@@ -5,6 +5,8 @@ import struct
 FNAME = "baseevo"+FEXT
 
 for game in games:
+    if game not in BASEEVO_FILE:
+        continue
     fmt = "H"
     fmtsize = struct.calcsize(fmt)
     ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")

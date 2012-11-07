@@ -2,10 +2,14 @@
 import os, sys
 import struct
 
-allowed_games = ["diamond", "platinum"]
+allowed_games = ["diamond", "platinum", "heartgold"]
 
 games = []
 for a in sys.argv[1:]:
+    if a == "--help":
+        print("Usage: %s [%s]\
+If game is left blank, all games will be processed."%(sys.argv[0], "|".join(allowed_games)))
+        exit()
     if a in allowed_games:
         games.append(a)
 if not games:
@@ -43,6 +47,9 @@ fs = {
         "/fielddata/encountdata/p_enc_data.narc":"Pearl Encounter Data",
         "/msgdata/msg.narc":"DP Message Files",
         },
+    "heartgold":{
+        
+        },
 }
 
 dexfmt = {}
@@ -72,6 +79,7 @@ dexfmt["diamond"] = ["BBBBBBBBBBHHHBBBBBBBBBB",
     ["color"]
 ]
 dexfmt["platinum"] = dexfmt["diamond"]
+dexfmt["heartgold"] = dexfmt["diamond"]
 
 evofmt = {}
 evofmt["diamond"] = ["HHHHHHHHHHHHHHHHHHHHHxx",
@@ -98,6 +106,7 @@ evofmt["diamond"] = ["HHHHHHHHHHHHHHHHHHHHHxx",
     ["target7"],
 ]
 evofmt["platinum"] = evofmt["diamond"]
+evofmt["heartgold"] = evofmt["diamond"]
 
 movefmt = {}
 movefmt["diamond"] = ["H",
@@ -105,6 +114,7 @@ movefmt["diamond"] = ["H",
     ["level", 9, 15, 0x7F],
 ]
 movefmt["platinum"] = movefmt["diamond"]
+movefmt["heartgold"] = movefmt["diamond"]
 
 trdatafmt = {}
 trdatafmt["diamond"] = ["BBBBHHHHIBxxx",
@@ -120,6 +130,7 @@ trdatafmt["diamond"] = ["BBBBHHHHIBxxx",
     ["battletype2"],
 ]
 trdatafmt["platinum"] = trdatafmt["diamond"]
+trdatafmt["heartgold"] = trdatafmt["diamond"] # TODO: may need fixing
 
 trpokefmt = {
     "diamond":["HHHHHHHxx",
@@ -255,6 +266,7 @@ encfmt["diamond"] = ["IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII"+"IIIIII"+"IIIIIIIII"
     "superrod5natid",
 ]
 encfmt["platinum"] = encfmt["diamond"]
+# TODO: heartgold
 
 DATA_DIR = "local/data/"
 STATIC_DIR = "static/"
@@ -263,21 +275,25 @@ FORMAT_SUBDIR = "formats/"
 POKEDEX_FILE = {
     "diamond":"/poketool/personal/personal.narc",
     "platinum":"/poketool/personal/pl_personal.narc",
+    "heartgold":"/a/0/0/2"
 }
 
 EXPRATE_FILE = {
     "diamond":"/poketool/personal/growtbl.narc",
     "platinum":"/poketool/personal/pl_growtbl.narc",
+    "heartgold":"/a/0/0/3"
 }
 
 EVO_FILE = {
     "diamond":"/poketool/personal/evo.narc",
     "platinum":"/poketool/personal/evo.narc",
+    "heartgold":"/a/0/3/4"
 }
 
 LEVELMOVE_FILE = {
     "diamond":"/poketool/personal/wotbl.narc",
     "platinum":"/poketool/personal/wotbl.narc",
+    "heartgold":"/a/0/3/3"
 }
 
 BASEEVO_FILE = {
@@ -288,21 +304,25 @@ BASEEVO_FILE = {
 TRDATA_FILE = {
     "diamond":"/poketool/trainer/trdata.narc",
     "platinum":"/poketool/trainer/trdata.narc",
+    "heartgold":"/a/0/5/5"
 }
 
 TRPOKE_FILE = {
     "diamond":"/poketool/trainer/trpoke.narc",
     "platinum":"/poketool/trainer/trpoke.narc",
+    "heartgold":"/a/0/5/6"
 }
 
 ENC_FILE = {
     "diamond":"/fielddata/encountdata/d_enc_data.narc",
     "platinum":"/fielddata/encountdata/pl_enc_data.narc",
+    "heartgold":"/a/0/3/7"
 }
 
 MSG_FILE = {
     "diamond":"/msgdata/msg.narc",
     "platinum":"/msgdata/pl_msg.narc",
+    "heartgold":"/a/0/2/7"
 }
 
 for game in games:
