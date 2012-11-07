@@ -48,6 +48,14 @@ fs = {
         "/msgdata/msg.narc":"DP Message Files",
         },
     "heartgold":{
+        "/a/0/0/2":"<a href='pokedex"+FEXT+"'>Pokemon data</a>",
+        "/a/0/0/3":"<a href='exprate"+FEXT+"'>Experience Table</a>",
+        "/a/0/3/4":"<a href='evo"+FEXT+"'>Evolutions</a>",
+        "/a/0/3/3":"<a href='levelmoves"+FEXT+"'>Level-Up Moves</a>",
+        "/poketool/personal/pms.narc":"<a href='baseevo"+FEXT+"'>Base Evolutions/Baby Pokemon</a>",
+        "/a/0/5/5":"<a href='trdata"+FEXT+"'>Trainer data</a>",
+        "/a/0/3/7":"<a href='enc"+FEXT+"'>Encounter Data</a>",
+        "/a/0/2/7":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
         
         },
 }
@@ -299,6 +307,7 @@ LEVELMOVE_FILE = {
 BASEEVO_FILE = {
     "diamond":"/poketool/personal/pms.narc",
     "platinum":"/poketool/personal/pms.narc",
+    "heartgold":"/poketool/personal/pms.narc",
 }
 
 TRDATA_FILE = {
