@@ -86,8 +86,8 @@ dexfmt["diamond"] = ["BBBBBBBBBBHHHBBBBBBBBBB",
     ["flee"],
     ["color"]
 ]
-dexfmt["platinum"] = dexfmt["diamond"]
-dexfmt["heartgold"] = dexfmt["diamond"]
+dexfmt["platinum"] = dexfmt["diamond"][:]
+dexfmt["heartgold"] = dexfmt["diamond"][:]
 
 evofmt = {}
 evofmt["diamond"] = ["HHHHHHHHHHHHHHHHHHHHHxx",
@@ -113,16 +113,16 @@ evofmt["diamond"] = ["HHHHHHHHHHHHHHHHHHHHHxx",
     ["param7"],
     ["target7"],
 ]
-evofmt["platinum"] = evofmt["diamond"]
-evofmt["heartgold"] = evofmt["diamond"]
+evofmt["platinum"] = evofmt["diamond"][:]
+evofmt["heartgold"] = evofmt["diamond"][:]
 
 movefmt = {}
 movefmt["diamond"] = ["H",
     ["moveid", 0, 8, 0x1FF],
     ["level", 9, 15, 0x7F],
 ]
-movefmt["platinum"] = movefmt["diamond"]
-movefmt["heartgold"] = movefmt["diamond"]
+movefmt["platinum"] = movefmt["diamond"][:]
+movefmt["heartgold"] = movefmt["diamond"][:]
 
 trdatafmt = {}
 trdatafmt["diamond"] = ["BBBBHHHHIBxxx",
@@ -137,8 +137,8 @@ trdatafmt["diamond"] = ["BBBBHHHHIBxxx",
     ["ai"],
     ["battletype2"],
 ]
-trdatafmt["platinum"] = trdatafmt["diamond"]
-trdatafmt["heartgold"] = trdatafmt["diamond"] # TODO: may need fixing
+trdatafmt["platinum"] = trdatafmt["diamond"][:]
+trdatafmt["heartgold"] = trdatafmt["diamond"][:] # TODO: may need fixing
 
 trpokefmt = {
     "diamond":["HHHHHHHxx",
@@ -273,7 +273,7 @@ encfmt["diamond"] = ["IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII"+"IIIIII"+"IIIIIIIII"
     "superrod5minlevel",
     "superrod5natid",
 ]
-encfmt["platinum"] = encfmt["diamond"]
+encfmt["platinum"] = encfmt["diamond"][:]
 # TODO: heartgold
 
 DATA_DIR = "local/data/"
