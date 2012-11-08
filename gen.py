@@ -140,18 +140,6 @@ trdatafmt["diamond"] = ["BBBBHHHHIBxxx",
 trdatafmt["platinum"] = trdatafmt["diamond"][:]
 trdatafmt["heartgold"] = trdatafmt["diamond"][:] # TODO: may need fixing
 
-trpokefmt = {
-    "diamond":["HHHHHHHxx",
-    ["level"],
-    ["formepokemon"],
-    ["itemmove1"],
-    ["move2"],
-    ["move3"],
-    ["move4"],
-    ["replacedmove1"]
-    ],
-}
-
 #file:///home/david/Dropbox/Public/py/ppre.pyw
 # xxxxxxxxxxxxxxxxxxxxxxxx
 encfmt = {}
