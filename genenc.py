@@ -37,7 +37,7 @@ for game in games:
         data = struct.unpack(fmt, f[:fmtsize])
         for i, entry in enumerate(datafmt[game]):
             if entry == "pad" and data[i]:
-                print j, data[i]
+                print(j, data[i])
             ofile.write("\t<tr><td>%s</td><td>%d</td></tr>\n"%(entry, data[i]))
     ofile.write("</table>")
     ofile.close()
