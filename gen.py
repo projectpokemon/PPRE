@@ -2,7 +2,7 @@
 import os, sys
 import struct
 
-allowed_games = ["diamond", "platinum", "heartgold"]
+allowed_games = ["diamond", "platinum", "heartgold", "black", "black2"]
 
 games = []
 for a in sys.argv[1:]:
@@ -58,6 +58,12 @@ fs = {
         "/a/0/2/7":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
         
         },
+    "black":{
+        
+        },
+    "black2":{
+        
+        },
 }
 
 dexfmt = {}
@@ -88,6 +94,40 @@ dexfmt["diamond"] = ["BBBBBBBBBBHHHBBBBBBBBBB",
 ]
 dexfmt["platinum"] = dexfmt["diamond"][:]
 dexfmt["heartgold"] = dexfmt["diamond"][:]
+dexfmt["black"] = ["BBBBBBBBBBHHHHBBBBBBBBBBHHBBHHH", 
+    ["basehp"],
+    ["baseatk"],
+    ["basedef"],
+    ["basespeed"],
+    ["basespatk"],
+    ["basespdef"],
+    ["type1"],
+    ["type2"],
+    ["catchrate"],
+    ["stage"],
+    ["evs"],
+    ["item1"],
+    ["item2"],
+    ["item3"],
+    ["gender"],
+    ["hatchcycle"],
+    ["basehappy"],
+    ["exprate"],
+    ["egggroup1"],
+    ["egggroup2"],
+    ["ability1"],
+    ["ability2"],
+    ["ability3"],
+    ["flee"],
+    ["formid"],
+    ["form"],
+    ["numforms"],
+    ["color"],
+    ["baseexp"],
+    ["height"],
+    ["weight"]
+]
+dexfmt["black2"] = dexfmt["black"][:]
 
 evofmt = {}
 evofmt["diamond"] = ["HHHHHHHHHHHHHHHHHHHHHxx",
@@ -399,7 +439,9 @@ FORMAT_SUBDIR = "formats/"
 POKEDEX_FILE = {
     "diamond":"/poketool/personal/personal.narc",
     "platinum":"/poketool/personal/pl_personal.narc",
-    "heartgold":"/a/0/0/2"
+    "heartgold":"/a/0/0/2",
+    "black":"/a/0/1/6",
+    "black2":"/a/0/1/6"
 }
 
 EXPRATE_FILE = {

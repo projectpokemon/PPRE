@@ -27,6 +27,8 @@ for game in games:
         ofile.write("\t<tr><td><h4>Pokemon Id #%d</h4></td></tr>\n"%j)
         dexdata = struct.unpack(fmt, f[:struct.calcsize(fmt)])
         for i, entry in enumerate(dexfmt[game]):
+            if entry[0] == "pad" and dexdata[i]:
+                print(j, dexdata[i])
             ofile.write("\t<tr><td>%s</td><td>%d</td></tr>\n"%(entry[0], dexdata[i]))
     ofile.write("</table>")
     ofile.close()
