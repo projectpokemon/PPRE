@@ -59,9 +59,10 @@ fs = {
         
         },
     "black":{
-        
+        "/a/0/1/6":"<a href='pokedex"+FEXT+"'>Pokemon data</a>",
         },
     "black2":{
+        "/a/0/1/6":"<a href='pokedex"+FEXT+"'>Pokemon data</a>",
         
         },
 }
@@ -155,6 +156,9 @@ evofmt["diamond"] = ["HHHHHHHHHHHHHHHHHHHHHxx",
 ]
 evofmt["platinum"] = evofmt["diamond"][:]
 evofmt["heartgold"] = evofmt["diamond"][:]
+evofmt["black"] = evofmt["diamond"][:]
+evofmt["black"][0] = "HHHHHHHHHHHHHHHHHHHHH"
+evofmt["black2"] = evofmt["black"][:]
 
 movefmt = {}
 movefmt["diamond"] = ["H",
@@ -163,6 +167,11 @@ movefmt["diamond"] = ["H",
 ]
 movefmt["platinum"] = movefmt["diamond"][:]
 movefmt["heartgold"] = movefmt["diamond"][:]
+movefmt["black"] = ["I",
+    ["moveid", 0, 15, 0xFFFF],
+    ["level", 16, 31, 0xFFFF],
+]
+movefmt["black2"] = movefmt["black"][:]
 
 trdatafmt = {}
 trdatafmt["diamond"] = ["BBBBHHHHIBxxx",
@@ -179,6 +188,8 @@ trdatafmt["diamond"] = ["BBBBHHHHIBxxx",
 ]
 trdatafmt["platinum"] = trdatafmt["diamond"][:]
 trdatafmt["heartgold"] = trdatafmt["diamond"][:] # TODO: may need fixing
+trdatafmt["black"] = trdatafmt["diamond"][:] # TODO: may need fixing
+trdatafmt["black2"] = trdatafmt["black"][:]
 
 #file:///home/david/Dropbox/Public/py/ppre.pyw
 # xxxxxxxxxxxxxxxxxxxxxxxx
@@ -447,49 +458,70 @@ POKEDEX_FILE = {
 EXPRATE_FILE = {
     "diamond":"/poketool/personal/growtbl.narc",
     "platinum":"/poketool/personal/pl_growtbl.narc",
-    "heartgold":"/a/0/0/3"
+    "heartgold":"/a/0/0/3",
+    "black":"/a/0/1/7",
+    "black2":"/a/0/1/7",
 }
 
 EVO_FILE = {
     "diamond":"/poketool/personal/evo.narc",
     "platinum":"/poketool/personal/evo.narc",
-    "heartgold":"/a/0/3/4"
+    "heartgold":"/a/0/3/4",
+    "black":"/a/0/1/9",
+    "black2":"/a/0/1/9",
 }
 
 LEVELMOVE_FILE = {
     "diamond":"/poketool/personal/wotbl.narc",
     "platinum":"/poketool/personal/wotbl.narc",
-    "heartgold":"/a/0/3/3"
+    "heartgold":"/a/0/3/3",
+    "black":"/a/0/1/8",
+    "black2":"/a/0/1/8",
 }
 
 BASEEVO_FILE = {
     "diamond":"/poketool/personal/pms.narc",
     "platinum":"/poketool/personal/pms.narc",
     "heartgold":"/poketool/personal/pms.narc",
+    "black":"/a/0/2/0",
+    "black2":"/a/0/2/0",
 }
 
 TRDATA_FILE = {
     "diamond":"/poketool/trainer/trdata.narc",
     "platinum":"/poketool/trainer/trdata.narc",
-    "heartgold":"/a/0/5/5"
+    "heartgold":"/a/0/5/5",
+    "black":"/a/0/9/2",
+    "black2":"/a/0/9/2",
 }
 
 TRPOKE_FILE = {
     "diamond":"/poketool/trainer/trpoke.narc",
     "platinum":"/poketool/trainer/trpoke.narc",
-    "heartgold":"/a/0/5/6"
+    "heartgold":"/a/0/5/6",
+    "black":"/a/0/9/3",
+    "black2":"/a/0/9/3",
 }
 
 ENC_FILE = {
     "diamond":"/fielddata/encountdata/d_enc_data.narc",
     "platinum":"/fielddata/encountdata/pl_enc_data.narc",
-    "heartgold":"/a/0/3/7"
+    "heartgold":"/a/0/3/7",
+    "black":"/a/1/2/6",
+    "black2":"/a/1/2/6"
 }
 
 MSG_FILE = {
     "diamond":"/msgdata/msg.narc",
     "platinum":"/msgdata/pl_msg.narc",
-    "heartgold":"/a/0/2/7"
+    "heartgold":"/a/0/2/7",
+    "black":"/a/0/0/2",
+    "black2":"/a/0/0/2",
+}
+
+MSG_FILE2 = {
+    "black":"/a/0/0/3",
+    "black2":"/a/0/0/3",
 }
 
 for game in games:

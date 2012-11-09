@@ -75,15 +75,19 @@ class binaryreader:
     def __init__(self, string):
         self.s = array.array('H',string)
         self.ofs = 0
+        self.ReadUInt16 = self.read16
+        self.ReadUInt32 = self.read32
+        self.Seek = self.seek
     def read16(self):
         ret = self.s[self.ofs]
         self.ofs += 1
         return ret
-
     def read32(self):
         ret = self.s[self.ofs] | (self.s[self.ofs+1]<<16)
         self.ofs += 2
         return ret
+    def seek(self, ofs):
+        self.ofs = ofs>>1
         
 def gen4get(f):
     texts = []
@@ -133,11 +137,67 @@ def gen4get(f):
         texts.append([str(i), text])
     return texts
     
+def gen5get(f):
+    texts = []
+    reader = binaryreader(f)
+    
+    numblocks = reader.read16()
+    numentries = reader.read16()
+    size0 = reader.read32()
+    unk0 = reader.read32()
+    blockoffsets = []
+    for i in range(numblocks):
+        blockoffsets.append(reader.read32())
+    for i in range(numblocks):
+        reader.seek(blockoffsets[i])
+        size = reader.read32()
+        tableoffsets = []
+        charcounts = []
+        unknowns = []
+        for j in range(numentries):
+            tableoffsets.append(reader.read32())
+            charcounts.append(reader.read16())
+            unknowns.append(reader.read16())
+        for j in range(numentries):
+            encchars = []
+            text = ""
+            reader.seek(blockoffsets[i]+tableoffsets[j])
+            for k in range(charcounts[j]):
+                encchars.append(reader.read16())
+            key = encchars[len(encchars)-1]^0xFFFF
+            decchars = []
+            while encchars:
+                char = encchars.pop() ^ key
+                key = ((key>>3)|(key<<13))&0xFFFF
+                decchars.append(char)
+            #if decchars[0] == 0xF100:
+            #    decchars.pop(0) #TODO: fill in
+            while decchars:
+                c = decchars.pop()
+                if c == 0xFFFF:
+                    break
+                elif c == 0xFFFE:
+                    text += "\\n"
+                elif c < 20 or c > 0xFFF0:
+                    text += "\\x%04X"%c
+                else:
+                    text += unichr(c)
+            texts.append(["%i_%i"%(i, j), text])
+    return texts
 
+def getlenfromlabel(x):
+    maxlen = 0
+    for text in x:
+        l = int(text[0].split("_")[1])
+        if l > maxlen:
+            maxlen = l
+    return maxlen
 textfmt = {
     "diamond":[gen4get, gen4alg, len],
     "platinum":[gen4get, gen4alg, len],
-    "heartgold":[gen4get, gen4alg, len]
+    "heartgold":[gen4get, gen4alg, len],
+    "black":[gen5get, "", getlenfromlabel],
+    "black2":[gen5get, "", getlenfromlabel],
 }
 
 for game in games:

@@ -29,7 +29,7 @@ for game in games:
         ofile.write("\t<tr><td><h4>Pokemon Id #%d</h4></td></tr>\n"%j)
         while 1:
             data = struct.unpack(fmt, f[:struct.calcsize(fmt)])
-            if data[0] == 0xffff:
+            if data[0]&0xFFFF == 0xffff:
                 ofile.write("\t<tr><td colspan='2'>%d</td></tr>\n"%(data[0]))
                 break
             for i, entry in enumerate(movefmt[game]):

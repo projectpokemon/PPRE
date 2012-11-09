@@ -29,6 +29,8 @@ for game in games:
     n = narc.NARC(open(DATA_DIR+game+"/fs/"+TRDATA_FILE[game], "rb").read())
     for j, f in enumerate(n.gmif.files):
         ofile.write("\t<tr><td><h4>Trainer Id #%d</h4></td></tr>\n"%j)
+        if len(f) < fmtsize:
+            continue
         data = struct.unpack(fmt, f[:fmtsize])
         for i, entry in enumerate(trdatafmt[game]):
             ofile.write("\t<tr><td>%s</td><td>%d</td></tr>\n"%(entry[0], data[i]))
