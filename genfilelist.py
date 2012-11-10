@@ -17,7 +17,7 @@ for game in games:
     ofile = open(STATIC_DIR+game+"/filelist"+FEXT, "w")
     ofile.write("""
 <h2>Pokemon %s Internal Filelist</h2>
-<table>\n"""%game.title())
+<table class='filelist'>\n"""%game.title())
     C_DIR = DATA_DIR+game+"/fs"
     recursefs("")
     ofile.write("</table>")
