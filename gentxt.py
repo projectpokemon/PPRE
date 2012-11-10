@@ -200,41 +200,45 @@ textfmt = {
     "black2":[gen5get, "", getlenfromlabel],
 }
 
-for game in games:
-    gettext = textfmt[game][0]
-    alg = textfmt[game][1]
-    getlen = textfmt[game][2]
-    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
-    ofile.write("<code style='white-space:pre;'>\n")
-    for line in alg.split("\n"):
-        ofile.write("%s\n"%line)
-    ofile.write("</code>\n")
-    ofile.close()
-    n = narc.NARC(open(DATA_DIR+game+"/fs/"+MSG_FILE[game], "rb").read())
-    ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
-    ofile.write("""
+for msg in [["msg", MSG_FILE], ["msg2", MSG_FILE2]]:
+    FNAME = msg[0]+FEXT
+    for game in games:
+        if game not in msg[1]:
+            continue
+        gettext = textfmt[game][0]
+        alg = textfmt[game][1]
+        getlen = textfmt[game][2]
+        ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
+        ofile.write("<code style='white-space:pre;'>\n")
+        for line in alg.split("\n"):
+            ofile.write("%s\n"%line)
+        ofile.write("</code>\n")
+        ofile.close()
+        n = narc.NARC(open(DATA_DIR+game+"/fs/"+msg[1][game], "rb").read())
+        ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
+        ofile.write("""
 <h2>Pokemon %s Message Data</h2>
 <h3>%s - NARC Container</h3>
 <p><a href='./%s%s'>Format/Algorithm</a></p>
 <table>
 <tr>
     <td>Index</td><td>Contents</td><td>Entries</td>
-</tr>\n"""%(game.title(), MSG_FILE[game], FORMAT_SUBDIR, FNAME))
-    ODIR = STATIC_DIR+game+"/msg/"
-    if not os.path.exists(ODIR):
-        os.mkdir(ODIR)
-    for j, f in enumerate(n.gmif.files):
-        texts = gettext(f) # [[num, text], [num, text]]
-        ofile.write("<tr><td>%i</td><td><a href='msg/%i%s'>Text %i</a></td><td>%i</td></tr>\n"%(j, j, FEXT, j, getlen(texts)))
-        mfile = open(ODIR+str(j)+FEXT, "w")
-        mfile.write("""
+</tr>\n"""%(game.title(), msg[1][game], FORMAT_SUBDIR, FNAME))
+        ODIR = STATIC_DIR+game+"/"+msg[0]+"/"
+        if not os.path.exists(ODIR):
+            os.mkdir(ODIR)
+        for j, f in enumerate(n.gmif.files):
+            texts = gettext(f) # [[num, text], [num, text]]
+            ofile.write("<tr><td>%i</td><td><a href='%s/%i%s'>Text %i</a></td><td>%i</td></tr>\n"%(j, msg[0], j, FEXT, j, getlen(texts)))
+            mfile = open(ODIR+str(j)+FEXT, "w")
+            mfile.write("""
 <h2>Pokemon %s Message File #%i</h2>
 <h3>%s/%i - <a href="../%s%s">Message Formatted File</a></h3>
 <p><a href="../%s">Message File Index</a></p>
-"""%(game.title(), j, MSG_FILE[game], j, FORMAT_SUBDIR, FNAME, FNAME))
-        for k, text in enumerate(texts):
-            mfile.write("<p><a href='#entry%i' name='entry%i'># %s</a> %s</p>\n"%(k, k, text[0], "<br>".join("<br>".join(text[1].encode("utf-8").split("\\n")).split("\\r"))))
-        mfile.close()
-    ofile.write("</table>\n")
-    ofile.close()
+"""%(game.title(), j, msg[1][game], j, FORMAT_SUBDIR, FNAME, FNAME))
+            for k, text in enumerate(texts):
+                mfile.write("<p><a href='#entry%i' name='entry%i'># %s</a> %s</p>\n"%(k, k, text[0], "<br>".join("<br>".join(text[1].encode("utf-8").split("\\n")).split("\\r"))))
+            mfile.close()
+        ofile.write("</table>\n")
+        ofile.close()
     

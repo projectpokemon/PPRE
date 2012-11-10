@@ -59,10 +59,26 @@ fs = {
         
         },
     "black":{
+        "/a/0/0/2":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
+        "/a/0/0/3":"<a href='msg2"+FEXT+"'>Text/Story Files</a>",
         "/a/0/1/6":"<a href='pokedex"+FEXT+"'>Pokemon data</a>",
+        "/a/0/1/7":"<a href='exprate"+FEXT+"'>Experience Table</a>",
+        "/a/0/1/8":"<a href='levelmoves"+FEXT+"'>Level-Up Moves</a>",
+        "/a/0/1/9":"<a href='evo"+FEXT+"'>Evolutions</a>",
+        "/a/0/2/0":"<a href='baseevo"+FEXT+"'>Base Evolutions/Baby Pokemon</a>",
+        "/a/0/9/2":"<a href='trdata"+FEXT+"'>Trainer data</a>",
+        "/a/1/2/6":"Encounter Data",
         },
     "black2":{
+        "/a/0/0/2":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
+        "/a/0/0/3":"<a href='msg2"+FEXT+"'>Text/Story Files</a>",
         "/a/0/1/6":"<a href='pokedex"+FEXT+"'>Pokemon data</a>",
+        "/a/0/1/7":"<a href='exprate"+FEXT+"'>Experience Table</a>",
+        "/a/0/1/8":"<a href='levelmoves"+FEXT+"'>Level-Up Moves</a>",
+        "/a/0/1/9":"<a href='evo"+FEXT+"'>Evolutions</a>",
+        "/a/0/2/0":"<a href='baseevo"+FEXT+"'>Base Evolutions/Baby Pokemon</a>",
+        "/a/0/9/2":"<a href='trdata"+FEXT+"'>Trainer data</a>",
+        "/a/1/2/6":"Encounter Data",
         
         },
 }
