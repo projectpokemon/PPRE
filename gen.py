@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os, sys
 import struct
+import template
 
 allowed_games = ["diamond", "platinum", "heartgold", "black", "black2"]
 

@@ -200,7 +200,7 @@ textfmt = {
     "black2":[gen5get, "", getlenfromlabel],
 }
 
-for msg in [["msg", MSG_FILE], ["msg2", MSG_FILE2]]:
+for msg in [["msg", MSG_FILE, "Message/Text"], ["msg2", MSG_FILE2, "Script/Text"]]:
     FNAME = msg[0]+FEXT
     for game in games:
         if game not in msg[1]:
@@ -208,14 +208,14 @@ for msg in [["msg", MSG_FILE], ["msg2", MSG_FILE2]]:
         gettext = textfmt[game][0]
         alg = textfmt[game][1]
         getlen = textfmt[game][2]
-        ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
+        ofile = template.open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w", "Pokemon %s %s Format"%(game.title(), msg[2]))
         ofile.write("<code style='white-space:pre;'>\n")
         for line in alg.split("\n"):
             ofile.write("%s\n"%line)
         ofile.write("</code>\n")
         ofile.close()
         n = narc.NARC(open(DATA_DIR+game+"/fs/"+msg[1][game], "rb").read())
-        ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
+        ofile = template.open(STATIC_DIR+game+"/"+FNAME, "w", "Pokemon %s %s Format"%(game.title(), msg[2]))
         ofile.write("""
 <h2>Pokemon %s Message Data</h2>
 <h3>%s - NARC Container</h3>

@@ -6,7 +6,7 @@ FNAME = "levelmoves"+FEXT
 
 for game in games:
     fmt = movefmt[game].pop(0)
-    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w", "Pokemon %s Level-Up Move Format"%game.title())
     ofile.write("""
 <h2>Pokemon %s Level-Up Move Format</h2>
 <p>Structure Size: %d bytes</p>
@@ -18,7 +18,7 @@ for game in games:
         ofile.write("<tr><td>%d-%d</td><td>%s</td></tr>"%(entry[1], entry[2], entry[0]))
     ofile.write("</table>\n")
     ofile.close()
-    ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FNAME, "w", "Pokemon %s Level-Up Move Data"%game.title())
     ofile.write("""
 <h2>Pokemon %s Level-Up Moves</h2>
 <h3>%s - NARC Container</h3>

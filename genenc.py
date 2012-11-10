@@ -11,7 +11,7 @@ for game in games:
         continue
     fmt = datafmt[game].pop(0)
     fmtsize = struct.calcsize(fmt)
-    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w", "Pokemon %s Encounter Format"%game.title())
     ofile.write("""
 <h2>Pokemon %s Encounter Format</h2>
 <p>Structure Size: %d bytes</p>
@@ -25,7 +25,7 @@ for game in games:
     writefmt(ofile, fmt, datafmt[game])
     ofile.write("</table>\n")
     ofile.close()
-    ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FNAME, "w", "Pokemon %s Encounter Data"%game.title())
     ofile.write("""
 <h2>Pokemon %s Encounters</h2>
 <h3>%s - NARC Container</h3>

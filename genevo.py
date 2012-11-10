@@ -6,7 +6,7 @@ FNAME = "evo"+FEXT
 
 for game in games:
     fmt = evofmt[game].pop(0)
-    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w", "Pokemon %s Evolution Format"%game.title())
     ofile.write("""
 <h2>Pokemon %s Evolution Format</h2>
 <p>Structure Size: %d bytes</p>
@@ -19,7 +19,7 @@ for game in games:
         ofs += struct.calcsize(fmt[i])
     ofile.write("</table>\n")
     ofile.close()
-    ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FNAME, "w", "Pokemon %s Evolution Data"%game.title())
     ofile.write("""
 <h2>Pokemon %s Evolutions</h2>
 <h3>%s - NARC Container</h3>

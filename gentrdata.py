@@ -7,7 +7,7 @@ FNAME = "trdata"+FEXT
 for game in games:
     fmt = trdatafmt[game].pop(0)
     fmtsize = struct.calcsize(fmt)
-    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w", "Pokemon %s Trainer Data Format"%game.title())
     ofile.write("""
 <h2>Pokemon %s Trainer Format</h2>
 <p>Structure Size: %d bytes</p>
@@ -20,7 +20,7 @@ for game in games:
         ofs += struct.calcsize(fmt[i])
     ofile.write("</table>\n")
     ofile.close()
-    ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FNAME, "w", "Pokemon %s Trainer Data"%game.title())
     ofile.write("""
 <h2>Pokemon %s Trainers</h2>
 <h3>%s - NARC Container</h3>

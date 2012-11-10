@@ -6,12 +6,12 @@ FNAME = "exprate"+FEXT
 
 for game in games:
     fmt = "I"*101
-    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w", "Pokemon %s Experience/Growth Table Format"%game.title())
     ofile.write("""
 <h2>Pokemon %s Experience/Growth Table Format</h2>
 <p>Structure Size: %d bytes</p>\n<p>4 bytes * 101 entries</p>\n"""%(game.title(), struct.calcsize(fmt)))
     ofile.close()
-    ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FNAME, "w", "Pokemon %s Experience/Growth Table Data"%game.title())
     ofile.write("""
 <h2>Pokemon %s Experience Table</h2>
 <h3>%s - NARC Container</h3>

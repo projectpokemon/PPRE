@@ -9,12 +9,12 @@ for game in games:
         continue
     fmt = "H"
     fmtsize = struct.calcsize(fmt)
-    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w", "Pokemon %s Base Evolution/Baby Lookup Format"%game.title())
     ofile.write("""
 <h2>Pokemon %s Base Evolution/Baby Lookup</h2>
 <p>Structure Size: %d bytes</p>\n<p>2 bytes * POKEMON</p>\n"""%(game.title(), fmtsize))
     ofile.close()
-    ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FNAME, "w", "Pokemon %s Base Evolution/Baby Lookup Data"%game.title())
     ofile.write("""
 <h2>Pokemon %s Base Evolution/Baby Lookup</h2>
 <h3>%s - Raw Container</h3>

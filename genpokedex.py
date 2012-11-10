@@ -6,7 +6,7 @@ FNAME = "pokedex"+FEXT
 
 for game in games:
     fmt = dexfmt[game].pop(0)
-    ofile = open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FORMAT_SUBDIR+FNAME, "w", "Pokemon %s Pokedex Format"%game.title())
     ofile.write("""
 <h2>Pokemon %s Pokedex/Personal Format</h2>
 <p>Structure Size: %d bytes</p>\n<table>\n"""%(game.title(), struct.calcsize(fmt)))
@@ -16,7 +16,7 @@ for game in games:
         ofs += struct.calcsize(fmt[i])
     ofile.write("</table>\n")
     ofile.close()
-    ofile = open(STATIC_DIR+game+"/"+FNAME, "w")
+    ofile = template.open(STATIC_DIR+game+"/"+FNAME, "w", "Pokemon %s Pokedex Data"%game.title())
     ofile.write("""
 <h2>Pokemon %s Pokemon Data</h2>
 <h3>%s - NARC Container</h3>
