@@ -1,3 +1,5 @@
 static
 local
 *.pyc
+ndstool
+custom*
