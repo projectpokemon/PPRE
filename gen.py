@@ -5,12 +5,16 @@ import template
 
 allowed_games = ["diamond", "platinum", "heartgold", "black", "black2"]
 
+genindex = False
 games = []
 for a in sys.argv[1:]:
     if a == "--help":
         print("Usage: %s [%s]\
 If game is left blank, all games will be processed."%(sys.argv[0], "|".join(allowed_games)))
         exit()
+    if a == "--gen-index":
+        genindex = True
+        continue
     if a in allowed_games:
         games.append(a)
 if not games:
@@ -546,6 +550,9 @@ for game in games:
         os.mkdir(STATIC_DIR+game)
     if not os.path.exists(STATIC_DIR+game+"/formats"):
         os.mkdir(STATIC_DIR+game+"/formats")
+    if genindex:
+        template.idxfile(STATIC_DIR+game+"/index"+FEXT, "w", "Raw DB - Pokemon "+game.title())
+        template.idxfile(STATIC_DIR+game+"/formats/index"+FEXT, "w", "Raw DB Formats - Pokemon "+game.title())
         
 def writefmt(ofile, fmt, datafmt):
     ofs = 0

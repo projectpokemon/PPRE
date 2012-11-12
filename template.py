@@ -19,6 +19,9 @@ def defaultmkdir(d):
     if not os.path.exists(d):
         os.mkdir(d)
 
+def defaultidxopen(f, title):
+    return
+
 try:
     from customtemplate import *
 except:
@@ -33,5 +36,14 @@ class templatefile(file):
         defaultclose(self, self.title)
         super(templatefile, self).close()
         
+class idxfile(templatefile):
+    def __init__(self, name, mode="w", title="Data"):
+        super(templatefile, self).__init__(name, mode)
+        self.title = title
+        defaultopen(self, self.title)
+        defaultidxopen(self, self.title)
+    def close(self):
+        defaultclose(self, self.title)
+        super(templatefile, self).close()
 mkdir = defaultmkdir
 open = templatefile
