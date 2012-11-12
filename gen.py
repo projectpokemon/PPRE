@@ -551,8 +551,8 @@ for game in games:
     if not os.path.exists(STATIC_DIR+game+"/formats"):
         os.mkdir(STATIC_DIR+game+"/formats")
     if genindex:
-        template.idxfile(STATIC_DIR+game+"/index"+FEXT, "w", "Raw DB - Pokemon "+game.title()).close()
-        template.idxfile(STATIC_DIR+game+"/formats/index"+FEXT, "w", "Raw DB Formats - Pokemon "+game.title()).close()
+        template.idxfile(STATIC_DIR+game+"/index"+FEXT, "w", "Pokemon "+game.title()).close()
+        template.idxfile(STATIC_DIR+game+"/formats/index"+FEXT, "w", "Pokemon "+game.title()+" Formats").close()
         
 def writefmt(ofile, fmt, datafmt):
     ofs = 0
