@@ -464,6 +464,47 @@ encfmt["heartgold"] = ["BBBBBBxxBBBBBBBBBBBBHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
     "radionatid2",
 ]
 
+def sortentry(s):
+    return [s, "H", ["natid"]]
+searchfiles = {}
+searchfiles["diamond"] = {
+    0:["weight","I",["hg"]],
+    1:["height","I",["dm"]],
+    11:sortentry("national"),
+    12:sortentry("regional"),
+    13:sortentry("alphabetical"),
+    14:sortentry("heaviest"),
+    15:sortentry("lightest"),
+    16:sortentry("tallest"),
+    17:sortentry("smallest"),
+    18:sortentry("ABC"),
+    19:sortentry("DEF"),
+    20:sortentry("GHI"),
+    21:sortentry("JKL"),
+    22:sortentry("MNO"),
+    23:sortentry("PQR"),
+    24:sortentry("STU"),
+    25:sortentry("VWX"),
+    26:sortentry("YZ"),
+    27:sortentry("normal"),
+    28:sortentry("fighting"),
+    29:sortentry("flying"),
+    30:sortentry("poison"),
+    31:sortentry("ground"),
+    32:sortentry("rock"),
+    33:sortentry("bug"),
+    34:sortentry("ghost"),
+    35:sortentry("steel"),
+    36:sortentry("fire"),
+    37:sortentry("water"),
+    38:sortentry("grass"),
+    39:sortentry("electric"),
+    40:sortentry("psychic"),
+    41:sortentry("ice"),
+    42:sortentry("dragon"),
+    43:sortentry("dark"),
+}
+
 DATA_DIR = "local/data/"
 STATIC_DIR = "static/"
 FORMAT_SUBDIR = "formats/"
@@ -543,6 +584,10 @@ MSG_FILE = {
 MSG_FILE2 = {
     "black":"/a/0/0/3",
     "black2":"/a/0/0/3",
+}
+
+ZUKAN_FILE = {
+    "diamond":"/application/zukanlist/zkn_data/zukan_data.narc"
 }
 
 for game in games:
