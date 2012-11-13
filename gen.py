@@ -35,6 +35,7 @@ fs = {
         "/fielddata/encountdata/d_enc_data.narc":"<a href='enc"+FEXT+"'>Encounter Data</a>",
         "/fielddata/encountdata/p_enc_data.narc":"Pearl Encounter Data",
         "/msgdata/msg.narc":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
+        "/application/zukanlist/zukan_data/zukan_data.narc":"<a href='search"+FEXT+"'>Dex Search Files</a>",
         },
     "platinum":{
         "/poketool/personal/pl_personal.narc":"<a href='pokedex"+FEXT+"'>Pokemon data</a>",
@@ -45,12 +46,14 @@ fs = {
         "/poketool/trainer/trdata.narc":"<a href='trdata"+FEXT+"'>Trainer data</a>",
         "/fielddata/encountdata/pl_enc_data.narc":"<a href='enc"+FEXT+"'>Encounter Data</a>",
         "/msgdata/pl_msg.narc":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
+        "/application/zukanlist/zukan_data/zukan_data_gira.narc":"<a href='search"+FEXT+"'>Dex Search Files</a>",
         
         "/poketool/personal/personal.narc":"DP Pokemon Data",
         "/poketool/personal/growtbl.narc":"DP Experience Table",
         "/fielddata/encountdata/d_enc_data.narc":"Diamond Encounter Data",
         "/fielddata/encountdata/p_enc_data.narc":"Pearl Encounter Data",
         "/msgdata/msg.narc":"DP Message Files",
+        "/application/zukanlist/zukan_data/zukan_data.narc":"DP Dex Search Files",
         },
     "heartgold":{
         "/a/0/0/2":"<a href='pokedex"+FEXT+"'>Pokemon data</a>",
@@ -61,7 +64,7 @@ fs = {
         "/a/0/5/5":"<a href='trdata"+FEXT+"'>Trainer data</a>",
         "/a/0/3/7":"<a href='enc"+FEXT+"'>Encounter Data</a>",
         "/a/0/2/7":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
-        
+        "/a/0/7/4":"<a href='search"+FEXT+"'>Dex Search Files</a>",
         },
     "black":{
         "/a/0/0/2":"<a href='msg"+FEXT+"'>Text/Message Files</a>",
@@ -504,6 +507,44 @@ searchfiles["diamond"] = {
     42:sortentry("dragon"),
     43:sortentry("dark"),
 }
+searchfiles["platinum"] = searchfiles["diamond"]
+searchfiles["heartgold"] = {
+    0:["weight","I",["hg"]],
+    1:["height","I",["dm"]],
+    11:sortentry("national"),
+    12:sortentry("regional"),
+    13:sortentry("alphabetical"),
+    14:sortentry("heaviest"),
+    15:sortentry("lightest"),
+    16:sortentry("tallest"),
+    17:sortentry("smallest"),
+    93:sortentry("ABC"),
+    94:sortentry("DEF"),
+    95:sortentry("GHI"),
+    96:sortentry("JKL"),
+    97:sortentry("MNO"),
+    98:sortentry("PQR"),
+    99:sortentry("STU"),
+    100:sortentry("VWX"),
+    101:sortentry("YZ"),
+    62:sortentry("normal"),
+    63:sortentry("fighting"),
+    64:sortentry("flying"),
+    65:sortentry("poison"),
+    66:sortentry("ground"),
+    67:sortentry("rock"),
+    68:sortentry("bug"),
+    69:sortentry("ghost"),
+    70:sortentry("steel"),
+    71:sortentry("fire"),
+    72:sortentry("water"),
+    73:sortentry("grass"),
+    74:sortentry("electric"),
+    75:sortentry("psychic"),
+    76:sortentry("ice"),
+    77:sortentry("dragon"),
+    78:sortentry("dark"),
+}
 
 DATA_DIR = "local/data/"
 STATIC_DIR = "static/"
@@ -587,7 +628,9 @@ MSG_FILE2 = {
 }
 
 ZUKAN_FILE = {
-    "diamond":"/application/zukanlist/zkn_data/zukan_data.narc"
+    "diamond":"/application/zukanlist/zkn_data/zukan_data.narc",
+    "platinum":"/application/zukanlist/zkn_data/zukan_data_gira.narc",
+    "heartgold":"/a/0/7/4"
 }
 
 for game in games:
