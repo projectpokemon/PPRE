@@ -4,25 +4,40 @@ import struct
 import template
 
 allowed_games = ["diamond", "platinum", "heartgold", "black", "black2"]
-
+EXT = "php"
 genindex = False
 games = []
-for a in sys.argv[1:]:
+
+args = sys.argv[1:]
+while args:
+    a = args.pop(0)
     if a == "--help":
-        print("Usage: %s [%s]\
-If game is left blank, all games will be processed."%(sys.argv[0], "|".join(allowed_games)))
+        print("""Usage: %s [Options] [Game1 [Game2 [...]]]
+If game is left blank, all games will be processed.
+
+Options:
+--gen-index         Generate index files.
+--ext <extension>   Use <extension> for newly created files.
+--help              Show this help, then exit.
+
+Valid Games:
+%s
+"""%(sys.argv[0], ", ".join(allowed_games)))
         exit()
     if a == "--gen-index":
         genindex = True
+        continue
+    if a == "--ext":
+        EXT = args.pop(0)
         continue
     if a in allowed_games:
         games.append(a)
 if not games:
     games = allowed_games
+FEXT = "."+EXT
 
 struct_name = {"B": "UInt8", "H":"UInt16", "I":"UInt32"}
 
-FEXT = ".php"
 
 fs = {
     "diamond":{
