@@ -17,7 +17,7 @@ def defaultclose(f, title):
 
 def defaultmkdir(d):
     if not os.path.exists(d):
-        os.mkdir(d)
+        os.makedirs(d)
 
 def defaultidxopen(f, title):
     return
