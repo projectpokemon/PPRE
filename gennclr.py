@@ -25,6 +25,7 @@ def recursefs(d):
                     if not pfile:
                         template.mkdir(os.path.dirname(ODIR+d))
                         pfile = template.open(ODIR+d+FEXT, "w", "Pokemon %s NCLR - %s"%(game.title(), d))
+                        pfile.write("<p><a href='%s%s'>RLCN list</a></p>"%("../"*len(d.strip("/").split("/")), FNAME))
                     pfile.write("<p>File %i: "%j)
                     for k, c in enumerate(clr.pltt.colors):
                         pfile.write("<span style='background-color: #%02X%02X%02X;'>%i</span>"%(c[0], c[1], c[2], k))
