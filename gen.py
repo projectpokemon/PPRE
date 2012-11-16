@@ -680,5 +680,6 @@ def writefmt(ofile, fmt, datafmt):
         i += 1
         
 if __name__ == "__main__":
-    import genbaseevo, genenc, genevo, genexprate, genmoves, genpokedex, gentrdata, gentxt
+    import genbaseevo, genenc, genevo, genexprate, genmoves, genpokedex, gentrdata, gentxt, gensearch
+    import gennarc, gennclr
     import genfilelist
