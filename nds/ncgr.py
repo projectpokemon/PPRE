@@ -68,12 +68,12 @@ class CHAR:
         for l in range(lenL):
             lenM = len(self.tiles[l])
             if self.tiled:
-                for n in range(0,8):
-                    for m in range(0,lenM):
-                        for p in range(0,8):
+                for n in range(8):
+                    for m in range(lenM):
+                        for p in range(8):
                             data += chr(self.tiles[l][m][n][p])
             else:
-                for m in range(0,lenM):
+                for m in range(lenM):
                     data += chr(self.tiles[l][m])
         return data
 
@@ -94,12 +94,11 @@ class NCGR:
         palette = ImagePalette.ImagePalette("RGB")
         palette.dirty = 1
         for i in range(256):
-            k = i
+            k = (i*48)%256
             palette.palette[i] = [k, k, k]
-        if self.char.tiled:
-            w = self.char.width*8
-            h = self.char.height*8
-        else:
-            w = self.char.width
-            h = self.char.height
-        return Image.fromstring("P", (w, h), self.char.toString())
+        w = self.char.width*8
+        h = self.char.height*8
+        data = self.char.toString()
+        if not w or not h:
+            return Image.fromstring("P", (1, 1), "\x00")
+        return Image.fromstring("P", (w, h), data)
