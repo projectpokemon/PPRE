@@ -11,8 +11,16 @@ import pokeversion
 from nds import narc, txt
 
 files = {
-    "Diamond":{"Main":"/msgdata/msg.narc"}, 
-    "Pearl":{"Main":"/msgdata/msg.narc"},}
+    "Diamond":{"Main":"/msgdata/msg.narc"},
+    "Pearl":{"Main":"/msgdata/msg.narc"},
+    "Platinum":{"Main":"/msgdata/pl_msg.narc"},
+    "HeartGold":{"Main":"/a/0/2/7"},
+    "SoulSilver":{"Main":"/a/0/2/7"},
+    "Black":{"Main":"/a/0/0/2", "Story":"/a/0/0/3"},
+    "White":{"Main":"/a/0/0/2", "Story":"/a/0/0/3"},
+    "Black2":{"Main":"/a/0/0/2", "Story":"/a/0/0/3"},
+    "White2":{"Main":"/a/0/0/2", "Story":"/a/0/0/3"},
+    }
 
 wintitle = "%s - Text Editor - PPRE"
 
@@ -42,12 +50,13 @@ class EditText(QMainWindow):
         QObject.connect(self.menutasks["newtext"],
             QtCore.SIGNAL("triggered()"), self.newText)
         for f in files[config.project["versioninfo"][0]]:
-            self.menutasks["opentext"] = QAction(self.menus["file"])
-            self.menutasks["opentext"].setText(
+            self.menutasks["opentext_"+f] = QAction(self.menus["file"])
+            self.menutasks["opentext_"+f].setText(
                 translations["menu_opentext"]+": "+f)
-            self.menus["file"].addAction(self.menutasks["opentext"])
-            QObject.connect(self.menutasks["opentext"],
-                QtCore.SIGNAL("triggered()"), lambda: self.openTextNarc(f))
+            self.menus["file"].addAction(self.menutasks["opentext_"+f])
+            func = lambda x: (lambda: self.openTextNarc(x))
+            QObject.connect(self.menutasks["opentext_"+f],
+                QtCore.SIGNAL("triggered()"), func(f))
         self.menutasks["savetext"] = QAction(self.menus["file"])
         self.menutasks["savetext"].setText(translations["menu_savetext"])
         self.menus["file"].addAction(self.menutasks["savetext"])
@@ -95,6 +104,8 @@ class EditText(QMainWindow):
         version = config.project["versioninfo"]
         if pokeversion.gens[version[0]] == 4:
             text = txt.gen4get(self.narc.gmif.files[self.currentfile])
+        elif pokeversion.gens[version[0]] == 5:
+            text = txt.gen5get(self.narc.gmif.files[self.currentfile])
         buff = ""
         for entry in text:
             buff += entry[0]+": "+entry[1]+"\n\n"
@@ -113,6 +124,8 @@ class EditText(QMainWindow):
             texts.append(t)
         if pokeversion.gens[version[0]] == 4:
             self.narc.gmif.files[self.currentfile] = txt.gen4put(texts)
+        elif pokeversion.gens[version[0]] == 5:
+            self.narc.gmif.files[self.currentfile] = txt.gen5put(texts)
         self.narc.toFile(open(self.fname, "wb"))
         self.dirty = False
         self.updateCurrentFileLabel()

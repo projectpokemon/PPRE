@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
             return
         self.newProjectOf(ndsFile)
     def newProjectOf(self, ndsFile):
-        d, tail = os.path.split(ndsFile)
+        d, tail = os.path.split(os.path.abspath(ndsFile))
         name = os.path.splitext(tail)[0]
         d += "/"+name+"/"
         if os.path.exists(d):
@@ -198,7 +198,10 @@ class MainWindow(QMainWindow):
             self.projectinfo["location_directory_value"].text()}
         config.project["versioninfo"] = pokeversion.get()
     def saveProject(self):
-        self.saveProjectOf(self.projFile)
+        if not self.projFile:
+            self.saveProjectAs()
+        else:
+            self.saveProjectOf(self.projFile)
     def saveProjectAs(self):
         projFile = QFileDialog.getSaveFileName(None, "Save PPRE Project File", 
             filter="PPRE Project Files (*.pprj);;All Files (*.*)")
