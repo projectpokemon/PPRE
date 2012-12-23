@@ -23,3 +23,19 @@ def get():
         gamename = "Unknown"
         
     return (gamename, lang, romversion)
+    
+textfiles = {
+    "Diamond":{"Main":"/msgdata/msg.narc"},
+    "Pearl":{"Main":"/msgdata/msg.narc"},
+    "Platinum":{"Main":"/msgdata/pl_msg.narc"},
+    "HeartGold":{"Main":"/a/0/2/7"},
+    "SoulSilver":{"Main":"/a/0/2/7"},
+    "Black":{"Main":"/a/0/0/2", "Story":"/a/0/0/3"},
+    "White":{"Main":"/a/0/0/2", "Story":"/a/0/0/3"},
+    "Black2":{"Main":"/a/0/0/2", "Story":"/a/0/0/3"},
+    "White2":{"Main":"/a/0/0/2", "Story":"/a/0/0/3"},
+}
+
+pokemonfiles = {
+    
+    }

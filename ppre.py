@@ -13,6 +13,7 @@ import ndstool
 import pokeversion
 
 import edittext
+import editpokemon
 
 class version:
     major = 2
@@ -125,9 +126,14 @@ class MainWindow(QMainWindow):
         self.menutasks["edittext"] = QAction(self.menus["edit"])
         self.menutasks["edittext"].setText(translations["menu_edittext"])
         self.menus["edit"].addAction(self.menutasks["edittext"])
-        self.menubar.addAction(self.menus["edit"].menuAction())
         QObject.connect(self.menutasks["edittext"],
             QtCore.SIGNAL("triggered()"), edittext.create)
+        self.menutasks["editpokemon"] = QAction(self.menus["edit"])
+        self.menutasks["editpokemon"].setText(translations["menu_editpokemon"])
+        self.menus["edit"].addAction(self.menutasks["editpokemon"])
+        QObject.connect(self.menutasks["editpokemon"],
+            QtCore.SIGNAL("triggered()"), editpokemon.create)
+        self.menubar.addAction(self.menus["edit"].menuAction())
         self.projectinfo = {}
         i = 0
         for sect in config.sections:
