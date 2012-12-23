@@ -37,5 +37,6 @@ textfiles = {
 }
 
 pokemonfiles = {
+    "Diamond":{"Personal":"/poketool/personal/personal.narc"},
     
     }

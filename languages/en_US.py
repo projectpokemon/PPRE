@@ -25,6 +25,9 @@ translations = {
 "error_noromloaded":"No ROM is loaded",
 "error_noromloaded_title":"No ROM",
 "text_textfile":"Text File: ",
+"pokemontab_desc":"&Name and Flavor",
+"pokemontab_general":"&General",
+"pokemontab_moves":"&Moves",
     
     
     

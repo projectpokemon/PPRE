@@ -30,7 +30,8 @@ Options:
  
 Dialogs:
  home                       Main Window
- texteditor                 Text Editor"""%(sys.argv[0]))
+ texteditor                 Text Editor
+ pokemoneditor              Pokemon Editor"""%(sys.argv[0]))
     exit()
     
 class MainWindow(QMainWindow):
@@ -55,6 +56,8 @@ class MainWindow(QMainWindow):
                     pass
                 elif arg == "texteditor":
                     edittext.create()
+                elif arg == "pokemoneditor":
+                    editpokemon.create()
             else:
                 print("Unrecognized argument: %s"%arg)
     def setupUi(self):

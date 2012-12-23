@@ -18,6 +18,9 @@ class EditPokemon(QMainWindow):
     def __init__(self, parent=None):
         super(EditPokemon, self).__init__(parent)
         self.setupUi()
+        self.personalname = config.project["directory"]+"fs"+files[
+            config.project["versioninfo"][0]]["Personal"]
+        self.personalnarc = narc.NARC(open(self.personalname, "rb").read())
         self.dirty = False
     def setupUi(self):
         self.setObjectName("EditPokemon")
@@ -53,11 +56,25 @@ class EditPokemon(QMainWindow):
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
         self.widgetcontainer = QWidget(self)
-        self.widgetcontainer.setObjectName("widgetcontainer")
+        self.pokemonlist = QComboBox(self.widgetcontainer)
+        self.pokemonlist.setGeometry(QRect(50, 25, 200, 20))
+        QObject.connect(self.pokemonlist,
+            QtCore.SIGNAL("currentIndexChanged(int)"), self.openPokemon)
+        self.tabcontainer = QTabWidget(self.widgetcontainer)
+        self.tabcontainer.setGeometry(QRect(25, 50, 550, 300))
+        self.maintab = QWidget(self.tabcontainer)
+        self.tabcontainer.addTab(self.maintab, translations["pokemontab_desc"])
+        self.generaltab = QWidget(self.tabcontainer)
+        self.tabcontainer.addTab(self.generaltab, 
+            translations["pokemontab_general"])
+        self.movetab = QWidget(self.tabcontainer)
+        self.tabcontainer.addTab(self.movetab, translations["pokemontab_moves"])
         self.setCentralWidget(self.widgetcontainer)
         QMetaObject.connectSlotsByName(self)
     def newPokemon(self):
         print("newPokemon() not implemented")
+    def openPokemon(self, i):
+        print(i)
     def savePokemon(self):
         print("savePokemon() not implemented")
     def quit(self):
@@ -79,7 +96,7 @@ class EditPokemon(QMainWindow):
                         "Do you want to save this pokemon?",
                     QMessageBox.Yes, QMessageBox.No)
             if prompt == QMessageBox.Yes:
-                if not self.saveText():
+                if not self.savePokemon():
                     return False
         return True
         
