@@ -138,7 +138,7 @@ def gen4get(f):
                     text += "VAR({"
                     args = [kind, count]
                     for k in range(count):
-                        args.append(string.pop())
+                        args.append(string.pop(0))
                 except IndexError:
                     break
                 text += ",".join(map(str, args))
