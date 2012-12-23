@@ -44,12 +44,11 @@ for i from 1 to num
         $container = 0
         $bit = 0
         while $string
-            while $string and $container < 0x200
-                $container |= ($string.pop() << $bit)
-                $bit += 9
-            $newstring.append($container&0x1FF)
-            $container >>= 9
-            $bit -= 9
+            $container |= $string.pop() << $bit
+            while $bit >= 9
+                $bit -= 9
+                $newstring.append($container&0x1FF)
+                $container >>= 9
         $string = $newstring
         $size = $newstring.size
     $text = ""
@@ -111,7 +110,22 @@ def gen4get(f):
             string.append(reader.read16() ^ key)
             key = (key+0x493D)&0xFFFF
         if string[0] == 0xF100:
-            string.pop() # TODO: decompress
+            string.pop(0)
+            newstring = []
+            container = 0
+            bit = 0
+            while string:
+                container |= string.pop(0)<<bit
+                bit += 15
+                while bit >= 9:
+                    bit -= 9
+                    c = container&0x1FF
+                    if c == 0x1FF:
+                        newstring.append(0xFFFF)
+                    else:
+                        newstring.append(c)
+                    container >>= 9
+            string = newstring
         text = ""
         while string:
             char = string.pop(0)
