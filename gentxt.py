@@ -1,8 +1,8 @@
 from gen import *
 from nds import narc
+from nds.txt import gen4get, gen5get
 import struct, array
 import cStringIO as StringIO
-import unicodeparser
 
 FNAME = "msg"+FEXT 
 
@@ -69,87 +69,6 @@ for i from 1 to num
             
 
 """
-
-class binaryreader:
-    def __init__(self, string):
-        self.s = array.array('H',string)
-        self.ofs = 0
-        self.ReadUInt16 = self.read16
-        self.ReadUInt32 = self.read32
-        self.Seek = self.seek
-    def read16(self):
-        ret = self.s[self.ofs]
-        self.ofs += 1
-        return ret
-    def read32(self):
-        ret = self.s[self.ofs] | (self.s[self.ofs+1]<<16)
-        self.ofs += 2
-        return ret
-    def seek(self, ofs):
-        self.ofs = ofs>>1
-        
-def gen4get(f):
-    texts = []
-    reader = binaryreader(f)
-    
-    num = reader.read16()
-    seed = reader.read16()
-    offsets = []
-    sizes = []
-    for i in range(num):
-        tmp = ((((seed*0x2FD)&0xFFFF)*(i+1))&0xFFFF)
-        key = tmp | (tmp << 16)
-        offsets.append(reader.read32() ^ key)
-        sizes.append(reader.read32() ^ key)
-    for i in range(num):
-        offset = offsets[i]
-        size = sizes[i]
-        key = (0x91BD3*(i+1))&0xFFFF
-        string = []
-        for j in range(size):
-            string.append(reader.read16() ^ key)
-            key = (key+0x493D)&0xFFFF
-        if string[0] == 0xF100:
-            string.pop(0)
-            newstring = []
-            container = 0
-            bit = 0
-            while string:
-                container |= string.pop(0)<<bit
-                bit += 15
-                while bit >= 9:
-                    bit -= 9
-                    c = container&0x1FF
-                    if c == 0x1FF:
-                        newstring.append(0xFFFF)
-                    else:
-                        newstring.append(c)
-                    container >>= 9
-            string = newstring
-        text = ""
-        while string:
-            char = string.pop(0)
-            if char == 0xFFFF:
-                break
-            if char == 0xFFFE:
-                try:
-                    kind = string.pop(0)
-                    count = string.pop(0)
-                    text += "VAR({"
-                    args = [kind, count]
-                    for k in range(count):
-                        args.append(string.pop(0))
-                except IndexError:
-                    break
-                text += ",".join(map(str, args))
-                text += "})"
-            else:
-                try:
-                    text += unicodeparser.tb[char]
-                except:
-                    text += "\\x%04X"%char
-        texts.append([str(i), text])
-    return texts
     
 gen5alg = """
 uint16 numblocks = read16()
@@ -196,54 +115,6 @@ for i from 1 to numblocks
                 $string += unichr($char)
             
 """
-
-def gen5get(f):
-    texts = []
-    reader = binaryreader(f)
-    
-    numblocks = reader.read16()
-    numentries = reader.read16()
-    size0 = reader.read32()
-    unk0 = reader.read32()
-    blockoffsets = []
-    for i in range(numblocks):
-        blockoffsets.append(reader.read32())
-    for i in range(numblocks):
-        reader.seek(blockoffsets[i])
-        size = reader.read32()
-        tableoffsets = []
-        charcounts = []
-        unknowns = []
-        for j in range(numentries):
-            tableoffsets.append(reader.read32())
-            charcounts.append(reader.read16())
-            unknowns.append(reader.read16())
-        for j in range(numentries):
-            encchars = []
-            text = ""
-            reader.seek(blockoffsets[i]+tableoffsets[j])
-            for k in range(charcounts[j]):
-                encchars.append(reader.read16())
-            key = encchars[len(encchars)-1]^0xFFFF
-            decchars = []
-            while encchars:
-                char = encchars.pop() ^ key
-                key = ((key>>3)|(key<<13))&0xFFFF
-                decchars.append(char)
-            #if decchars[0] == 0xF100:
-            #    decchars.pop(0) #TODO: fill in
-            while decchars:
-                c = decchars.pop()
-                if c == 0xFFFF:
-                    break
-                elif c == 0xFFFE:
-                    text += "\\n"
-                elif c < 20 or c > 0xFFF0:
-                    text += "\\x%04X"%c
-                else:
-                    text += unichr(c)
-            texts.append(["%i_%i"%(i, j), text])
-    return texts
 
 def getlenfromlabel(x):
     maxlen = 0
