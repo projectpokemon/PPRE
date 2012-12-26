@@ -1,0 +1,3 @@
+[submodule "rawdb"]
+	path = rawdb
+	url = http://alpha@projectpokemon.org/git/rawdb.git/
