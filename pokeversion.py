@@ -40,3 +40,26 @@ pokemonfiles = {
     "Diamond":{"Personal":"/poketool/personal/personal.narc"},
     
     }
+    
+textentries = {
+    "Diamond":{
+        "English":{
+            "Locations":382,
+            "Types":565,
+            "Abilities":552,
+            "Items":344,
+            "Moves":588,
+            "Pokemon":362,
+            "Weight":619,
+            "Height":620,
+            "Species":621,
+            "Flavor":{
+                "Diamond":615,
+                "Pearl":616
+            },
+            "Class":560,
+            "Trainers":559,
+            "Trainer Quotes":555
+        },
+    }
+}
