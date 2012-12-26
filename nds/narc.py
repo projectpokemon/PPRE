@@ -20,6 +20,12 @@ class BTAF:
         return self.header[0]
     def getEntryNum(self):
         return self.header[1]
+    def toString(self, gmif):
+        ret = "BTAF"+pack("II", self.header[0], self.header[1])
+        for ofs, l in gmif.getEntries():
+            ret += pack("II", ofs, ofs+l)
+        return ret
+
 class BTNF:
     def __init__(self, rawdata):
         if len(rawdata)>0:
@@ -30,6 +36,11 @@ class BTNF:
         else:
             self.magic = "BTNF"
             self.header = (16, 4, 0, 1)
+    def toString(self):
+        ret = "BTNF"
+        ret += pack("IIHH", self.header[0], self.header[1], self.header[2],
+            self.header[3])
+        return ret
 class GMIF:
     def __init__(self, rawdata, t):
         if len(rawdata)>0:
@@ -43,9 +54,28 @@ class GMIF:
         self.files = []
         for ofs in t:
             self.files.append(rawdata[8+ofs[0]:8+ofs[1]])
+    def getEntries(self):
+        ret = []
+        of = 0
+        for f in self.files:
+            l = len(f)
+            ret.append([of, l])
+            while l%4:
+                l += 1
+            of += l
+        return ret
+    def toString(self):
+        ret = ""
+        for f in self.files:
+            ret += f
+            l = len(f)
+            while l%4:
+                l += 1
+                ret += "\x00"
+        self.size = len(ret)
+        return "GMIF"+pack("I", self.size)+ret
 class NARC:
     def __init__(self, rawdata):
-
         if len(rawdata)>0:
             self.magic = rawdata[:4]
             if self.magic != "NARC":
@@ -60,3 +90,11 @@ class NARC:
         self.btnf = BTNF(rawdata)
         rawdata= rawdata[self.btnf.header[0]:]
         self.gmif = GMIF(rawdata, self.btaf.table)
+    def toString(self):
+        ret = "NARC"
+        ret += pack("IIHH", self.header[0], self.header[1], self.header[2],
+            self.header[3]) + self.btaf.toString(self.gmif)
+        ret += self.btnf.toString()+self.gmif.toString()
+        return ret
+    def toFile(self, f):
+        f.write(self.toString())
