@@ -21,6 +21,7 @@ class EditWidget(QWidget):
     NONE = 0
     SPINBOX = 1
     COMBOBOX = 2
+    LABEL = 3
     def __init__(self, kind=SPINBOX, parent=None):
         super(EditWidget, self).__init__(parent)
         self.kind = kind
@@ -44,6 +45,10 @@ class EditWidget(QWidget):
             self.setValues = self.valuer.addItems
             QObject.connect(self.valuer,
                 QtCore.SIGNAL("currentIndexChanged(int)"), self._changed)
+        elif kind == EditWidget.LABEL:
+            self.valuer = QLabel(self)
+            self.setValue = lambda x: self.valuer.setText(str(x))
+            self.getValue = lambda: int(self.valuer.text())
         if kind != EditWidget.NONE:
             self.valuer.setGeometry(QRect(100, 0, 120, 20))
     def setName(self, name):
@@ -87,7 +92,10 @@ class EditDlg(QMainWindow):
         self.menus = {}
         self.menus["file"] = QMenu(self.menubar)
         self.menus["file"].setTitle(translate("menu_file"))
-        self.menutasks = {}
+        self.menutasks = []
+        self.addMenuEntry("file", translate("menu_new"), self.new)
+        self.addMenuEntry("file", translate("menu_save"), self.save)
+        self.addMenuEntry("file", translate("menu_close"), self.quit)
         self.menubar.addAction(self.menus["file"].menuAction())
         self.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(self)
@@ -117,6 +125,32 @@ class EditDlg(QMainWindow):
                 w.setValue(data.pop(0))
         self.dirty = False
         self.updateWindowTitle()
+    def save(self):
+        print("save() not implemented")
+    def new(self):
+        print("new() not implemented")
+    def quit(self):
+        if not self.checkClean():
+            return
+        self.close()
+    def checkClean(self, allowCancel=True):
+        if self.dirty:
+            if allowCancel:
+                prompt = QMessageBox.question(self, "Close?", 
+                    "This file has been modified.\n"+
+                        "Do you want to save this file?",
+                    QMessageBox.Yes, QMessageBox.No, QMessageBox.Cancel)
+                if prompt == QMessageBox.Cancel:
+                    return False
+            else:
+                prompt = QMessageBox.question(self, "Close?", 
+                    "This file has been modified.\n"+
+                        "Do you want to save this file?",
+                    QMessageBox.Yes, QMessageBox.No)
+            if prompt == QMessageBox.Yes:
+                if not self.save():
+                    return False
+        return True
     def changed(self, param1=None):
         self.dirty = True
         self.updateWindowTitle()
@@ -128,6 +162,12 @@ class EditDlg(QMainWindow):
         if not text:
             text = self.chooser.currentText()
         self.setWindowTitle("%s%s - %s - PPRE"%(text, dirt, self.wintitle))
+    def addMenuEntry(self, menuname, text, callback):
+        action = QAction(self.menus[menuname])
+        action.setText(text)
+        self.menus[menuname].addAction(action)
+        self.menutasks.append(action)
+        QObject.connect(action, QtCore.SIGNAL("triggered()"), callback)
     def addEditableTab(self, tabname, fmt, boundfile, getwidget=defaultWidget):
         boundnarc = narc.NARC(open(boundfile, "rb").read())
         tabscroller = QScrollArea(self.tabcontainer)
