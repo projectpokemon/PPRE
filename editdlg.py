@@ -3,8 +3,10 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4 import QtCore, QtGui
+import struct
 
 from language import translate
+from nds import narc
 
 def defaultWidget(name, size, parent):
     sb = EditWidget(EditWidget.SPINBOX, parent)
@@ -23,25 +25,36 @@ class EditWidget(QWidget):
         super(EditWidget, self).__init__(parent)
         self.kind = kind
         self.label = QLabel(self)
-        self.label.setGeometry(QRect(0, 0, 80, 20))
-        self.valuer = None
-        if kind == EditWidget.SPINBOX:
+        self.label.setGeometry(QRect(0, 0, 100, 20))
+        if kind == EditWidget.NONE:
+            self.valuer = None
+            self.setValue = self.storeValue
+            self.getValue = self.getStored
+        elif kind == EditWidget.SPINBOX:
             self.valuer = QSpinBox(self)
             self.setValue = self.valuer.setValue
             self.getValue = self.valuer.value
             self.setValues = self.setSpinBoxValues
+            QObject.connect(self.valuer,
+                QtCore.SIGNAL("valueChanged(int)"), self.changed)
         elif kind == EditWidget.COMBOBOX:
             self.valuer = QComboBox(self)
             self.setValue = self.valuer.setCurrentIndex
             self.getValue = self.valuer.currentIndex
             self.setValues = self.valuer.addItems
-        if self.valuer:
-            self.valuer.setGeometry(QRect(80, 0, 80, 20))
+            QObject.connect(self.valuer,
+                QtCore.SIGNAL("currentIndexChanged(int)"), self._changed)
+        if kind != EditWidget.NONE:
+            self.valuer.setGeometry(QRect(100, 0, 120, 20))
     def setName(self, name):
         self.label.setText(name)
     def setSpinBoxValues(self, values):
         self.valuer.setMinimum(min(values))
         self.valuer.setMaximum(max(values))
+    def storeValue(self, value):
+        self.stored = value
+    def getStored(self):
+        return self.stored
     def getGeometry(self):
         if not self.valuer:
             return (self.label.geometry().width(),
@@ -49,6 +62,11 @@ class EditWidget(QWidget):
         return (self.label.geometry().width()+self.valuer.geometry().width(),
             max([self.label.geometry().height(), 
                 self.valuer.geometry().height()]))
+    def changed(self, param1=None):
+        return
+    def _changed(self, param1=None):
+        self.changed(param1)
+        return
 
 class EditDlg(QMainWindow):
     wintitle = "Editor"
@@ -58,7 +76,6 @@ class EditDlg(QMainWindow):
         self.currentchoice = 0
         self.game = "Diamond"
         self.setupUi()
-        self.addEditableTab("General", ["BB", ["field 1"], ["field 2"]], None)
     def setupUi(self):
         self.setObjectName("EditDlg")
         self.resize(600, 400)
@@ -80,39 +97,56 @@ class EditDlg(QMainWindow):
         self.chooser.setGeometry(QRect(50, 25, 200, 20))
         QObject.connect(self.chooser,
             QtCore.SIGNAL("currentIndexChanged(int)"), self.openChoice)
+        self.currentLabel = QLabel(self.widgetcontainer)
+        self.currentLabel.setGeometry(QRect(260, 25, 100, 20))
         self.tabcontainer = QTabWidget(self.widgetcontainer)
         self.tabcontainer.setGeometry(QRect(25, 50, 550, 300))
         self.tabs = []
         self.setCentralWidget(self.widgetcontainer)
-        self.updateWindowTitle()
+        self.updateWindowTitle("No file loaded")
         QMetaObject.connectSlotsByName(self)
     def openChoice(self, i):
         self.currentchoice = i
+        self.currentLabel.setText("File ID: %i"%i)
+        for tab in self.tabs:
+            f = tab[0].gmif.files[i]
+            fmt = tab[1]
+            fields = tab[2]
+            data = list(struct.unpack_from(fmt[0], f))
+            for w in fields:
+                w.setValue(data.pop(0))
         self.dirty = False
+        self.updateWindowTitle()
     def changed(self, param1=None):
         self.dirty = True
         self.updateWindowTitle()
-    def updateWindowTitle(self):
+    def updateWindowTitle(self, text=None):
         if self.dirty:
             dirt = " [modified]"
         else:
             dirt = ""
-        self.setWindowTitle("%s%s - %s - PPRE"%(self.chooser.currentText(),
-            dirt, self.wintitle))
-    def addEditableTab(self, tabname, fmt, boundnarc, getwidget=defaultWidget):
-        tab = QScrollArea(self.tabcontainer)
+        if not text:
+            text = self.chooser.currentText()
+        self.setWindowTitle("%s%s - %s - PPRE"%(text, dirt, self.wintitle))
+    def addEditableTab(self, tabname, fmt, boundfile, getwidget=defaultWidget):
+        boundnarc = narc.NARC(open(boundfile, "rb").read())
+        tabscroller = QScrollArea(self.tabcontainer)
+        container = QWidget(tabscroller)
         fields = []
         y = 10
         ypadding = 0
         x = 5
         for i, f in enumerate(fmt[0]):
-            w = getwidget(fmt[i+1][0], f, tab)
+            w = getwidget(fmt[i+1][0], f, container)
             width, height = w.getGeometry()
             w.setGeometry(QRect(x, y, width, height))
+            w.changed = self.changed
             fields.append(w)
             y += ypadding + height
-        self.tabs.append([tab, fields])
-        self.tabcontainer.addTab(tab, tabname)
+        container.setGeometry(QRect(0, 0, 400, y))
+        tabscroller.setWidget(container)
+        self.tabs.append([boundnarc, fmt, fields, container])
+        self.tabcontainer.addTab(tabscroller, tabname)
         
 if __name__ == "__main__":
     import sys
