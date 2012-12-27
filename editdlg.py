@@ -7,6 +7,7 @@ import struct
 
 from language import translate
 from nds import narc
+from nds.fmt import FormatIterator
 
 def defaultWidget(name, size, parent):
     sb = EditWidget(EditWidget.SPINBOX, parent)
@@ -22,16 +23,15 @@ class EditWidget(QWidget):
     SPINBOX = 1
     COMBOBOX = 2
     LABEL = 3
+    CHECKBOX = 4
+    TAB = 16
     def __init__(self, kind=SPINBOX, parent=None):
         super(EditWidget, self).__init__(parent)
         self.kind = kind
         self.label = QLabel(self)
         self.label.setGeometry(QRect(0, 0, 100, 20))
-        if kind == EditWidget.NONE:
-            self.valuer = None
-            self.setValue = self.storeValue
-            self.getValue = self.getStored
-        elif kind == EditWidget.SPINBOX:
+        self.valuer = None
+        if kind == EditWidget.SPINBOX:
             self.valuer = QSpinBox(self)
             self.setValue = self.valuer.setValue
             self.getValue = self.valuer.value
@@ -48,18 +48,26 @@ class EditWidget(QWidget):
         elif kind == EditWidget.LABEL:
             self.valuer = QLabel(self)
             self.setValue = lambda x: self.valuer.setText(str(x))
-            self.getValue = lambda: int(self.valuer.text())
-        if kind != EditWidget.NONE:
+            self._getValue = self.valuer.text
+        elif kind == EditWidget.CHECKBOX:
+            self.valuer = QCheckBox(self)
+            self.setValue = self.valuer.setChecked
+            self._getValue = self.valuer.isChecked
+            QObject.connect(self.valuer,
+                QtCore.SIGNAL("stateChanged(int)"), self._changed)
+        if self.valuer != None:
             self.valuer.setGeometry(QRect(100, 0, 120, 20))
     def setName(self, name):
         self.label.setText(name)
     def setSpinBoxValues(self, values):
         self.valuer.setMinimum(min(values))
         self.valuer.setMaximum(max(values))
-    def storeValue(self, value):
+    def setValue(self, value):
         self.stored = value
-    def getStored(self):
+    def _getValue(self):
         return self.stored
+    def getValue(self):
+        return int(self._getValue())
     def getGeometry(self):
         if not self.valuer:
             return (self.label.geometry().width(),
@@ -176,17 +184,28 @@ class EditDlg(QMainWindow):
         y = 10
         ypadding = 0
         x = 5
-        for i, f in enumerate(fmt[0]):
+        self.tabcontainer.addTab(tabscroller, tabname)
+        halfguess = struct.calcsize(fmt[0][:len(fmt[0])/2])
+        for i, f in enumerate(FormatIterator(fmt[0])):
             w = getwidget(fmt[i+1][0], f, container)
+            if i == halfguess:
+                x = width+10
+                my = y
+                y = 10
+            if w.kind == EditWidget.TAB:
+                scr = QScrollArea(self.tabcontainer)
+                scr.setWidget(w)
+                self.tabcontainer.addTab(scr, w.tabname)
+                fields.append(w)
+                continue
             width, height = w.getGeometry()
             w.setGeometry(QRect(x, y, width, height))
             w.changed = self.changed
             fields.append(w)
             y += ypadding + height
-        container.setGeometry(QRect(0, 0, 400, y))
+        container.setGeometry(QRect(0, 0, width*2+20, max(my, y)))
         tabscroller.setWidget(container)
         self.tabs.append([boundnarc, fmt, fields, container])
-        self.tabcontainer.addTab(tabscroller, tabname)
         
 if __name__ == "__main__":
     import sys
