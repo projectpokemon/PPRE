@@ -56,7 +56,7 @@ class EditWidget(QWidget):
             QObject.connect(self.valuer,
                 QtCore.SIGNAL("stateChanged(int)"), self._changed)
         if self.valuer != None:
-            self.valuer.setGeometry(QRect(100, 0, 120, 20))
+            self.valuer.setGeometry(QRect(100, 0, 150, 20))
     def setName(self, name):
         self.label.setText(name)
     def setSpinBoxValues(self, values):
@@ -194,6 +194,7 @@ class EditDlg(QMainWindow):
         container = QWidget(tabscroller)
         fields = []
         y = 10
+        my = y
         ypadding = 0
         x = 5
         self.tabcontainer.addTab(tabscroller, tabname)

@@ -37,9 +37,13 @@ textfiles = {
 }
 
 pokemonfiles = {
-    "Diamond":{"Personal":"/poketool/personal/personal.narc"},
-    
-    }
+    "Diamond":{
+        "Personal":"/poketool/personal/personal.narc",
+        "Evolution":"/poketool/personal/evo.narc"},
+    "HeartGold":{
+        "Personal":"/a/0/0/2",
+        "Evolution":"/a/0/3/4"},
+}
     
 textentries = {
     "Diamond":{
@@ -59,7 +63,26 @@ textentries = {
             },
             "Class":560,
             "Trainers":559,
-            "Trainer Quotes":555
+            "Trainer Quotes":555,
         },
-    }
+    },
+    "HeartGold":{
+        "English":{
+            "Locations": 279, 
+            "Types": 735, 
+            "Abilities": 720, 
+            "Items": 222, 
+            "Moves": 750, 
+            "Pokemon": 237,
+            "Height": 814,
+            "Weight": 812,
+            "Flavor":{
+                "HeartGold": 803,
+                "SoulSilver": 804,
+            },
+            "Species": 823,
+            "Class": 730,
+            "Trainers": 729,
+        },
+    },
 }

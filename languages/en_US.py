@@ -56,9 +56,16 @@ translations = {
 "pokemonegggroups":["", "Monster", "Water 1", "Bug", "Flying", "Field", "Fairy",
     "Grass", "Human-like", "Water 3", "Mineral", "Amorphous", "Water 2",
     "Ditto", "Dragon", "No Eggs"],
-    
 "pokemontm":"TM",
 "pokemonhm":"HM",
+"pokemonevolutionmethods":["None", "Friendship", "Friendship (Day)",
+    "Friendship (Night)", "Level", "Trade", "Trade (Item)", "Use Item", 
+    "Level (Atk > Def)", "Level (Atk=Def)", "Level (Atk < Def)", 
+    "Level (PID < 5)", "Level (PID > 4)", "Level (1 of 2)", "Level (2 of 2)", 
+    "Beauty", "Use Item(Male)", "Use Item(Female)", "Level Up Day, holding",
+    "Level Up Night, holding", "Know Attack", "Party Pokemon",
+    "Level (Male)", "Level (Female)", "Level Up at Mt. Coronet",
+    "Level Up (Eterna)", "Level Up (Rt 217)"],
     
     
 }

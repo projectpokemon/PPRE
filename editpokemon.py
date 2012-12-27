@@ -10,7 +10,7 @@ import config
 from language import translate
 import pokeversion
 from nds import narc, txt
-from nds.fmt import dexfmt
+from nds.fmt import dexfmt, evofmt
 
 files = pokeversion.pokemonfiles
 
@@ -95,6 +95,8 @@ class EditPokemon(EditDlg):
         game = config.project["versioninfo"][0]
         self.personalfname = config.project["directory"]+"fs"+files[
             game]["Personal"]
+        self.evolutionfname = config.project["directory"]+"fs"+files[
+            game]["Evolution"]
         self.textfname = config.project["directory"]+"fs"+pokeversion.textfiles[
             game]["Main"]
         self.textnarc = narc.NARC(open(self.textfname, "rb").read())
@@ -105,6 +107,8 @@ class EditPokemon(EditDlg):
         self.chooser.addItems(self.pokemonnames)
         self.addEditableTab("Personal", dexfmt[game.lower()],
             self.personalfname, self.getPokemonWidget)
+        self.addEditableTab("Evolution", evofmt[game.lower()],
+            self.evolutionfname, self.getEvolutionWidget)
     def getTextEntry(self, entry):
         version = config.project["versioninfo"]
         entrynum = pokeversion.textentries[version[0]][pokeversion.langs[
@@ -145,6 +149,21 @@ class EditPokemon(EditDlg):
             sb.setValues([0, 0xFFFF])
         else:
             sb.setValues([0, 0xFF])
+        sb.setName(translate(name))
+        return sb
+    def getEvolutionWidget(self, name, size, parent):
+        choices = None
+        if name[:6] == "method":
+            choices = translate("pokemonevolutionmethods")
+        elif name[:6] == "target":
+            choices = self.pokemonnames
+        if choices:
+            cb = EditWidget(EditWidget.COMBOBOX, parent)
+            cb.setValues(choices)
+            cb.setName(translate(name))
+            return cb
+        sb = EditWidget(EditWidget.SPINBOX, parent)
+        sb.setValues([0, 0xFFFF])
         sb.setName(translate(name))
         return sb
     
