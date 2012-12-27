@@ -1,5 +1,37 @@
+
+class FormatIterator:
+    def __init__(self, fmt):
+        self.fmt = list(fmt)
+    def next(self):
+        s = ""
+        if not self.fmt:
+            raise StopIteration
+        c = self.fmt.pop(0)
+        while c == "x":
+            if not self.fmt:
+                raise StopIteration
+            c = self.fmt.pop(0)
+        hasnum = False
+        while c.isdigit():
+            hasnum = True
+            s += c
+            c = self.fmt.pop(0)
+        if hasnum:
+            if c != 's':
+                num = int(s)
+                newfmt = []
+                for i in range(num):
+                    newfmt.append(c)
+                newfmt.extend(self.fmt)
+                self.fmt = newfmt
+                return self.fmt.pop(0)
+        s += c
+        return s
+    def __iter__(self):
+        return self
+
 dexfmt = {}
-dexfmt["diamond"] = ["BBBBBBBBBBHHHBBBBBBBBBB", 
+dexfmt["diamond"] = ["BBBBBBBBBBHHHBBBBBBBBBBxx13s", 
     ["basehp"],
     ["baseatk"],
     ["basedef"],
@@ -22,7 +54,8 @@ dexfmt["diamond"] = ["BBBBBBBBBBHHHBBBBBBBBBB",
     ["ability1"],
     ["ability2"],
     ["flee"],
-    ["color"]
+    ["color"],
+    ["tms"]
 ]
 dexfmt["platinum"] = dexfmt["diamond"][:]
 dexfmt["heartgold"] = dexfmt["diamond"][:]
