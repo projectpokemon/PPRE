@@ -18,4 +18,3 @@ for game in games:
     fieldgen.makeHtmlEntries(dexfmt[game], 
         DATA_DIR+game+"/fs/"+POKEDEX_FILE[game], ofile)
     ofile.close()
-exit()
