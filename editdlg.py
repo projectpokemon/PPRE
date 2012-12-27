@@ -126,15 +126,27 @@ class EditDlg(QMainWindow):
         self.currentLabel.setText("File ID: %i"%i)
         for tab in self.tabs:
             f = tab[0].gmif.files[i]
-            fmt = tab[1]
-            fields = tab[2]
+            fmt = tab[2]
+            fields = tab[3]
             data = list(struct.unpack_from(fmt[0], f))
             for w in fields:
                 w.setValue(data.pop(0))
         self.dirty = False
         self.updateWindowTitle()
     def save(self):
-        print("save() not implemented")
+        if not self.dirty:
+            return
+        for tab in self.tabs:
+            fmt = tab[2]
+            fields = tab[3]
+            args = []
+            for w in fields:
+                args.append(w.getValue())
+            data = struct.pack(fmt[0], *args)
+            tab[0].gmif.files[self.currentchoice] = data
+            tab[0].toFile(open(tab[1], "wb"))
+        self.dirty = False
+        self.updateWindowTitle()
     def new(self):
         print("new() not implemented")
     def quit(self):
@@ -205,7 +217,7 @@ class EditDlg(QMainWindow):
             y += ypadding + height
         container.setGeometry(QRect(0, 0, width*2+20, max(my, y)))
         tabscroller.setWidget(container)
-        self.tabs.append([boundnarc, fmt, fields, container])
+        self.tabs.append([boundnarc, boundfile, fmt, fields, container])
         
 if __name__ == "__main__":
     import sys

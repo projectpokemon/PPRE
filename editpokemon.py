@@ -28,7 +28,7 @@ class EditEVs(EditWidget):
             sb.setName(translate("pokemonstat_"+stat)+" EV")
             width, height = sb.getGeometry()
             sb.setGeometry(QRect(x, y, width, height))
-            sb.changed = self.changed
+            sb.changed = self._changed
             self.valuers.append(sb)
             y += height
         self.setGeometry(0, 0, width, y)
@@ -39,7 +39,7 @@ class EditEVs(EditWidget):
     def getValue(self):
         value = 0
         for i in range(6):
-            value |= self.values[i].getValue()<<(i*2)
+            value |= self.valuers[i].getValue()<<(i*2)
         return value
     def getGeometry(self):
         return (self.geometry().width(), self.geometry().height())
@@ -69,7 +69,7 @@ class EditTMs(EditWidget):
             sb.setName(txt%(i-off+1))
             width, height = sb.getGeometry()
             sb.setGeometry(QRect(x, y, width, height))
-            sb.changed = self.changed
+            sb.changed = self._changed
             self.valuers.append(sb)
             y += height
         self.setGeometry(0, 0, width*2, mheight)
@@ -80,8 +80,13 @@ class EditTMs(EditWidget):
                 idx = i*8+j
                 self.valuers[idx].setValue((tmdata[i]>>j)&1)
     def getValue(self):
-        value = 0
-        return value
+        values = []
+        for i in range(13):
+            values.append(0)
+            for j in range(8):
+                idx = i*8+j
+                values[i] |= self.valuers[idx].getValue() << j
+        return struct.pack("13B", *values)
 
 class EditPokemon(EditDlg):
     wintitle = "Pokemon Editor"
