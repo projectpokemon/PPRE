@@ -1,12 +1,12 @@
-import collections, struct
+import struct
 import narc
 
 def getFieldsByString(datafmt, f):
-    ret = collections.OrderedDict()
+    ret = []
     size = struct.calcsize(datafmt[0])
     vals = list(struct.unpack(datafmt[0], f[:size]))
     for d in datafmt[1:]:
-        ret[d[0]] = vals.pop(0)
+        ret.append([d[0], vals.pop(0)])
     return ret
         
 def getEntries(datafmt, fname):
@@ -38,5 +38,5 @@ def makeHtmlEntries(datafmt, fname, ofile, separator=defaultSeparator):
         ofile.write(separator(i))
         for field in entry:
             ofile.write("\n<tr><td>%s</td><td>%i</td></tr>\n"%
-                (field, entry[field]))
+                (field[0], field[1]))
     ofile.write("</table>")

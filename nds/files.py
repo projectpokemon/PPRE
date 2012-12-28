@@ -62,6 +62,14 @@ TRPOKE_FILE = {
     "black2":"/a/0/9/3",
 }
 
+ITEMDATA_FILE = {
+    "diamond":"/itemtool/itemdata/item_data.narc",
+    "platinum":"/itemtool/itemdata/pl_item_data.narc",
+    "heartgold":"/a/0/1/7",
+    "black":"/a/0/2/4",
+    "black2":"/a/0/2/4"
+}
+
 ENC_FILE = {
     "diamond":"/fielddata/encountdata/d_enc_data.narc",
     "platinum":"/fielddata/encountdata/pl_enc_data.narc",

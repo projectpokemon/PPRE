@@ -205,8 +205,40 @@ trdatafmt["heartgold"] = trdatafmt["diamond"][:] # TODO: may need fixing
 trdatafmt["black"] = trdatafmt["diamond"][:] # TODO: may need fixing
 trdatafmt["black2"] = trdatafmt["black"][:]
 
-#file:///home/david/Dropbox/Public/py/ppre.pyw
-# xxxxxxxxxxxxxxxxxxxxxxxx
+itemdatafmt = {}
+itemdatafmt["diamond"] = ["H"+"B"*18+"b"*6+"BBbbb",
+    ["price"],
+    ["batteeffect"],
+    ["gain"],
+    ["berrytag"],
+    ["flingeffect"],
+    ["flingpower"],
+    ["naturalpower"],
+    ["flag1"],
+    ["pocket"],
+    ["itemtype"],
+    ["itemcategory"],
+    ["flag2"],
+    ["flag3"],
+    ["flag4"],
+    ["flag5"],
+    ["xstat1"],
+    ["xstat2"],
+    ["xstat3"],
+    ["flag6"],
+    ["hpev"],
+    ["atkev"],
+    ["defev"],
+    ["speev"],
+    ["spaev"],
+    ["spdev"],
+    ["hprestore"],
+    ["pprestore"],
+    ["happy1"],
+    ["happy2"],
+    ["happy3"],
+]
+
 encfmt = {}
 encfmt["diamond"] = ["IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII"+"IIIIII"+"IIIIIIIII"+
     "IBBxxIBBxxIBBxxIBBxxIBBxxI"+"x"*44+"IBBxxIBBxxIBBxxIBBxxIBBxxI"*3,
