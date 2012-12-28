@@ -137,6 +137,56 @@ movefmt["black"] = ["I",
 ]
 movefmt["black2"] = movefmt["black"][:]
 
+movedatafmt = {}
+movedatafmt["diamond"] = ["HBBBBBBHbBBBxx",
+    ["effect"],
+    ["category"],
+    ["power"],
+    ["type"],
+    ["accuracy"],
+    ["pp"],
+    ["effectchance"],
+    ["flag1"],
+    ["priority"],
+    ["flag2"],
+    ["contesteffect"],
+    ["contesttype"]
+]
+movedatafmt["platinum"] = movedatafmt["diamond"][:]
+movedatafmt["heartgold"] = movedatafmt["diamond"][:]
+movedatafmt["black"] = ["BBBBBBbBhBBBBBBHBBBBBBBBBBBBxxHxx",
+    ["type"],
+    ["effectcategory"],
+    ["category"],
+    ["power"],
+    ["accuracy"],
+    ["pp"],
+    ["priority"],
+    ["hits"],
+    ["resulteffect"],
+    ["effectchance"],
+    ["status"],
+    ["minturns"],
+    ["maxturns"],
+    ["crit"],
+    ["flinch"],
+    ["effect"],
+    ["recoil"],
+    ["healing"],
+    ["target"],
+    ["stat1"],
+    ["stat2"],
+    ["stat3"],
+    ["magnitude1"],
+    ["magnitude2"],
+    ["magnitude3"],
+    ["statchance1"],
+    ["statchance2"],
+    ["statchance3"],
+    ["flag"]
+]
+movedatafmt["black2"] = movedatafmt["black"][:]
+
 trdatafmt = {}
 trdatafmt["diamond"] = ["BBBBHHHHIBxxx",
     ["flag"],

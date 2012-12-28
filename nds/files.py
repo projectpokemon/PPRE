@@ -30,6 +30,14 @@ LEVELMOVE_FILE = {
     "black2":"/a/0/1/8",
 }
 
+MOVEDATA_FILE = {
+    "diamond":"/poketool/waza/waza_tbl.narc",
+    "platinum":"/poketool/waza/pl_waza_tbl.narc",
+    "heartgold":"/a/0/1/1",
+    "black":"/a/0/2/1",
+    "black2":"/a/0/2/1"
+}
+
 BASEEVO_FILE = {
     "diamond":"/poketool/personal/pms.narc",
     "platinum":"/poketool/personal/pms.narc",
@@ -78,7 +86,8 @@ MSG_FILE2 = {
 ZUKAN_FILE = {
     "diamond":"/application/zukanlist/zkn_data/zukan_data.narc",
     "platinum":"/application/zukanlist/zkn_data/zukan_data_gira.narc",
-    "heartgold":"/a/0/7/4"
+    "heartgold":"/a/0/7/4",
+    "black":"/a/0/2/1",
 } 
 
 def getFSHTML(FEXT):
@@ -88,6 +97,7 @@ def getFSHTML(FEXT):
         "/poketool/personal/growtbl.narc":"<a href='exprate"+FEXT+"'>Experience Table</a>",
         "/poketool/personal/evo.narc":"<a href='evo"+FEXT+"'>Evolutions</a>",
         "/poketool/personal/wotbl.narc":"<a href='levelmoves"+FEXT+"'>Level-Up Moves</a>",
+        "/poketool/waza/waza_tbl.narc":"<a href='movedata"+FEXT+"'>Move Data</a>",
         "/poketool/personal/pms.narc":"<a href='baseevo"+FEXT+"'>Base Evolutions/Baby Pokemon</a>",
         "/poketool/trainer/trdata.narc":"<a href='trdata"+FEXT+"'>Trainer data</a>",
         "/fielddata/encountdata/d_enc_data.narc":"<a href='enc"+FEXT+"'>Encounter Data</a>",
@@ -100,6 +110,7 @@ def getFSHTML(FEXT):
         "/poketool/personal/pl_growtbl.narc":"<a href='exprate"+FEXT+"'>Experience Table</a>",
         "/poketool/personal/evo.narc":"<a href='evo"+FEXT+"'>Evolutions</a>",
         "/poketool/personal/wotbl.narc":"<a href='levelmoves"+FEXT+"'>Level-Up Moves</a>",
+        "/poketool/waza/pl_waza_tbl.narc":"<a href='movedata"+FEXT+"'>Move Data</a>",
         "/poketool/personal/pms.narc":"<a href='baseevo"+FEXT+"'>Base Evolutions/Baby Pokemon</a>",
         "/poketool/trainer/trdata.narc":"<a href='trdata"+FEXT+"'>Trainer data</a>",
         "/fielddata/encountdata/pl_enc_data.narc":"<a href='enc"+FEXT+"'>Encounter Data</a>",
@@ -108,6 +119,7 @@ def getFSHTML(FEXT):
         
         "/poketool/personal/personal.narc":"DP Pokemon Data",
         "/poketool/personal/growtbl.narc":"DP Experience Table",
+        "/poketool/waza/waza_tbl.narc":"DP Move Data",
         "/fielddata/encountdata/d_enc_data.narc":"Diamond Encounter Data",
         "/fielddata/encountdata/p_enc_data.narc":"Pearl Encounter Data",
         "/msgdata/msg.narc":"DP Message Files",
@@ -118,6 +130,7 @@ def getFSHTML(FEXT):
         "/a/0/0/3":"<a href='exprate"+FEXT+"'>Experience Table</a>",
         "/a/0/3/4":"<a href='evo"+FEXT+"'>Evolutions</a>",
         "/a/0/3/3":"<a href='levelmoves"+FEXT+"'>Level-Up Moves</a>",
+        "/a/0/1/1":"<a href='movedata"+FEXT+"'>Move Data</a>",
         "/poketool/personal/pms.narc":"<a href='baseevo"+FEXT+"'>Base Evolutions/Baby Pokemon</a>",
         "/a/0/5/5":"<a href='trdata"+FEXT+"'>Trainer data</a>",
         "/a/0/3/7":"<a href='enc"+FEXT+"'>Encounter Data</a>",
