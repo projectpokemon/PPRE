@@ -44,6 +44,14 @@ pokemonfiles = {
         "Personal":"/a/0/0/2",
         "Evolution":"/a/0/3/4"},
 }
+
+movefiles = {
+    "Diamond":{"Moves":"/poketool/waza/waza_tbl.narc"},
+    "Platinum":{"Moves":"/poketool/waza/pl_waza_tbl.narc"},
+    "HeartGold":{"Moves":"/a/0/1/1"},
+    "Black":{"Moves":"/a/0/2/1"},
+    "Black2":{"Moves":"/a/0/2/1"},
+}
     
 textentries = {
     "Diamond":{

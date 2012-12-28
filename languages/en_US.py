@@ -11,6 +11,7 @@ translations = {
 "menu_edit":"&Edit",
 "menu_edittext":"Text Editor",
 "menu_editpokemon":"Pokemon Editor",
+"menu_editmoves":"Move Editor",
 "menu_newtext":"New Text File",
 "menu_opentext":"Open Text NARC",
 "menu_savetext":"Save Text File",
@@ -66,6 +67,8 @@ translations = {
     "Level Up Night, holding", "Know Attack", "Party Pokemon",
     "Level (Male)", "Level (Female)", "Level Up at Mt. Coronet",
     "Level Up (Eterna)", "Level Up (Rt 217)"],
+"movecategories":["Physical", "Special", "Other"],
+"movecontesttypes":["Cool", "Beauty", "Cute", "Smart", "Tough"],
     
     
 }

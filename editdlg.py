@@ -37,7 +37,7 @@ class EditWidget(QWidget):
             self.getValue = self.valuer.value
             self.setValues = self.setSpinBoxValues
             QObject.connect(self.valuer,
-                QtCore.SIGNAL("valueChanged(int)"), self.changed)
+                QtCore.SIGNAL("valueChanged(int)"), self._changed)
         elif kind == EditWidget.COMBOBOX:
             self.valuer = QComboBox(self)
             self.setValue = self.valuer.setCurrentIndex
@@ -54,9 +54,12 @@ class EditWidget(QWidget):
             self.setValue = self.valuer.setChecked
             self._getValue = self.valuer.isChecked
             QObject.connect(self.valuer,
+                QtCore.SIGNAL("toggled(bool)"), self._changed)
+            QObject.connect(self.valuer,
                 QtCore.SIGNAL("stateChanged(int)"), self._changed)
         if self.valuer != None:
             self.valuer.setGeometry(QRect(100, 0, 150, 20))
+        QMetaObject.connectSlotsByName(self)
     def setName(self, name):
         self.label.setText(name)
     def setSpinBoxValues(self, values):
@@ -153,6 +156,10 @@ class EditDlg(QMainWindow):
         if not self.checkClean():
             return
         self.close()
+    def closeEvent(self, event):
+        if not self.checkClean():
+            event.ignore()
+        event.accept()
     def checkClean(self, allowCancel=True):
         if self.dirty:
             if allowCancel:
@@ -209,6 +216,7 @@ class EditDlg(QMainWindow):
                 scr = QScrollArea(self.tabcontainer)
                 scr.setWidget(w)
                 self.tabcontainer.addTab(scr, w.tabname)
+                w.changed = self.changed
                 fields.append(w)
                 continue
             width, height = w.getGeometry()

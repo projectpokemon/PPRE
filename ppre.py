@@ -12,12 +12,11 @@ from language import translations
 import ndstool
 import pokeversion
 
-import edittext
-import editpokemon
+import edittext, editpokemon, editmoves
 
 class version:
     major = 2
-    minor = 1
+    minor = 2
     revision = 0
 
 if "--help" in sys.argv or "-h" in sys.argv:
@@ -136,6 +135,11 @@ class MainWindow(QMainWindow):
         self.menus["edit"].addAction(self.menutasks["editpokemon"])
         QObject.connect(self.menutasks["editpokemon"],
             QtCore.SIGNAL("triggered()"), editpokemon.create)
+        self.menutasks["editmoves"] = QAction(self.menus["edit"])
+        self.menutasks["editmoves"].setText(translations["menu_editmoves"])
+        self.menus["edit"].addAction(self.menutasks["editmoves"])
+        QObject.connect(self.menutasks["editmoves"],
+            QtCore.SIGNAL("triggered()"), editmoves.create)
         self.menubar.addAction(self.menus["edit"].menuAction())
         self.projectinfo = {}
         i = 0
