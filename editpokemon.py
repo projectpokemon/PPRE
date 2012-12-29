@@ -97,9 +97,6 @@ class EditPokemon(EditDlg):
             game]["Personal"]
         self.evolutionfname = config.project["directory"]+"fs"+files[
             game]["Evolution"]
-        self.textfname = config.project["directory"]+"fs"+pokeversion.textfiles[
-            game]["Main"]
-        self.textnarc = narc.NARC(open(self.textfname, "rb").read())
         self.pokemonnames = self.getTextEntry("Pokemon")
         self.typenames = self.getTextEntry("Types")
         self.itemnames = self.getTextEntry("Items")
@@ -109,6 +106,8 @@ class EditPokemon(EditDlg):
             self.personalfname, self.getPokemonWidget)
         self.addEditableTab("Evolution", evofmt[game.lower()],
             self.evolutionfname, self.getEvolutionWidget)
+        self.addTextTab("Flavor", self.getFlavorEntries, self.getFlavorEntry, 
+            self.getFlavorWidget)
     def getTextEntry(self, entry):
         version = config.project["versioninfo"]
         entrynum = pokeversion.textentries[version[0]][pokeversion.langs[
@@ -166,7 +165,31 @@ class EditPokemon(EditDlg):
         sb.setValues([0, 0xFFFF])
         sb.setName(translate(name))
         return sb
-    
+    def getFlavorEntries(self):
+        version = config.project["versioninfo"]
+        texts = pokeversion.textentries[version[0]][
+                    pokeversion.langs[version[1]]]
+        ret = []
+        ret.append(("names", texts["PokemonNames"].keys()))
+        ret.append(("flavor", sorted(texts["Flavor"].keys())))
+        return ret
+    def getFlavorEntry(self, section, name, i):
+        version = config.project["versioninfo"]
+        texts = pokeversion.textentries[version[0]][
+                    pokeversion.langs[version[1]]]
+        if section == "flavor":
+            return (texts["Flavor"][name], "0_"+str(i))
+        return (texts["PokemonNames"][name], "0_"+str(i))
+    def getFlavorWidget(self, section, name, parent):
+        if section == "flavor":
+            te = EditWidget(EditWidget.TEXTEDIT, parent)
+            te.setName(translate(name))
+            return te
+        le = EditWidget(EditWidget.LINEEDIT, parent)
+        le.setName(translate(name))
+        return le
+        
+
 def create():
     if not config.project:
         QMessageBox.critical(None, translations["error_noromloaded_title"], 

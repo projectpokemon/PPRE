@@ -62,6 +62,9 @@ textentries = {
             "Items":344,
             "Moves":588,
             "Pokemon":362,
+            "PokemonNames":{
+                "English":362
+            },
             "Weight":619,
             "Height":620,
             "Species":621,

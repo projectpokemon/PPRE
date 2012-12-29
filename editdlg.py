@@ -5,8 +5,10 @@ from PyQt4.QtGui import *
 from PyQt4 import QtCore, QtGui
 import struct
 
+import config
+import pokeversion
 from language import translate
-from nds import narc
+from nds import narc, txt
 from nds.fmt import FormatIterator
 
 def defaultWidget(name, size, parent):
@@ -18,12 +20,19 @@ def defaultWidget(name, size, parent):
     sb.setName(translate(name))
     return sb
     
+def defaultTextWidget(section, name, parent):
+    le = EditWidget(EditWidget.LINEEDIT, parent)
+    le.setName(translate(name))
+    return le
+    
 class EditWidget(QWidget):
     NONE = 0
     SPINBOX = 1
     COMBOBOX = 2
     LABEL = 3
     CHECKBOX = 4
+    LINEEDIT = 5
+    TEXTEDIT = 6
     TAB = 16
     def __init__(self, kind=SPINBOX, parent=None):
         super(EditWidget, self).__init__(parent)
@@ -57,8 +66,18 @@ class EditWidget(QWidget):
                 QtCore.SIGNAL("toggled(bool)"), self._changed)
             QObject.connect(self.valuer,
                 QtCore.SIGNAL("stateChanged(int)"), self._changed)
+        elif kind == EditWidget.LINEEDIT:
+            self.valuer = QLineEdit(self)
+            self.setValue = self.valuer.setText
+            self.getValue = self.valuer.text
+            #TODO signals
         if self.valuer != None:
             self.valuer.setGeometry(QRect(100, 0, 150, 20))
+        if kind == EditWidget.TEXTEDIT:
+            self.valuer = QTextEdit(self)
+            self.setValue = self.valuer.setPlainText
+            self.getValue = self.valuer.toPlainText
+            self.valuer.setGeometry(QRect(100, 0, 200, 60))
         QMetaObject.connectSlotsByName(self)
     def setName(self, name):
         self.label.setText(name)
@@ -90,7 +109,14 @@ class EditDlg(QMainWindow):
         super(EditDlg, self).__init__(parent)
         self.dirty = False
         self.currentchoice = 0
-        self.game = "Diamond"
+        game = config.project["versioninfo"][0]
+        self.textfname = config.project["directory"]+"fs"+pokeversion.textfiles[
+            game]["Main"]
+        self.textnarc = narc.NARC(open(self.textfname, "rb").read())
+        if pokeversion.gens[game] == 4:
+            self.gettext = txt.gen4get
+        elif pokeversion.gens[game] == 5:
+            self.gettext = txt.gen5get
         self.setupUi()
     def setupUi(self):
         self.setObjectName("EditDlg")
@@ -121,6 +147,8 @@ class EditDlg(QMainWindow):
         self.tabcontainer = QTabWidget(self.widgetcontainer)
         self.tabcontainer.setGeometry(QRect(25, 50, 550, 300))
         self.tabs = []
+        self.texttabs = []
+        self.manualtabs = []
         self.setCentralWidget(self.widgetcontainer)
         self.updateWindowTitle("No file loaded")
         QMetaObject.connectSlotsByName(self)
@@ -134,6 +162,20 @@ class EditDlg(QMainWindow):
             data = list(struct.unpack_from(fmt[0], f))
             for w in fields:
                 w.setValue(data.pop(0))
+        textcache = {}
+        for tab in self.texttabs:
+            getEntry = tab[1]
+            for field in tab[0]:
+                section = field[0]
+                name = field[1]
+                w = field[2]
+                f, idx = getEntry(section, name, i)
+                if f not in textcache:
+                    textcache[f] = self.gettext(self.textnarc.gmif.files[f])
+                for t in textcache[f]:
+                    if idx == t[0]:
+                        w.setValue(t[1])
+                        break
         self.dirty = False
         self.updateWindowTitle()
     def save(self):
@@ -227,6 +269,31 @@ class EditDlg(QMainWindow):
         container.setGeometry(QRect(0, 0, width*2+20, max(my, y)))
         tabscroller.setWidget(container)
         self.tabs.append([boundnarc, boundfile, fmt, fields, container])
+    def addTextTab(self, tabname, getEntryList, getEntry, getwidget=defaultTextWidget):
+        tabscroller = QScrollArea(self.tabcontainer)
+        container = QWidget(tabscroller)
+        fields = []
+        y = 10
+        ypadding = 0
+        x = 5
+        mwidth = 0
+        self.tabcontainer.addTab(tabscroller, tabname)
+        for section in getEntryList():
+            w = QLabel(translate(section[0]), container)
+            w.setGeometry(QRect(x, y, 100, 20))
+            y += ypadding + 20
+            for entry in section[1]:
+                w = getwidget(section[0], entry, container)
+                width, height = w.getGeometry()
+                w.setGeometry(QRect(x, y, width, height))
+                w.changed = self.changed
+                fields.append([section[0], entry, w])
+                y += ypadding + height
+                mwidth = max(mwidth, width)
+        container.setGeometry(QRect(0, 0, mwidth+20, y))
+        tabscroller.setWidget(container)
+        self.texttabs.append([fields, getEntry, container])
+        
         
 if __name__ == "__main__":
     import sys
