@@ -43,6 +43,12 @@ pokemonfiles = {
     "HeartGold":{
         "Personal":"/a/0/0/2",
         "Evolution":"/a/0/3/4"},
+    "Black":{
+        "Personal":"/a/0/1/6",
+        "Evolution":"/a/0/1/9"},
+    "Black2":{
+        "Personal":"/a/0/1/6",
+        "Evolution":"/a/0/1/9"},
 }
 
 movefiles = {
@@ -94,6 +100,27 @@ textentries = {
             "Species": 823,
             "Class": 730,
             "Trainers": 729,
+            "PokemonNames":{
+                "English": 237
+            },
+        },
+    },
+    "Black":{
+        "English":{
+            "Pokemon": 70,
+            "Types": 199,
+            "Abilities": 182,
+            "Moves": 204,
+            "Items": 54,
+            "Species": 260,
+            "Flavor":{
+                "Black": 235,
+                "White": 236
+            },
+            "PokemonNames":{
+                "English": 70
+            },
+            
         },
     },
 }
