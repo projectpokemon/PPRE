@@ -33,4 +33,4 @@ class binarywriter:
     def toarray(self):
         return self.s
     def pos(self):
-        return len(self.s) 
+        return len(self.s)<<1
