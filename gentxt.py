@@ -119,7 +119,7 @@ for i from 1 to numblocks
 def getlenfromlabel(x):
     maxlen = 0
     for text in x:
-        l = int(text[0].split("_")[1])
+        l = int(text[0].split("_")[1].strip("c"))
         if l > maxlen:
             maxlen = l
     return maxlen

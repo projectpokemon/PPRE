@@ -250,6 +250,7 @@ def gen5get(f):
             charcounts.append(reader.read16())
             unknowns.append(reader.read16())
         for j in range(numentries):
+            compressed = False
             encchars = []
             text = ""
             reader.seek(blockoffsets[i]+tableoffsets[j])
@@ -260,18 +261,37 @@ def gen5get(f):
             while encchars:
                 char = encchars.pop() ^ key
                 key = ((key>>3)|(key<<13))&0xFFFF
-                decchars.append(char)
-            #if decchars[0] == 0xF100:
-            #    decchars.pop(0) #TODO: fill in
+                decchars.insert(0, char)
+            if decchars[0] == 0xF100:
+                compressed = True
+                decchars.pop(0)
+                newstring = []
+                container = 0
+                bit = 0
+                while decchars:
+                    container |= decchars.pop(0)<<bit
+                    bit += 16
+                    while bit >= 9:
+                        bit -= 9
+                        c = container&0x1FF
+                        if c == 0x1FF:
+                            newstring.append(0xFFFF)
+                        else:
+                            newstring.append(c)
+                        container >>= 9
+                decchars = newstring
             while decchars:
-                c = decchars.pop()
+                c = decchars.pop(0)
                 if c == 0xFFFF:
                     break
                 elif c == 0xFFFE:
                     text += "\\n"
-                elif c < 20 or c > 0xFFF0:
+                elif c < 20 or c > 0xF000:
                     text += "\\x%04X"%c
                 else:
                     text += unichr(c)
-            texts.append(["%i_%i"%(i, j), text])
+            e = "%i_%i"%(i, j)
+            if compressed:
+                e += "c"
+            texts.append([e, text])
     return texts
