@@ -58,6 +58,14 @@ class EditText(QMainWindow):
         QObject.connect(self.menutasks["close"],
             QtCore.SIGNAL("triggered()"), self.quit)
         self.menubar.addAction(self.menus["file"].menuAction())
+        self.menus["tools"] = QMenu(self.menubar)
+        self.menus["tools"].setTitle(translations["menu_tools"])
+        self.menutasks["search"] = QAction(self.menus["tools"])
+        self.menutasks["search"].setText(translations["menu_search"])
+        self.menus["tools"].addAction(self.menutasks["search"])
+        QObject.connect(self.menutasks["search"],
+            QtCore.SIGNAL("triggered()"), self.search)
+        self.menubar.addAction(self.menus["tools"].menuAction())
         self.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
@@ -119,6 +127,7 @@ class EditText(QMainWindow):
         self.narc.toFile(open(self.fname, "wb"))
         self.dirty = False
         self.updateCurrentFileLabel()
+        self.openText(self.currentfile)
     def changed(self):
         if not self.dirty:
             self.dirty = True
@@ -151,6 +160,44 @@ class EditText(QMainWindow):
                 if not self.saveText():
                     return False
         return True
+    def search(self):
+        s, ok = QInputDialog.getText(None, "Search all files", "Search (Case Insensitive)")
+        if not ok or not s:
+            return
+        s = str(s).lower()
+        hits = []
+        version = config.project["versioninfo"]
+        for i, f in enumerate(self.narc.gmif.files):
+            if pokeversion.gens[version[0]] == 4:
+                texts = txt.gen4get(f)
+            else:
+                texts = txt.gen5get(f)
+            for entry in texts:
+                if s in entry[1].lower():
+                    hits.append((i, entry[0], entry[1]))
+        if not hits:
+            QMessageBox.information(None, "Search results", "None found")
+            return
+        dlg = QMainWindow(config.mw)
+        dlg.setWindowTitle("Search Results")
+        dlg.resize(600, 400)
+        wdgt = QWidget(dlg)
+        scroller = QScrollArea(wdgt)
+        scroller.setGeometry(QRect(0, 0, 600, 400))
+        container = QWidget(scroller)
+        y = 10
+        for result in hits:
+            label = QLabel(container)
+            label.setText("[%s] %s: %s"%result)
+            label.setGeometry(QRect(0, y, 580, 20))
+            y += 20
+        container.setGeometry(QRect(0, 0, 600, y))
+        scroller.setWidget(container)
+        dlg.setCentralWidget(wdgt)
+        dlg.show()
+                
+            
+        
 
 def create():
     if not config.project:

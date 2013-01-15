@@ -1,5 +1,6 @@
 translations = {
 "menu_file":"&File",
+"menu_tools":"&Tools",
 "menu_newproject":"&New Project",
 "menu_openproject":"&Open Project",
 "menu_saveproject":"&Save Project",
@@ -17,6 +18,7 @@ translations = {
 "menu_savetext":"Save Text File",
 "menu_new":"New File",
 "menu_save":"Save File",
+"menu_search":"Search",
 "config_location_base_name":"Base ROM",
 "config_location_directory_name":"Directory",
 "config_project_description_name":"Project Description",
