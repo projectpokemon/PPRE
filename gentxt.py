@@ -74,13 +74,13 @@ gen5alg = """
 uint16 numblocks = read16()
 uint16 numentries = read16()
 
-uint32 size0 = read32()
-uint32 unk0 = read32()
+uint32 filesize = read32()
+uint32 zero = read32()
 
 uint32 blockoffsets[numblocks]
 uint32 tableoffsets[numblocks][numentries]
 uint16 charcounts[numblocks][numentries]
-uint16 unknowns[numblocks][numentries]
+uint16 textflags[numblocks][numentries]
 
 string texts[numblocks][numentries]
 
@@ -88,10 +88,11 @@ for i from 1 to numblocks
     blockoffsets[i] = read32()
 for i from 1 to numblocks
     seek(blockoffsets[i])
+    uint32 blocksize = read32()
     for j from 1 to numentries
         tableoffsets[i][j] = read32()
         charcounts[i][j] = read16()
-        unknowns[i][j] = read16()
+        textflags[i][j] = read16()
     for j from 1 to numentries
         $encchars = [0]
         $decchars = [0]
@@ -109,7 +110,7 @@ for i from 1 to numblocks
                 break
             else if $char == 0xFFFE
                 $string += "\\n"
-            else if $char > 0xFFF0
+            else if $char == 0xF000
                 $string += SPECIAL($char)
             else
                 $string += unichr($char)
@@ -119,7 +120,7 @@ for i from 1 to numblocks
 def getlenfromlabel(x):
     maxlen = 0
     for text in x:
-        l = int(text[0].split("_")[1].strip("c"))
+        l = int(text[0].split("_")[1].strip("cABCDEFGHIJKLMNOP"))
         if l > maxlen:
             maxlen = l
     return maxlen
@@ -127,8 +128,8 @@ textfmt = {
     "diamond":[gen4get, gen4alg, len],
     "platinum":[gen4get, gen4alg, len],
     "heartgold":[gen4get, gen4alg, len],
-    "black":[gen5get, "", getlenfromlabel],
-    "black2":[gen5get, "", getlenfromlabel],
+    "black":[gen5get, gen5alg, getlenfromlabel],
+    "black2":[gen5get, gen5alg, getlenfromlabel],
 }
 
 for msg in [["msg", MSG_FILE, "Message/Text"], ["msg2", MSG_FILE2, "Script/Text"]]:

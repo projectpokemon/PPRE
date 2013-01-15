@@ -118,7 +118,6 @@ def gen4get(f):
     return sorted(texts, cmp=sortTextKeys)
     
 def gen4put(texts):
-    writer = binarywriter()
     stringwriter = binarywriter()
     ofs = {}
     sizes = {}
@@ -206,6 +205,7 @@ def gen4put(texts):
         seed |= 0x100
     else:
         aofs = 4+num*8
+    writer = binarywriter()
     writer.write16(num)
     writer.write16(seed)
     for i in range(num):
@@ -234,21 +234,22 @@ def gen5get(f):
     
     numblocks = reader.read16()
     numentries = reader.read16()
-    size0 = reader.read32()
-    unk0 = reader.read32()
+    filesize = reader.read32()
+    zero = reader.read32()
     blockoffsets = []
     for i in range(numblocks):
         blockoffsets.append(reader.read32())
+    # filesize == len(f)-reader.pos()
     for i in range(numblocks):
         reader.seek(blockoffsets[i])
         size = reader.read32()
         tableoffsets = []
         charcounts = []
-        unknowns = []
+        textflags = []
         for j in range(numentries):
             tableoffsets.append(reader.read32())
             charcounts.append(reader.read16())
-            unknowns.append(reader.read16())
+            textflags.append(reader.read16())
         for j in range(numentries):
             compressed = False
             encchars = []
@@ -288,10 +289,162 @@ def gen5get(f):
                     text += "\\n"
                 elif c < 20 or c > 0xF000:
                     text += "\\x%04X"%c
+                elif c == 0xF000:
+                    try:
+                        kind = decchars.pop(0)
+                        count = decchars.pop(0)
+                        if kind == 0xbe00 and count == 0:
+                            text += "\\f"
+                            continue
+                        if kind == 0xbe01 and count == 0:
+                            text += "\\r"
+                            continue
+                        text += "VAR("
+                        args = [kind]
+                        for k in range(count):
+                            args.append(decchars.pop(0))
+                    except IndexError:
+                        break
+                    text += ", ".join(map(str, args))
+                    text += ")"
                 else:
                     text += unichr(c)
             e = "%i_%i"%(i, j)
+            flag = ""
+            val = textflags[j]
+            c = 65
+            while val:
+                if val&1:
+                    flag += chr(c)
+                c += 1
+                val >>= 1
             if compressed:
-                e += "c"
+                flag += "c"
+            e += flag
             texts.append([e, text])
     return texts
+    
+def get5put(texts):
+    textofs = {}
+    sizes = {}
+    comments = {}
+    textflags = {}
+    blockwriters = {}
+    for entry in texts:
+        match = re.match("([^_]+)_([0-9]+)(.*)", entry[0])
+        if not match:
+            continue
+        blockid = match.group(1)
+        textid = int(match.group(2))
+        flags = match.group(3)
+        text = entry[1]
+        if blockid.lower() == "comment":
+            comments[textid] = text
+            continue
+        blockid = int(blockid)
+        if blockid not in blockwriters:
+            blockwriters[blockid] = binarywriter()
+            textofs[blockid] = {}
+            sizes[blockid] = {}
+            textflags[blockid] = {}
+        textofs[blockid][textid] = blockwriters[blockid].pos()
+        dec = []
+        while text:
+            c = text[0]
+            text = text[1:]
+            if c == '\\':
+                c = text[0]
+                text = text[1:]
+                if c == 'x':
+                    n = int(text[:4], 16)
+                    text = text[4:]
+                elif c == 'n':
+                    n = 0xFFFE
+                elif c == 'r':
+                    dec.append(0xF000)
+                    n = 0xbe01
+                elif c == 'f':
+                    dec.append(0xF000)
+                    n = 0xbe00
+                else:
+                    n = 1
+                dec.append(n)
+            elif c == 'V':
+                if text[:2] == "AR":
+                    text = text[3:]
+                    eov = text.find(")")
+                    args = map(int, text[:eov].split(","))
+                    text = text[eov+1:]
+                    dec.append(0xF000)
+                    dec.append(args.pop(0))
+                    dec.append(len(args))
+                    for a in args:
+                        dec.append(a)
+                else:
+                    dec.append(ord('V'))
+            else:
+                dec.append(ord(c))
+        flag = 0
+        for i in range(16):
+            if chr(65+i) in flags:
+                flag |= 1<<i
+        textflags[blockid][textid] = flag
+        if "c" in flags:
+            comp = [0xF100]
+            container = 0
+            bit = 0
+            while dec:
+                c = dec.pop(0)
+                if c>>9:
+                    print("Illegal compressed character: %i"%c)
+                container |= c<<bit
+                bit += 9
+                while bit >= 16:
+                    bit -= 16
+                    comp.append(container&0xFFFF)
+                    container >>= 16
+            container |= 0xFFFF<<bit
+            comp.append(container&0xFFFF)
+            dec = comp[:]
+        else:
+            dec.append(0xFFFF)
+        key = 0
+        enc = []
+        while dec:
+            char = dec.pop() ^ key
+            key = ((key>>3)|(key<<13))&0xFFFF
+            enc.insert(0, char)
+        enc.append(key)
+        sizes[blockid][textid] = len(enc)
+        for e in enc:
+            blockwriters[blockid].write16(e)
+    numblocks = max(blockwriters)+1
+    if numblocks != len(blockwriters):
+        raise KeyError
+    numentries = 0
+    for block in blockwriters:
+        numentries = max(numentries, max(blockwriters[block]))
+    offsets = []
+    sizes = []
+    baseofs = 12+4*numblocks
+    textblock = binarywriter()
+    for i in range(numblocks):
+        data = blockwriters[i].toarray()
+        offsets.append(baseofs+textblock.pos())
+        relofs = numentries*8+4
+        textblock.write32(len(data)+relofs)
+        for j in range(numentries):
+            textblock.write32(textofs[i][j]+relofs)
+            textblock.write16(sizes[i][j])
+            textblock.write16(textflags[i][j])
+        textblock.writear(data)
+        sizes.append(len(data))
+    writer = binarywriter()
+    writer.write16(numblocks)
+    writer.write16(numentries)
+    writer.write32(textblock.pos())
+    writer.write32(0)
+    for i in range(numblocks):
+        writer.write32(offsets[i])
+    writer.writear(textblock.toarray())
+    return writer.tostring()
