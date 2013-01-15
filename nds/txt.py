@@ -324,7 +324,7 @@ def gen5get(f):
             texts.append([e, text])
     return texts
     
-def get5put(texts):
+def gen5put(texts):
     textofs = {}
     sizes = {}
     comments = {}
@@ -362,10 +362,14 @@ def get5put(texts):
                     n = 0xFFFE
                 elif c == 'r':
                     dec.append(0xF000)
-                    n = 0xbe01
+                    dec.append(0xbe01)
+                    dec.append(0)
+                    continue
                 elif c == 'f':
                     dec.append(0xF000)
-                    n = 0xbe00
+                    dec.append(0xbe00)
+                    dec.append(0)
+                    continue
                 else:
                     n = 1
                 dec.append(n)
@@ -406,15 +410,13 @@ def get5put(texts):
             container |= 0xFFFF<<bit
             comp.append(container&0xFFFF)
             dec = comp[:]
-        else:
-            dec.append(0xFFFF)
         key = 0
         enc = []
         while dec:
             char = dec.pop() ^ key
             key = ((key>>3)|(key<<13))&0xFFFF
             enc.insert(0, char)
-        enc.append(key)
+        enc.append(key^0xFFFF)
         sizes[blockid][textid] = len(enc)
         for e in enc:
             blockwriters[blockid].write16(e)
@@ -423,9 +425,8 @@ def get5put(texts):
         raise KeyError
     numentries = 0
     for block in blockwriters:
-        numentries = max(numentries, max(blockwriters[block]))
+        numentries = max(numentries, max(textofs[block])+1)
     offsets = []
-    sizes = []
     baseofs = 12+4*numblocks
     textblock = binarywriter()
     for i in range(numblocks):
@@ -438,7 +439,6 @@ def get5put(texts):
             textblock.write16(sizes[i][j])
             textblock.write16(textflags[i][j])
         textblock.writear(data)
-        sizes.append(len(data))
     writer = binarywriter()
     writer.write16(numblocks)
     writer.write16(numentries)
@@ -448,3 +448,13 @@ def get5put(texts):
         writer.write32(offsets[i])
     writer.writear(textblock.toarray())
     return writer.tostring()
+    
+def get(gen, f):
+    if gen == 5:
+        return gen5get(f)
+    return gen4get(f)
+    
+def put(gen, texts):
+    if gen == 5:
+        return gen5put(texts)
+    return gen4put(texts)
