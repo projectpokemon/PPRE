@@ -23,11 +23,16 @@ Requirements to run PPRE (Source Version):
 * PyQt4
 * Git
 
-Current Game Support (incomplete):
+Current Game Support:
 * Diamond (US)
+* Pearl (US)
+* Platinum (US)
 * Heart Gold (US)
+* Soul Silver (US)
 * Black (US)
+* White (US)
 * Black2 (US)
+* White2 (US)
 
 Current Editors (incomplete):
 * Pokemon Editor (Read/Write)
