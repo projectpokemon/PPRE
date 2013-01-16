@@ -9,7 +9,7 @@ from PyQt4 import QtCore, QtGui
 from compat import *
 import config
 from language import translations
-import ndstool
+import ndstool, xdelta3
 import pokeversion
 
 import edittext, editpokemon, editmoves
@@ -111,6 +111,11 @@ class MainWindow(QMainWindow):
         self.menus["file"].addAction(self.menutasks["exportromas"])
         QObject.connect(self.menutasks["exportromas"],
             QtCore.SIGNAL("triggered()"), self.exportRomAs)
+        self.menutasks["makepatch"] = QAction(self.menus["file"])
+        self.menutasks["makepatch"].setText(translations["menu_makepatch"])
+        self.menus["file"].addAction(self.menutasks["makepatch"])
+        QObject.connect(self.menutasks["makepatch"],
+            QtCore.SIGNAL("triggered()"), self.makePatch)
         self.menutasks["quit"] = QAction(self.menus["file"])
         self.menutasks["quit"].setText(translations["menu_quit"])
         self.menutasks["quit"].setShortcut("CTRL+Q")
@@ -241,6 +246,25 @@ class MainWindow(QMainWindow):
             return
         ndstool.build(output, config.project["directory"])
         return
+    def makePatch(self):
+        if not config.project:
+            QMessageBox.critical(None, translations["error_noromloaded_title"], 
+                translations["error_noromloaded"])
+        inrom = str(self.projectinfo["location_base_value"].text())
+        outrom = str(self.projectinfo["project_output_value"].text())
+        if not os.path.exists(inrom):
+            QMessageBox.critical(None, translations["error_noromloaded_title"], 
+                translations["error_nooriginalrom"])
+            return
+        if not os.path.exists(outrom):
+            QMessageBox.critical(None, translations["error_noromloaded_title"], 
+                translations["error_nonewrom"])
+            return
+        patchFile = QFileDialog.getSaveFileName(None, "Save Patch File", 
+            filter="xdelta3 Patch Files (*.xdelta3);;All Files (*.*)")
+        if not patchFile:
+            return
+        xdelta3.makePatch(patchFile, inrom, outrom)
     def quit(self):
         if self.dirty:
             prompt = QMessageBox.question(None, "Close?", 
