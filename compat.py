@@ -1,7 +1,6 @@
 import sys
 
-if sys.version_info.major == 2:
+try:
     import ConfigParser as configparser
-    
-else:
+except:
     import configparser
