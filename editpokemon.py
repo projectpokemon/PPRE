@@ -87,6 +87,63 @@ class EditTMs(EditWidget):
                 idx = i*8+j
                 values[i] |= self.valuers[idx].getValue() << j
         return struct.pack("13B", *values)
+        
+class EditMoves(EditWidget):
+    def __init__(self, size="H", parent=None):
+        super(EditMoves, self).__init__(EditWidget.NONE, parent)
+        self.datasize = size
+        y = 0
+        x = 25
+        self.mover = EditWidget(EditWidget.COMBOBOX, self)
+        self.mover.changed = self._changed
+        width, height = self.mover.getGeometry()
+        self.mover.setGeometry(QRect(x, y, width, height))
+        y += height
+        self.leveler = EditWidget(EditWidget.SPINBOX, self)
+        self.leveler.changed = self._changed
+        if self.datasize == "I":
+            self.leveler.setValues([0, 0xFFFF])
+        else:
+            self.leveler.setValues([0, 0x7F])
+        width, height = self.leveler.getGeometry()
+        self.leveler.setGeometry(QRect(x, y, width, height))
+        y += height
+        self.deleter = QPushButton("X", self)
+        self.deleter.setGeometry(0, 0, x, y)
+        QObject.connect(self.deleter,
+            QtCore.SIGNAL("pressed()"), self._remove)
+        self.setGeometry(0, 0, x+width, y)
+    def _remove(self):
+        self.remove(self)
+    def setName(self, name):
+        self.mover.setName("Move")
+        self.leveler.setName("Level")
+    def setValue(self, value):
+        if self.datasize == "I":
+            self.mover.setValue(value&0xFFFF)
+            self.leveler.setValue((value>>16)&0xFFFF)
+        else:
+            self.mover.setValue(value&0x1FF)
+            self.leveler.setValue((value>>8)&0x7F)
+    def getValue(self):
+        if self.datasize == "I":
+            value = (self.leveler.getValue()<<16) | (self.mover.getValue())
+        else:
+            value = (self.leveler.getValue()<<9) | (self.mover.getValue())
+        return value
+    def getGeometry(self):
+        return (self.geometry().width(), self.geometry().height())
+    def __lt__(self, other):
+        if isinstance(other, EditMoves):
+            return self.leveler.getValue() < other.leveler.getValue()
+        return self.getValue() < other.getValue()
+
+def moveTerminator(data, length):
+    if data&0xFFFF == 0xFFFF:
+        return True
+    if length > 20:
+        return True
+    return False
 
 class EditPokemon(EditDlg):
     wintitle = "Pokemon Editor"
@@ -97,15 +154,26 @@ class EditPokemon(EditDlg):
             game]["Personal"]
         self.evolutionfname = config.project["directory"]+"fs"+files[
             game]["Evolution"]
+        self.lvlmovesfname = config.project["directory"]+"fs"+files[
+            game]["Moves"]
         self.pokemonnames = self.getTextEntry("Pokemon")
         self.typenames = self.getTextEntry("Types")
         self.itemnames = self.getTextEntry("Items")
         self.abilitynames = self.getTextEntry("Abilities")
+        self.movenames = self.getTextEntry("Moves")
         self.chooser.addItems(self.pokemonnames)
         self.addEditableTab("Personal", dexfmt[game.lower()],
             self.personalfname, self.getPokemonWidget)
         self.addEditableTab("Evolution", evofmt[game.lower()],
             self.evolutionfname, self.getEvolutionWidget)
+        if pokeversion.gens[game] == 5:
+            movefmt = ["I", "move %i"]
+            terminate = struct.pack("I", 0xFFFFFFFF)
+        else:
+            movefmt = ["H", "move %i"]
+            terminate = struct.pack("H", 0xFFFF)
+        self.addListableTab("Moveset", movefmt, self.lvlmovesfname, 
+            moveTerminator, terminate, self.getMoveWidget)
         self.addTextTab("Flavor", self.getFlavorEntries, self.getFlavorEntry, 
             self.getFlavorWidget)
     def getTextEntry(self, entry):
@@ -165,6 +233,11 @@ class EditPokemon(EditDlg):
         sb.setValues([0, 0xFFFF])
         sb.setName(translate(name))
         return sb
+    def getMoveWidget(self, name, size, parent):
+        w = EditMoves(size, parent)
+        w.mover.setValues(self.movenames)
+        w.setName(name)
+        return w
     def getFlavorEntries(self):
         version = config.project["versioninfo"]
         texts = pokeversion.textentries[version[0]][

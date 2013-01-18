@@ -4,6 +4,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4 import QtCore, QtGui
 import struct
+from string import letters
 
 import config
 import pokeversion
@@ -25,6 +26,11 @@ def defaultTextWidget(section, name, parent):
     le.setName(translate(name))
     return le
     
+def defaultTerminator(data, length):
+    if data == None:
+        return True
+    return False
+        
 class EditWidget(QWidget):
     NONE = 0
     SPINBOX = 1
@@ -51,7 +57,8 @@ class EditWidget(QWidget):
             self.valuer = QComboBox(self)
             self.setValue = self.valuer.setCurrentIndex
             self.getValue = self.valuer.currentIndex
-            self.setValues = self.valuer.addItems
+            self.setValues = self.setComboBoxValues
+            self.valuer.addItem("")
             QObject.connect(self.valuer,
                 QtCore.SIGNAL("currentIndexChanged(int)"), self._changed)
         elif kind == EditWidget.LABEL:
@@ -84,6 +91,9 @@ class EditWidget(QWidget):
     def setSpinBoxValues(self, values):
         self.valuer.setMinimum(min(values))
         self.valuer.setMaximum(max(values))
+    def setComboBoxValues(self, values):
+        self.valuer.clear()
+        self.valuer.addItems(values)
     def setValue(self, value):
         self.stored = value
     def _getValue(self):
@@ -102,6 +112,21 @@ class EditWidget(QWidget):
     def _changed(self, param1=None):
         self.changed(param1)
         return
+    def remove(self, w):
+        return
+    # So we can sort our widgets!
+    def __eq__(self, other):
+        return not self < other and not other < self
+    def __ne__(self, other):
+        return self < other or other < self
+    def __gt__(self, other):
+        return other < self
+    def __ge__(self, other):
+        return not self < other
+    def __le__(self, other):
+        return not other < self
+    def __lt__(self, other):
+        return self.getValue() < other.getValue()
 
 class EditDlg(QMainWindow):
     wintitle = "Editor"
@@ -115,8 +140,10 @@ class EditDlg(QMainWindow):
         self.textnarc = narc.NARC(open(self.textfname, "rb").read())
         if pokeversion.gens[game] == 4:
             self.gettext = txt.gen4get
+            self.puttext = txt.gen4put
         elif pokeversion.gens[game] == 5:
             self.gettext = txt.gen5get
+            self.puttext = txt.gen5put
         self.setupUi()
     def setupUi(self):
         self.setObjectName("EditDlg")
@@ -130,9 +157,9 @@ class EditDlg(QMainWindow):
         self.menus["file"] = QMenu(self.menubar)
         self.menus["file"].setTitle(translate("menu_file"))
         self.menutasks = []
-        self.addMenuEntry("file", translate("menu_new"), self.new)
-        self.addMenuEntry("file", translate("menu_save"), self.save)
-        self.addMenuEntry("file", translate("menu_close"), self.quit)
+        self.addMenuEntry("file", translate("menu_new"), self.new, "CTRL+N")
+        self.addMenuEntry("file", translate("menu_save"), self.save, "CTRL+S")
+        self.addMenuEntry("file", translate("menu_close"), self.quit, "CTRL+W")
         self.menubar.addAction(self.menus["file"].menuAction())
         self.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(self)
@@ -147,11 +174,33 @@ class EditDlg(QMainWindow):
         self.tabcontainer = QTabWidget(self.widgetcontainer)
         self.tabcontainer.setGeometry(QRect(25, 50, 550, 300))
         self.tabs = []
+        self.listtabs = []
         self.texttabs = []
         self.manualtabs = []
         self.setCentralWidget(self.widgetcontainer)
         self.updateWindowTitle("No file loaded")
         QMetaObject.connectSlotsByName(self)
+    def sortLists(self, changed=True):
+        for tab in self.listtabs:
+            tab[3].sort()
+            x = 0
+            y = 10
+            mx = 0
+            for w in tab[3]:
+                width, height = w.getGeometry()
+                w.setGeometry(QRect(x, y, width, height))
+                mx = max(mx, width)
+                y += height
+            tab[7].setGeometry(QRect(0, 0, mx, y))
+        if changed:
+            self.changed()
+    def removeFromListTab(self, target):
+        for tab in self.listtabs:
+            for w in tab[3]:
+                if w == target:
+                    tab[3].remove(w)
+                    self.sortLists()
+                    return
     def openChoice(self, i):
         self.currentchoice = i
         self.currentLabel.setText("File ID: %i"%i)
@@ -162,6 +211,22 @@ class EditDlg(QMainWindow):
             data = list(struct.unpack_from(fmt[0], f))
             for w in fields:
                 w.setValue(data.pop(0))
+        for tab in self.listtabs:
+            f = tab[0].gmif.files[i]
+            fmt = tab[2]
+            l = 0
+            while f:
+                data = list(struct.unpack_from(fmt[0], f))
+                f = f[struct.calcsize(fmt[0]):]
+                if tab[5](data[0], l):
+                    break
+                for j, fieldname in enumerate(fmt[1:]):
+                    w = tab[4](fieldname%l, fmt[0][j], tab[7])
+                    w.setValue(data.pop(0))
+                    w.remove = self.removeFromListTab
+                    w.changed = self.sortLists
+                    tab[3].append(w)
+                l += 1
         textcache = {}
         for tab in self.texttabs:
             getEntry = tab[1]
@@ -173,9 +238,10 @@ class EditDlg(QMainWindow):
                 if f not in textcache:
                     textcache[f] = self.gettext(self.textnarc.gmif.files[f])
                 for t in textcache[f]:
-                    if idx == t[0]:
+                    if idx == t[0].strip(letters):
                         w.setValue(t[1])
                         break
+        self.sortLists(False)
         self.dirty = False
         self.updateWindowTitle()
     def save(self):
@@ -190,6 +256,28 @@ class EditDlg(QMainWindow):
             data = struct.pack(fmt[0], *args)
             tab[0].gmif.files[self.currentchoice] = data
             tab[0].toFile(open(tab[1], "wb"))
+        textcache = {}
+        dirtyText = False
+        for tab in self.texttabs:
+            getEntry = tab[1]
+            for field in tab[0]:
+                section = field[0]
+                name = field[1]
+                w = field[2]
+                f, idx = getEntry(section, name, self.currentchoice)
+                if f not in textcache:
+                    textcache[f] = self.gettext(self.textnarc.gmif.files[f])
+                for t in textcache[f]:
+                    if idx == t[0].strip(letters):
+                        new = str(w.getValue())
+                        if new != t[1]:
+                            dirtyText = True
+                            t[1] = new
+                        break
+        if dirtyText:
+            for f in textcache:
+                self.textnarc.gmif.files[f] = self.puttext(textcache[f])
+            self.textnarc.toFile(open(self.textfname, "wb"))
         self.dirty = False
         self.updateWindowTitle()
     def new(self):
@@ -221,6 +309,8 @@ class EditDlg(QMainWindow):
                     return False
         return True
     def changed(self, param1=None):
+        if self.dirty:
+            return
         self.dirty = True
         self.updateWindowTitle()
     def updateWindowTitle(self, text=None):
@@ -231,9 +321,11 @@ class EditDlg(QMainWindow):
         if not text:
             text = self.chooser.currentText()
         self.setWindowTitle("%s%s - %s - PPRE"%(text, dirt, self.wintitle))
-    def addMenuEntry(self, menuname, text, callback):
+    def addMenuEntry(self, menuname, text, callback, shortcut=None):
         action = QAction(self.menus[menuname])
         action.setText(text)
+        if shortcut:
+            action.setShortcut(shortcut)
         self.menus[menuname].addAction(action)
         self.menutasks.append(action)
         QObject.connect(action, QtCore.SIGNAL("triggered()"), callback)
@@ -269,7 +361,20 @@ class EditDlg(QMainWindow):
         container.setGeometry(QRect(0, 0, width*2+20, max(my, y)))
         tabscroller.setWidget(container)
         self.tabs.append([boundnarc, boundfile, fmt, fields, container])
-    def addTextTab(self, tabname, getEntryList, getEntry, getwidget=defaultTextWidget):
+    def addListableTab(self, tabname, fmt, boundfile, 
+        isterminator=defaultTerminator, terminator=None,
+        getwidget=defaultWidget):
+        boundnarc = narc.NARC(open(boundfile, "rb").read())
+        tabscroller = QScrollArea(self.tabcontainer)
+        container = QWidget(tabscroller)
+        fields = []
+        self.tabcontainer.addTab(tabscroller, tabname)
+        container.setGeometry(QRect(0, 0, 0, 0))
+        tabscroller.setWidget(container)
+        self.listtabs.append([boundnarc, boundfile, fmt, fields, getwidget,
+            isterminator, terminator, container])
+    def addTextTab(self, tabname, getEntryList, getEntry, 
+        getwidget=defaultTextWidget):
         tabscroller = QScrollArea(self.tabcontainer)
         container = QWidget(tabscroller)
         fields = []

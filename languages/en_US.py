@@ -78,6 +78,7 @@ translations = {
     "Level Up (Eterna)", "Level Up (Rt 217)"],
 "movecategories":["Physical", "Special", "Other"],
 "movecontesttypes":["Cool", "Beauty", "Cute", "Smart", "Tough"],
-    
+"names":"Names",
+"flavor":"Flavor",
     
 }

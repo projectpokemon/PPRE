@@ -1,7 +1,8 @@
 import config
 
 gameids = {"ADA":"Diamond", "CPU":"Platinum", "IPK":"HeartGold", 
-    "IPG":"SoulSilver", "IRB":"Black", "IRA":"White", "IRE":"Black2"}
+    "IPG":"SoulSilver", "IRB":"Black", "IRA":"White", "IRE":"Black2",
+    "IRD":"White2"}
 langs = {"E":"English", "J":"Japanese", "O":"English", "K":"Korean"}
 pairs = [["Diamond", "Pearl"], ["Platinum"], ["HeartGold", "SoulSilver"],
     ["Black", "White"], ["Black2", "White2"]]
@@ -42,10 +43,8 @@ textfiles = {
 pokemonfiles = {
     "Diamond":{
         "Personal":"/poketool/personal/personal.narc",
-        "Evolution":"/poketool/personal/evo.narc"},
-    "Pearl":{
-        "Personal":"/poketool/personal/personal.narc",
-        "Evolution":"/poketool/personal/evo.narc"},
+        "Evolution":"/poketool/personal/evo.narc",
+        "Moves":"/poketool/personal/wotbl.narc"},
     "HeartGold":{
         "Personal":"/a/0/0/2",
         "Evolution":"/a/0/3/4"},
