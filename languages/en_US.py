@@ -10,6 +10,8 @@ translations = {
 "menu_makepatch":"Make &Patch",
 "menu_quit":"&Quit",
 "menu_close":"Close",
+"menu_view":"&View",
+"menu_filebrowser":"File &Browser",
 "menu_edit":"&Edit",
 "menu_edittext":"Text Editor",
 "menu_editpokemon":"Pokemon Editor",

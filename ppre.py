@@ -12,7 +12,7 @@ from language import translations
 import ndstool, xdelta3
 import pokeversion
 
-import edittext, editpokemon, editmoves
+import edittext, editpokemon, editmoves, filebrowser
 
 class version:
     major = 2
@@ -123,11 +123,14 @@ class MainWindow(QMainWindow):
         QObject.connect(self.menutasks["quit"],
             QtCore.SIGNAL("triggered()"), self.quit)
         self.menubar.addAction(self.menus["file"].menuAction())
-        self.setMenuBar(self.menubar)
-        self.statusbar = QStatusBar(self)
-        self.setStatusBar(self.statusbar)
-        self.widgetcontainer = QWidget(self)
-        self.widgetcontainer.setObjectName("widgetcontainer")
+        self.menus["view"] = QMenu(self.menubar)
+        self.menus["view"].setTitle(translations["menu_view"])
+        self.menutasks["viewfiles"] = QAction(self.menus["view"])
+        self.menutasks["viewfiles"].setText(translations["menu_filebrowser"])
+        self.menus["view"].addAction(self.menutasks["viewfiles"])
+        QObject.connect(self.menutasks["viewfiles"],
+            QtCore.SIGNAL("triggered()"), filebrowser.create)
+        self.menubar.addAction(self.menus["view"].menuAction())
         self.menus["edit"] = QMenu(self.menubar)
         self.menus["edit"].setTitle(translations["menu_edit"])
         self.menutasks["edittext"] = QAction(self.menus["edit"])
@@ -146,6 +149,11 @@ class MainWindow(QMainWindow):
         QObject.connect(self.menutasks["editmoves"],
             QtCore.SIGNAL("triggered()"), editmoves.create)
         self.menubar.addAction(self.menus["edit"].menuAction())
+        self.setMenuBar(self.menubar)
+        self.statusbar = QStatusBar(self)
+        self.setStatusBar(self.statusbar)
+        self.widgetcontainer = QWidget(self)
+        self.widgetcontainer.setObjectName("widgetcontainer")
         self.projectinfo = {}
         i = 0
         for sect in config.sections:
