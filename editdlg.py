@@ -227,6 +227,10 @@ class EditDlg(QMainWindow):
             for w in fields:
                 w.setValue(data.pop(0))
         for tab in self.listtabs:
+            while tab[3]:
+                w = tab[3].pop(0)
+                w.setParent(None)
+                w.destroy()
             f = tab[0].gmif.files[i]
             fmt = tab[2]
             l = 0
@@ -240,6 +244,7 @@ class EditDlg(QMainWindow):
                     w.setValue(data.pop(0))
                     w.remove = self.removeFromListTab
                     w.changed = self.sortLists
+                    w.show()
                     tab[3].append(w)
                 l += 1
         textcache = {}
@@ -269,6 +274,20 @@ class EditDlg(QMainWindow):
             for w in fields:
                 args.append(w.getValue())
             data = struct.pack(fmt[0], *args)
+            tab[0].gmif.files[self.currentchoice] = data
+            tab[0].toFile(open(tab[1], "wb"))
+        for tab in self.listtabs:
+            fmt = tab[2]
+            fields = tab[3]
+            i = 0
+            data = ""
+            while i < len(fields):
+                args = []
+                for j, fieldname in enumerate(fmt[1:]):
+                    args.append(fields[i].getValue())
+                    i += 1
+                data += struct.pack(fmt[0], *args)
+            data += tab[6]
             tab[0].gmif.files[self.currentchoice] = data
             tab[0].toFile(open(tab[1], "wb"))
         textcache = {}
@@ -382,7 +401,7 @@ class EditDlg(QMainWindow):
         boundnarc = narc.NARC(open(boundfile, "rb").read())
         tabscroller = QScrollArea(self.tabcontainer)
         container = QWidget(tabscroller)
-        adder = QPushButton("Add", container)
+        adder = QPushButton("Add Entry", container)
         fields = []
         self.tabcontainer.addTab(tabscroller, tabname)
         container.setGeometry(QRect(0, 0, 0, 0))
