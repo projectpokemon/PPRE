@@ -124,7 +124,7 @@ class EditMoves(EditWidget):
             self.leveler.setValue((value>>16)&0xFFFF)
         else:
             self.mover.setValue(value&0x1FF)
-            self.leveler.setValue((value>>8)&0x7F)
+            self.leveler.setValue((value>>9)&0x7F)
     def getValue(self):
         if self.datasize == "I":
             value = (self.leveler.getValue()<<16) | (self.mover.getValue())

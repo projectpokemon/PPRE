@@ -191,7 +191,9 @@ class EditDlg(QMainWindow):
                 w.setGeometry(QRect(x, y, width, height))
                 mx = max(mx, width)
                 y += height
-            tab[7].setGeometry(QRect(0, 0, mx, y))
+            rect = tab[8].geometry()
+            tab[8].setGeometry(mx, 10, rect.width(), rect.height())
+            tab[7].setGeometry(QRect(0, 0, mx+rect.width(), y))
         if changed:
             self.changed()
     def removeFromListTab(self, target):
@@ -199,8 +201,21 @@ class EditDlg(QMainWindow):
             for w in tab[3]:
                 if w == target:
                     tab[3].remove(w)
+                    w.setParent(None)
+                    w.destroy()
                     self.sortLists()
                     return
+    def addToListTab(self, tab):
+        fmt = tab[2]
+        l = len(tab[3])
+        for j, fieldname in enumerate(fmt[1:]):
+            w = tab[4](fieldname%l, fmt[0][j], tab[7])
+            w.setValue(0)
+            w.remove = self.removeFromListTab
+            w.changed = self.sortLists
+            w.show()
+            tab[3].append(w)
+        self.sortLists()
     def openChoice(self, i):
         self.currentchoice = i
         self.currentLabel.setText("File ID: %i"%i)
@@ -367,12 +382,17 @@ class EditDlg(QMainWindow):
         boundnarc = narc.NARC(open(boundfile, "rb").read())
         tabscroller = QScrollArea(self.tabcontainer)
         container = QWidget(tabscroller)
+        adder = QPushButton("Add", container)
         fields = []
         self.tabcontainer.addTab(tabscroller, tabname)
         container.setGeometry(QRect(0, 0, 0, 0))
         tabscroller.setWidget(container)
-        self.listtabs.append([boundnarc, boundfile, fmt, fields, getwidget,
-            isterminator, terminator, container])
+        tab = [boundnarc, boundfile, fmt, fields, getwidget,
+            isterminator, terminator, container, adder]
+        func = lambda x: (lambda: self.addToListTab(x))
+        QObject.connect(adder,
+            QtCore.SIGNAL("pressed()"), func(tab))
+        self.listtabs.append(tab)
     def addTextTab(self, tabname, getEntryList, getEntry, 
         getwidget=defaultTextWidget):
         tabscroller = QScrollArea(self.tabcontainer)
