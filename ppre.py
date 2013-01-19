@@ -16,11 +16,11 @@ import edittext, editpokemon, editmoves, filebrowser
 
 class version:
     major = 2
-    minor = 2
+    minor = 3
     revision = 0
 
 if "--help" in sys.argv or "-h" in sys.argv:
-    print("""Project Pokemon ROM Editor 2 - 2012
+    print("""Project Pokemon ROM Editor 2 - 2013
 Usage: %s [options]
 Options:
  --load/-l project.pprj     Loads a project
@@ -30,7 +30,8 @@ Options:
 Dialogs:
  home                       Main Window
  texteditor                 Text Editor
- pokemoneditor              Pokemon Editor"""%(sys.argv[0]))
+ pokemoneditor              Pokemon Editor
+ moveeditor                 Move Editor"""%(sys.argv[0]))
     exit()
     
 class MainWindow(QMainWindow):
@@ -57,6 +58,8 @@ class MainWindow(QMainWindow):
                     edittext.create()
                 elif arg == "pokemoneditor":
                     editpokemon.create()
+                elif arg == "moveeditor":
+                    editmoves.create()
             else:
                 print("Unrecognized argument: %s"%arg)
     def setupUi(self):
@@ -181,7 +184,7 @@ class MainWindow(QMainWindow):
         self.projFile = projFile
         config.load(open(projFile, "r"), config.qtSetter, self.projectinfo)
         config.project = {"directory": 
-            self.projectinfo["location_directory_value"].text()}
+            str(self.projectinfo["location_directory_value"].text())}
         config.project["versioninfo"] = pokeversion.get()
         return
     def newProject(self):
