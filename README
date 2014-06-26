@@ -45,7 +45,7 @@ Or
 1a. Use git to fetch the rawdb dependency (`git submodule update`)
 1b. Link rawdb/nds to nds (or copy it if your OS does not have link support)
 
-2. Run ppre.py
+2. Run ppre.sh or ppre.bat
 3. Create a new project (File > New Project, and select your base ROM)
 4. Name your project
 5. Don't forget to save your project
