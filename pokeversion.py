@@ -1,6 +1,6 @@
 import config
 
-gameids = {"ADA":"Diamond", "CPU":"Platinum", "IPK":"HeartGold", 
+gameids = {"ADA":"Diamond", "CPU":"Platinum", "IPK":"HeartGold",
     "IPG":"SoulSilver", "IRB":"Black", "IRA":"White", "IRE":"Black2",
     "IRD":"White2"}
 langs = {"E":"English", "J":"Japanese", "O":"English", "K":"Korean"}
@@ -27,7 +27,7 @@ def get():
             gamename = p[0]
             break
     return (gamename, lang, romversion, realgame)
-    
+
 textfiles = {
     "Diamond":{"Main":"/msgdata/msg.narc"},
     "Pearl":{"Main":"/msgdata/msg.narc"},
@@ -53,10 +53,12 @@ pokemonfiles = {
         "Evolution":"/a/0/3/4"},
     "Black":{
         "Personal":"/a/0/1/6",
-        "Evolution":"/a/0/1/9"},
+        "Evolution":"/a/0/1/9",
+        "Moves":"/a/0/1/8"},
     "White":{
         "Personal":"/a/0/1/6",
-        "Evolution":"/a/0/1/9"},
+        "Evolution":"/a/0/1/9",
+        "Moves":"/a/0/1/8"},
     "Black2":{
         "Personal":"/a/0/1/6",
         "Evolution":"/a/0/1/9"},
@@ -76,7 +78,7 @@ movefiles = {
     "Black2":{"Moves":"/a/0/2/1"},
     "White2":{"Moves":"/a/0/2/1"},
 }
-    
+
 textentries = {
     "Diamond":{
         "English":{
@@ -155,11 +157,11 @@ textentries = {
     },
     "HeartGold":{
         "English":{
-            "Locations": 279, 
-            "Types": 735, 
-            "Abilities": 720, 
-            "Items": 222, 
-            "Moves": 750, 
+            "Locations": 279,
+            "Types": 735,
+            "Abilities": 720,
+            "Items": 222,
+            "Moves": 750,
             "Pokemon": 237,
             "Height": 814,
             "Weight": 812,
@@ -177,11 +179,11 @@ textentries = {
     },
     "SoulSilver":{
         "English":{
-            "Locations": 279, 
-            "Types": 735, 
-            "Abilities": 720, 
-            "Items": 222, 
-            "Moves": 750, 
+            "Locations": 279,
+            "Types": 735,
+            "Abilities": 720,
+            "Items": 222,
+            "Moves": 750,
             "Pokemon": 237,
             "Height": 814,
             "Weight": 812,
@@ -212,7 +214,7 @@ textentries = {
             "PokemonNames":{
                 "English": 70
             },
-            
+
         },
     },
     "White":{
@@ -230,7 +232,7 @@ textentries = {
             "PokemonNames":{
                 "English": 70
             },
-            
+
         },
     },
     "Black2":{
@@ -247,7 +249,7 @@ textentries = {
             "PokemonNames":{
                 "English": 90
             },
-            
+
         },
     },
 }
