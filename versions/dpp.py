@@ -168,3 +168,7 @@ class Diamond(GameVersion):
 
 class Pearl(Diamond):
     pass
+
+
+class Platinum(Diamond):
+    pass
