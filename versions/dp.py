@@ -1,13 +1,64 @@
 
+import struct
+
 from rawdb.versions.base import GameVersion
-from rawdb.elements.atom import BaseAtom
+from rawdb.elements.atom import BaseAtom, AtomicInstance
+
+
+STATS = ['hp', 'atk', 'def', 'speed', 'spatk', 'spdef']
+
+
+class BaseStatAtomic(AtomicInstance):
+    def __getattr__(self, name):
+        try:
+            if name[:2] == 'ev':
+                # hp are LSBs (evs >> 0 & 0x3)
+                shift = STATS.index(name[2:])*2
+                return (self.evs >> shift) & 0x3
+            elif name[:2] == 'tm':
+                tmid = int(name[2:])-1
+                byte = tmid >> 3
+                shift = tmid % 8
+                return (self['tms%d' % byte] >> shift) & 0x1
+            raise
+        except:
+            return super(BaseStatAtomic, self).__getattr__(name)
+
+    def __setattr__(self, name, value):
+        try:
+            if name[:2] == 'ev':
+                shift = STATS.index(name[2:])*2
+                evs = self.evs
+                evs &= ~(0x3 << shift)
+                self.evs = evs | (value & 0x3) << shift
+            elif name[:2] == 'tm':
+                tmid = int(name[2:])-1
+                byte = tmid >> 3
+                shift = tmid % 8
+                if value:
+                    self['tms%d' % byte] |= 0x1 << shift
+                else:
+                    self['tms%d' % byte] &= ~(0x1 << shift)
+            raise
+        except:
+            return super(BaseStatAtomic, self).__setattr__(name, value)
+
+    def keys(self):
+        old = super(BaseStatAtomic, self).keys()
+        new_keys = [key for key in old if key[:2] not in ('ev', 'tm')]
+        for stat in STATS:
+            new_keys.append('ev'+stat)
+        for tmid in xrange(13*8):
+            new_keys.append('tm%d' % tmid)
+        return new_keys
 
 
 class BaseStatAtomDiamond(BaseAtom):
+    atomic = BaseStatAtomic
+
     def __init__(self):
         super(BaseStatAtomDiamond, self).__init__()
-        self.stats = ['hp', 'atk', 'def', 'speed', 'spatk', 'spdef']
-        for stat in self.stats:
+        for stat in STATS:
             self.uint8('base'+stat)
         self.uint8('type1')
         self.uint8('type2')
@@ -28,7 +79,7 @@ class BaseStatAtomDiamond(BaseAtom):
         self.uint8('color')
         self.padding(2)
         for i in xrange(13):
-            self.uint8('tm%d' % i)
+            self.uint8('tms%d' % i)
         self.padding(3)
 
 
@@ -42,9 +93,77 @@ class EvolutionAtomDiamond(BaseAtom):
         self.padding(2)
 
 
+class LevelMoveAtomic(AtomicInstance):
+    def __getattr__(self, name):
+        try:
+            if name[:5] == 'level':
+                lvlid = int(name[5:])
+                return (self['lvlmove%d' % lvlid] >> 9) & 0x7F
+            elif name[:4] == 'move':
+                lvlid = int(name[4:])
+                return self['lvlmove%d' % lvlid] & 0x1FF
+            raise
+        except:
+            return super(LevelMoveAtomic, self).__getattr__(name)
+
+    def __setattr__(self, name, value):
+        try:
+            if name[:5] == 'level':
+                lvlid = int(name[5:])
+                lvlmove = self['lvlmove%d' % lvlid]
+                value &= 0x7F
+                self['lvlmove%d' % lvlid] = (lvlmove & 0x1FF) | (value << 9)
+            elif name[:4] == 'move':
+                lvlid = int(name[4:])
+                lvlmove = self['lvlmove%d' % lvlid]
+                value &= 0x1FF
+                self['lvlmove%d' % lvlid] = value | (lvlmove & (0x7F << 9))
+            raise
+        except:
+            return super(LevelMoveAtomic, self).__setattr__(name, value)
+
+    def keys(self):
+        new_keys = []
+        for lvlid in xrange(20):
+            new_keys.append('level%d' % lvlid)
+            new_keys.append('move%d' % lvlid)
+        return new_keys
+
+
+class LevelMoveAtomDiamond(BaseAtom):
+    atomic = LevelMoveAtomic
+
+    def __init__(self):
+        super(LevelMoveAtomDiamond, self).__init__()
+        self.uint16('lvlmove')
+
+    def __call__(self, data):
+        attrs = {}
+        data = data[:]
+        size = self.format_size()
+        for key in self.keys():
+            if not data:
+                attrs[key] = 0
+                continue
+            one = struct.unpack(self.format_string(), data[:size])[0]
+            data = data[size:]
+            if one == (1 << (size << 3))-1:
+                attrs[key] = 0
+            else:
+                attrs[key] = one
+        return self.atomic(self, attrs)
+
+    def keys(self):
+        return ['lvlmove%d' % d for d in xrange(20)]
+
+
 class Diamond(GameVersion):
     base_stat_file = 'poketool/personal/personal.narc'
     base_stat_atom = BaseStatAtomDiamond
+    evolution_file = 'poketool/personal/evo.narc'
+    evolution_atom = EvolutionAtomDiamond
+    level_moves_file = 'poketool/personal/wotbl.narc'
+    level_moves_atom = LevelMoveAtomDiamond
 
 
 class Pearl(Diamond):
