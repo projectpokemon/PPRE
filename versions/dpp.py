@@ -153,6 +153,15 @@ class LevelMoveAtomDiamond(BaseAtom):
                 attrs[key] = one
         return self.atomic(self, attrs)
 
+    def pack(self, attrs):
+        packed = ''
+        size = self.format_size()
+        for name in self.keys():
+            if attrs[name]:
+                packed += struct.pack(self.format_string(), attrs[name])
+        packed += struct.pack(self.format_string(), (1 << (size << 3))-1)
+        return packed
+
     def keys(self):
         return ['lvlmove%d' % d for d in xrange(20)]
 
