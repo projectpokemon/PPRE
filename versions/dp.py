@@ -6,12 +6,9 @@ from rawdb.elements.atom import BaseAtom
 class BaseStatAtomDiamond(BaseAtom):
     def __init__(self):
         super(BaseStatAtomDiamond, self).__init__()
-        self.uint8('basehp')
-        self.uint8('baseatk')
-        self.uint8('basedef')
-        self.uint8('basespeed')
-        self.uint8('basespatk')
-        self.uint8('basespdef')
+        self.stats = ['hp', 'atk', 'def', 'speed', 'spatk', 'spdef']
+        for stat in self.stats:
+            self.uint8('base'+stat)
         self.uint8('type1')
         self.uint8('type2')
         self.uint8('catchrate')
@@ -33,6 +30,16 @@ class BaseStatAtomDiamond(BaseAtom):
         for i in xrange(13):
             self.uint8('tm%d' % i)
         self.padding(3)
+
+
+class EvolutionAtomDiamond(BaseAtom):
+    def __init__(self):
+        super(EvolutionAtomDiamond, self).__init__()
+        for i in xrange(7):
+            self.uint16('method%d' % i)
+            self.uint16('param%d' % i)
+            self.uint16('target%d' % i)
+        self.padding(2)
 
 
 class Diamond(GameVersion):
