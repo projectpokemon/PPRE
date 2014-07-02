@@ -3,9 +3,9 @@ from rawdb.versions.base import GameVersion
 from rawdb.elements.atom import BaseAtom
 
 
-class BaseStatAtomPearl(BaseAtom):
+class BaseStatAtomDiamond(BaseAtom):
     def __init__(self):
-        super(BaseStatAtomPearl, self).__init__()
+        super(BaseStatAtomDiamond, self).__init__()
         self.uint8('basehp')
         self.uint8('baseatk')
         self.uint8('basedef')
@@ -35,10 +35,10 @@ class BaseStatAtomPearl(BaseAtom):
         self.padding(3)
 
 
-class Pearl(GameVersion):
+class Diamond(GameVersion):
     base_stat_file = 'poketool/personal/personal.narc'
-    base_stat_atom = BaseStatAtomPearl
+    base_stat_atom = BaseStatAtomDiamond
 
 
-class Diamond(Pearl):
+class Pearl(Diamond):
     pass
