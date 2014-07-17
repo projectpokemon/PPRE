@@ -187,5 +187,22 @@ class BaseAtom(object):
             return arr, data
         format_entry[1] = array_func
 
-    def append_format(self, name, fmt):
-        self._fmt += [(name, fmt)]
+    def append_format(self, name, formatter):
+        """Add a new format entry
+
+        Parameters
+        ----------
+        name : string
+            Field name
+        formatter : string or function(data)
+            Describes how to format a section of data. If a string, this should
+            be parsed using struct.pack
+
+        Returns
+        -------
+        format_entry : tuple
+            Format entry
+        """
+        format_entry = (name, formatter)
+        self._fmt.append(format_entry)
+        return format_entry
