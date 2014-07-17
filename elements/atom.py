@@ -34,9 +34,14 @@ class AtomicInstance(object):
     def __init__(self, atom, attrs):
         super(AtomicInstance, self).__setattr__('_attrs', attrs)
         super(AtomicInstance, self).__setattr__('_atom', atom)
+        super(AtomicInstance, self).__setattr__('_frozen', False)
 
     def keys(self):
         return self._attrs.keys()
+
+    def freeze(self):
+        self._frozen = True
+        return self
 
     def __getattr__(self, name):
         return self._attrs[name]
@@ -45,7 +50,7 @@ class AtomicInstance(object):
         return self.__getattr__(key)
 
     def __setattr__(self, name, value):
-        if name not in self._attrs:
+        if self._frozen and name not in self._attrs:
             raise KeyError(name)
         self._attrs[name] = value
 
@@ -74,12 +79,32 @@ class BaseAtom(object):
         self._fmt = []
 
     def __call__(self, data):
-        unpacked = struct.unpack(self.format_string(), data)
-        return self.atomic(self, dict(izip(self.keys(), unpacked)))
+        # unpacked = struct.unpack(self.format_string(), data)
+        # return self.atomic(self, dict(izip(self.keys(), unpacked)))
+        return self.atomic(self, self.unpack(data)).freeze()
+
+    def unpack(self, data):
+        data = data[:]
+        unpacked = {}
+        for entry in self._fmt:
+            if not entry[1].strip('x'):
+                consume = len(entry[1])
+            else:
+                consume = struct.calcsize(entry[1])
+                unpacked[entry[0]] = struct.unpack(entry[1], data[:consume])[0]
+            data = data[consume:]
+        return unpacked
 
     def pack(self, attrs):
-        unpacked = [attrs[name] for name in self.keys()]
-        return struct.pack(self.format_string(), *unpacked)
+        # unpacked = [attrs[name] for name in self.keys()]
+        # return struct.pack(self.format_string(), *unpacked)
+        packed = ''
+        for entry in self._fmt:
+            if not entry[1].strip('x'):
+                packed += struct.pack(entry[1])
+            else:
+                packed += struct.pack(entry[1], attrs[entry[0]])
+        return packed
 
     def keys(self):
         return [entry[0] for entry in self._fmt if entry[0]]
