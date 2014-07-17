@@ -83,10 +83,10 @@ class BaseAtom(object):
         # return self.atomic(self, dict(izip(self.keys(), unpacked)))
         return self.atomic(self, self.unpack(data)).freeze()
 
-    def unpack(self, data):
+    def unpack(self, atom, data):
         data = data[:]
         unpacked = {}
-        for entry in self._fmt:
+        for entry in self.format_iterator():
             if not entry[1].strip('x'):
                 consume = len(entry[1])
             else:
@@ -95,11 +95,11 @@ class BaseAtom(object):
             data = data[consume:]
         return unpacked
 
-    def pack(self, attrs):
+    def pack(self, atom, attrs):
         # unpacked = [attrs[name] for name in self.keys()]
         # return struct.pack(self.format_string(), *unpacked)
         packed = ''
-        for entry in self._fmt:
+        for entry in self.format_iterator():
             if not entry[1].strip('x'):
                 packed += struct.pack(entry[1])
             else:
@@ -114,6 +114,28 @@ class BaseAtom(object):
 
     def format_size(self):
         return struct.calcsize(self.format_string())
+
+    def format_iterator(self):
+        return self._fmt
+
+    def parse_one(self, formatter, data):
+        """Parse a single formatter from input data
+
+        Parameters
+        ----------
+        formatter : string or function(data)
+            format character or format function
+        data : string
+            input data
+
+        Returns
+        -------
+        value
+            Value parsed
+        data : string
+            Remaining data
+        """
+        pass
 
     def int8(self, name):
         self.append_format(name, 'b')
@@ -135,6 +157,35 @@ class BaseAtom(object):
 
     def padding(self, length):
         self.append_format(None, 'x'*length)
+
+    def array(self, format_entry, count=None, terminator=None):
+        """Parse field array
+
+        Parameters
+        ----------
+        name : string
+            Name of field
+        format_entry
+            Formatter (result of self.int8(name), etc)
+        count : int or None
+            if not None, array stops growing at this size.
+        terminator : int or None
+            if not None, array stops when a value matching this shows up.
+        """
+        formatter = format_entry[1]
+
+        def array_func(data):
+            total = 0
+            arr = []
+            while 1:
+                if count is not None and total >= count:
+                    break
+                single, data = self.parse_one(formatter, data)
+                if terminator is not None and single == terminator:
+                    break
+                arr.append(single)
+            return arr, data
+        format_entry[1] = array_func
 
     def append_format(self, name, fmt):
         self._fmt += [(name, fmt)]
