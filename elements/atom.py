@@ -138,25 +138,97 @@ class BaseAtom(object):
         pass
 
     def int8(self, name):
-        self.append_format(name, 'b')
+        """Parse named field as int8
+
+        Parameters
+        ----------
+        name : string
+            Field name
+
+        Returns
+        -------
+        format_entry : tuple
+            Format entry
+        """
+        return self.append_format(name, 'b')
 
     def uint8(self, name):
-        self.append_format(name, 'B')
+        """Parse named field as uint8
+
+        Parameters
+        ----------
+        name : string
+            Field name
+
+        Returns
+        -------
+        format_entry : tuple
+            Format entry
+        """
+        return self.append_format(name, 'B')
 
     def int16(self, name):
-        self.append_format(name, 'h')
+        """Parse named field as int16
+
+        Parameters
+        ----------
+        name : string
+            Field name
+
+        Returns
+        -------
+        format_entry : tuple
+            Format entry
+        """
+        return self.append_format(name, 'h')
 
     def uint16(self, name):
-        self.append_format(name, 'H')
+        """Parse named field as uint16
+
+        Parameters
+        ----------
+        name : string
+            Field name
+
+        Returns
+        -------
+        format_entry : tuple
+            Format entry
+        """
+        return self.append_format(name, 'H')
 
     def int32(self, name):
-        self.append_format(name, 'i')
+        """Parse named field as int32
+
+        Parameters
+        ----------
+        name : string
+            Field name
+
+        Returns
+        -------
+        format_entry : tuple
+            Format entry
+        """
+        return self.append_format(name, 'i')
 
     def uint32(self, name):
-        self.append_format(name, 'I')
+        """Parse named field as uint32
+
+        Parameters
+        ----------
+        name : string
+            Field name
+
+        Returns
+        -------
+        format_entry : tuple
+            Format entry
+        """
+        return self.append_format(name, 'I')
 
     def padding(self, length):
-        self.append_format(None, 'x'*length)
+        return self.append_format(None, 'x'*length)
 
     def array(self, format_entry, count=None, terminator=None):
         """Parse field array
