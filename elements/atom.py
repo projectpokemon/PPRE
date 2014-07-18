@@ -45,7 +45,7 @@ class AtomicInstance(object):
         return self.__getattr__(key)
 
     def __setattr__(self, name, value):
-        if self._frozen and name not in self._attrs:
+        if name not in self._attrs:
             raise KeyError(name)
         self._attrs[name] = value
 
@@ -103,6 +103,16 @@ class ValenceFormatter(object):
             self.pack_one = self.pack_multi
         self.ignore = False
 
+    def pack(self, attrs):
+        # Compat for atomic.__str__
+        packed = ''
+        for entry in self.format_iterator():
+            if not entry.ignore:
+                packed += entry.pack_one(attrs[entry.name])
+            else:
+                packed += entry.pack_one(None)
+        return packed
+
     def unpack_char(self, data):
         if not self.format_char.strip('x'):
             value = None
@@ -148,7 +158,7 @@ class ValenceFormatter(object):
             value, data = entry.unpack_one(data)
             if not entry.ignore:
                 unpacked[entry.name] = value
-        return self.subatomic(self.atom, unpacked), data
+        return self.subatomic(self, unpacked), data
 
     def pack_multi(self, atomic):
         return str(atomic)
@@ -321,7 +331,6 @@ class BaseAtom(object):
         name, self._fmt = self._subfmts.pop()
         format_entry = ValenceFormatter(name, sub_formats=sub_fmt)
         format_entry.subatomic = self.subatomic
-        format_entry.atom = self
         return self.add_format(format_entry)
 
     def append_format(self, name, formatter):
