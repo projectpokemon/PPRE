@@ -98,10 +98,10 @@ class LevelMoveAtomic(AtomicInstance):
         try:
             if name[:5] == 'level':
                 lvlid = int(name[5:])
-                return (self['lvlmove%d' % lvlid] >> 9) & 0x7F
+                return (self['lvlmoves'][lvlid] >> 9) & 0x7F
             elif name[:4] == 'move':
                 lvlid = int(name[4:])
-                return self['lvlmove%d' % lvlid] & 0x1FF
+                return self['lvlmoves'][lvlid] & 0x1FF
             raise
         except:
             return super(LevelMoveAtomic, self).__getattr__(name)
@@ -110,14 +110,14 @@ class LevelMoveAtomic(AtomicInstance):
         try:
             if name[:5] == 'level':
                 lvlid = int(name[5:])
-                lvlmove = self['lvlmove%d' % lvlid]
+                lvlmove = self['lvlmoves'][lvlid]
                 value &= 0x7F
-                self['lvlmove%d' % lvlid] = (lvlmove & 0x1FF) | (value << 9)
+                self['lvlmoves'][lvlid] = (lvlmove & 0x1FF) | (value << 9)
             elif name[:4] == 'move':
                 lvlid = int(name[4:])
-                lvlmove = self['lvlmove%d' % lvlid]
+                lvlmove = self['lvlmoves'][lvlid]
                 value &= 0x1FF
-                self['lvlmove%d' % lvlid] = value | (lvlmove & (0x7F << 9))
+                self['lvlmoves'][lvlid] = value | (lvlmove & (0x7F << 9))
             raise
         except:
             return super(LevelMoveAtomic, self).__setattr__(name, value)
@@ -135,35 +135,7 @@ class LevelMoveAtomDiamond(BaseAtom):
 
     def __init__(self):
         super(LevelMoveAtomDiamond, self).__init__()
-        self.uint16('lvlmove')
-
-    def __call__(self, data):
-        attrs = {}
-        data = data[:]
-        size = self.format_size()
-        for key in self.keys():
-            if not data:
-                attrs[key] = 0
-                continue
-            one = struct.unpack(self.format_string(), data[:size])[0]
-            data = data[size:]
-            if one == (1 << (size << 3))-1:
-                attrs[key] = 0
-            else:
-                attrs[key] = one
-        return self.atomic(self, attrs)
-
-    def pack(self, attrs):
-        packed = ''
-        size = self.format_size()
-        for name in self.keys():
-            if attrs[name]:
-                packed += struct.pack(self.format_string(), attrs[name])
-        packed += struct.pack(self.format_string(), (1 << (size << 3))-1)
-        return packed
-
-    def keys(self):
-        return ['lvlmove%d' % d for d in xrange(20)]
+        self.array(self.uint16('lvlmoves'), terminator=0xffff)
 
 
 class Diamond(GameVersion):

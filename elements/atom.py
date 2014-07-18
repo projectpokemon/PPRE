@@ -312,7 +312,7 @@ class BaseAtom(object):
                                      array_item=format_entry)
         new_entry.count = count
         new_entry.terminator = terminator
-        return self.replace_format(format_entry, new_entry)
+        return self.replace_format(format_entry, new_entry, pop=False)
 
     def append_format(self, name, formatter):
         """Add a new format entry
