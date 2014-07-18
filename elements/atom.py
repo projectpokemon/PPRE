@@ -98,7 +98,7 @@ class ValenceFormatter(object):
         elif array_item is not None:
             self.formatter = array_item
             self.unpack_one = self.unpack_array
-            # self.pack_one = self.pack_array
+            self.pack_one = self.pack_array
         self.ignore = False
 
     def unpack_char(self, data):
@@ -129,6 +129,15 @@ class ValenceFormatter(object):
                 break
             arr.append(value)
         return arr, data
+
+    def pack_array(self, arr):
+        data = ''
+        for value in arr:
+            data += self.formatter.pack_one(value)
+        if self.terminator is not None:
+            data += self.formatter.pack_one(self.terminator)
+        # TODO: count validation
+        return data
 
 
 class BaseAtom(object):
