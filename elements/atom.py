@@ -247,19 +247,24 @@ class BaseAtom(object):
         terminator : int or None
             if not None, array stops when a value matching this shows up.
         """
-        formatter = format_entry[1]
 
         def array_func(data):
             total = 0
             arr = []
             while 1:
-                if count is not None and total >= count:
+                if array_func.count is not None and total >= array_func.count:
                     break
-                single, data = self.unpack_one(formatter, data)
-                if terminator is not None and single == terminator:
+                value, data = self.unpack_one(array_func.formatter, data)
+                if array_func.terminator is not None \
+                        and value == array_func.terminator:
                     break
-                arr.append(single)
+                arr.append(value)
             return arr, data
+
+        # Close values over this function and allow for mutations
+        array_func.count = count
+        array_func.terminator = terminator
+        array_func.formatter = format_entry[1]
         format_entry[1] = array_func
 
     def append_format(self, name, formatter):
