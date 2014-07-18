@@ -86,10 +86,13 @@ class ValenceFormatter(object):
         Array length for field
     terminator : int
         Array terminator value
+    subatomic : type
+        AtomicInstance type for creating subatoms
     ignore : bool
         If set to True, do not add to Atomic attributes (ex, padding)
     """
-    def __init__(self, name, format_char=None, array_item=None):
+    def __init__(self, name, format_char=None, array_item=None,
+                 sub_formats=None):
         self.name = name
         if format_char is not None:
             self.format_char = format_char
@@ -99,6 +102,10 @@ class ValenceFormatter(object):
             self.formatter = array_item
             self.unpack_one = self.unpack_array
             self.pack_one = self.pack_array
+        elif sub_formats is not None:
+            self.format_iterator = lambda: sub_formats
+            self.unpack_one = self.unpack_multi
+            self.pack_one = self.pack_multi
         self.ignore = False
 
     def unpack_char(self, data):
@@ -139,6 +146,18 @@ class ValenceFormatter(object):
         # TODO: count validation
         return data
 
+    def unpack_multi(self, data):
+        data = data[:]
+        unpacked = {}
+        for entry in self.format_iterator():
+            value, data = entry.unpack_one(data)
+            if not entry.ignore:
+                unpacked[entry.name] = value
+        return self.subatomic(self.atom, unpacked).freeze(), data
+
+    def pack_multi(self, atomic):
+        return str(atomic)
+
 
 class BaseAtom(object):
     """Base class for single element entries.
@@ -147,9 +166,11 @@ class BaseAtom(object):
 
     """
     atomic = AtomicInstance
+    subatomic = AtomicInstance
 
     def __init__(self):
         self._fmt = []
+        self._subfmts = []
 
     def __call__(self, data):
         # unpacked = struct.unpack(self.format_string(), data)
@@ -323,6 +344,18 @@ class BaseAtom(object):
         new_entry.terminator = terminator
         return self.replace_format(format_entry, new_entry, pop=False)
 
+    def sub_push(self, name):
+        self._subfmts.append((name, self._fmt))
+        self._fmt = []
+
+    def sub_pop(self):
+        sub_fmt = self._fmt
+        name, self._fmt = self._subfmts.pop()
+        format_entry = ValenceFormatter(name, sub_formats=sub_fmt)
+        format_entry.subatomic = self.subatomic
+        format_entry.atom = self
+        return self.add_format(format_entry)
+
     def append_format(self, name, formatter):
         """Add a new format entry
 
@@ -340,6 +373,10 @@ class BaseAtom(object):
             Format entry
         """
         format_entry = ValenceFormatter(name, format_char=formatter)
+        self._fmt.append(format_entry)
+        return format_entry
+
+    def add_format(self, format_entry):
         self._fmt.append(format_entry)
         return format_entry
 
