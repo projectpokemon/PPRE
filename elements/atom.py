@@ -34,14 +34,9 @@ class AtomicInstance(object):
     def __init__(self, atom, attrs):
         super(AtomicInstance, self).__setattr__('_attrs', attrs)
         super(AtomicInstance, self).__setattr__('_atom', atom)
-        super(AtomicInstance, self).__setattr__('_frozen', False)
 
     def keys(self):
         return self._attrs.keys()
-
-    def freeze(self):
-        super(AtomicInstance, self).__setattr__('_frozen', True)
-        return self
 
     def __getattr__(self, name):
         return self._attrs[name]
@@ -153,7 +148,7 @@ class ValenceFormatter(object):
             value, data = entry.unpack_one(data)
             if not entry.ignore:
                 unpacked[entry.name] = value
-        return self.subatomic(self.atom, unpacked).freeze(), data
+        return self.subatomic(self.atom, unpacked), data
 
     def pack_multi(self, atomic):
         return str(atomic)
@@ -175,7 +170,7 @@ class BaseAtom(object):
     def __call__(self, data):
         # unpacked = struct.unpack(self.format_string(), data)
         # return self.atomic(self, dict(izip(self.keys(), unpacked)))
-        return self.atomic(self, self.unpack(data)).freeze()
+        return self.atomic(self, self.unpack(data))
 
     def unpack(self, data):
         data = data[:]
@@ -200,33 +195,6 @@ class BaseAtom(object):
 
     def format_iterator(self):
         return self._fmt
-
-    def unpack_one(self, formatter, data):
-        """Unpack a single formatter from input data
-
-        Parameters
-        ----------
-        formatter : string or function(data)
-            format character or parser function
-        data : string
-            input data
-
-        Returns
-        -------
-        value
-            Value parsed
-        data : string
-            Remaining data
-        """
-        if hasattr(formatter, '__call__'):
-            return formatter(data)
-        elif not formatter.strip('x'):
-            value = None
-            consume = len(formatter)
-        else:
-            consume = struct.calcsize(formatter)
-            value = struct.unpack(formatter, data[:consume])[0]
-        return value, data[consume:]
 
     def int8(self, name):
         """Parse named field as int8
