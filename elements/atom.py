@@ -87,12 +87,7 @@ class BaseAtom(object):
         data = data[:]
         unpacked = {}
         for entry in self.format_iterator():
-            if not entry[1].strip('x'):
-                consume = len(entry[1])
-            else:
-                consume = struct.calcsize(entry[1])
-                unpacked[entry[0]] = struct.unpack(entry[1], data[:consume])[0]
-            data = data[consume:]
+            unpacked[entry[0]], data = self.unpack_one(entry[1], data)
         return unpacked
 
     def pack(self, atom, attrs):
@@ -118,13 +113,13 @@ class BaseAtom(object):
     def format_iterator(self):
         return self._fmt
 
-    def parse_one(self, formatter, data):
-        """Parse a single formatter from input data
+    def unpack_one(self, formatter, data):
+        """Unpack a single formatter from input data
 
         Parameters
         ----------
         formatter : string or function(data)
-            format character or format function
+            format character or parser function
         data : string
             input data
 
@@ -135,7 +130,15 @@ class BaseAtom(object):
         data : string
             Remaining data
         """
-        pass
+        if hasattr(formatter, '__call__'):
+            return formatter(data)
+        elif not formatter.strip('x'):
+            value = None
+            consume = len(formatter)
+        else:
+            consume = struct.calcsize(formatter)
+            value = struct.unpack(formatter, data[:consume])[0]
+        return value, data[consume:]
 
     def int8(self, name):
         """Parse named field as int8
@@ -252,7 +255,7 @@ class BaseAtom(object):
             while 1:
                 if count is not None and total >= count:
                     break
-                single, data = self.parse_one(formatter, data)
+                single, data = self.unpack_one(formatter, data)
                 if terminator is not None and single == terminator:
                     break
                 arr.append(single)
