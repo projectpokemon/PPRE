@@ -152,14 +152,17 @@ class BaseAtom(object):
         unpacked = {}
         for entry in self.format_iterator():
             value, data = entry.unpack_one(data)
-            if value is not None:
+            if not entry.ignore:
                 unpacked[entry.name] = value
         return unpacked
 
     def pack(self, attrs):
         packed = ''
         for entry in self.format_iterator():
-            packed += entry.pack_one(attrs[entry.name])
+            if not entry.ignore:
+                packed += entry.pack_one(attrs[entry.name])
+            else:
+                packed += entry.pack_one(None)
         return packed
 
     def keys(self):
