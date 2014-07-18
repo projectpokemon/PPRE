@@ -67,6 +67,66 @@ class AtomicInstance(object):
         return self.keys()
 
 
+class ValenceFormatter(object):
+    """Formatter that extends struct's functionality
+
+    Methods
+    -------
+    pack_one : function
+        Takes a value and formats it to a string
+    unpack_one : function
+        Takes a string and pulls out the value and remaining string from it
+
+    Attributes
+    ----------
+    format_char : string
+        Struct format string for field
+    count : int
+        Array length for field
+    terminator : int
+        Array terminator value
+    """
+    def __init__(self, name, format_char=None, array_item=None):
+        self.name = name
+        if format_char is not None:
+            self.format_char = format_char
+            self.unpack_one = self.unpack_char
+            self.pack_one = self.pack_char
+        elif array_item is not None:
+            self.formatter = array_item
+            self.unpack_one = self.unpack_array
+            # self.pack_one = self.pack_array
+
+    def unpack_char(self, data):
+        if not self.format_char.strip('x'):
+            value = None
+            consume = len(self.format_char)
+        else:
+            consume = struct.calcsize(self.format_char)
+            value = struct.unpack(self.format_char, data[:consume])[0]
+        return value, data[consume:]
+
+    def pack_char(self, value):
+        if not self.format_char.strip('x'):
+            data = struct.pack(self.format_char)
+        else:
+            data = struct.pack(self.format_char, value)
+        return data
+
+    def unpack_array(self, data):
+        total = 0
+        arr = []
+        while 1:
+            if self.count is not None and total >= self.count:
+                break
+            value, data = self.formatter.unpack_one(data)
+            if self.terminator is not None \
+                    and value == self.terminator:
+                break
+            arr.append(value)
+        return arr, data
+
+
 class BaseAtom(object):
     """Base class for single element entries.
 
