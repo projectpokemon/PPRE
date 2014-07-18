@@ -143,32 +143,21 @@ class BaseAtom(object):
         # return self.atomic(self, dict(izip(self.keys(), unpacked)))
         return self.atomic(self, self.unpack(data)).freeze()
 
-    def unpack(self, atom, data):
+    def unpack(self, data):
         data = data[:]
         unpacked = {}
         for entry in self.format_iterator():
-            unpacked[entry[0]], data = self.unpack_one(entry[1], data)
+            unpacked[entry.name], data = entry.unpack_one(data)
         return unpacked
 
-    def pack(self, atom, attrs):
-        # unpacked = [attrs[name] for name in self.keys()]
-        # return struct.pack(self.format_string(), *unpacked)
+    def pack(self, attrs):
         packed = ''
         for entry in self.format_iterator():
-            if not entry[1].strip('x'):
-                packed += struct.pack(entry[1])
-            else:
-                packed += struct.pack(entry[1], attrs[entry[0]])
+            packed += entry.pack_one(attrs[entry.name])
         return packed
 
     def keys(self):
-        return [entry[0] for entry in self._fmt if entry[0]]
-
-    def format_string(self):
-        return ''.join([entry[1] for entry in self._fmt])
-
-    def format_size(self):
-        return struct.calcsize(self.format_string())
+        return [entry.name for entry in self._fmt if entry.name]
 
     def format_iterator(self):
         return self._fmt
@@ -308,24 +297,11 @@ class BaseAtom(object):
             if not None, array stops when a value matching this shows up.
         """
 
-        def array_func(data):
-            total = 0
-            arr = []
-            while 1:
-                if array_func.count is not None and total >= array_func.count:
-                    break
-                value, data = self.unpack_one(array_func.formatter, data)
-                if array_func.terminator is not None \
-                        and value == array_func.terminator:
-                    break
-                arr.append(value)
-            return arr, data
-
-        # Close values over this function and allow for mutations
-        array_func.count = count
-        array_func.terminator = terminator
-        array_func.formatter = format_entry[1]
-        format_entry[1] = array_func
+        new_entry = ValenceFormatter(format_entry.name,
+                                     array_item=format_entry)
+        new_entry.count = count
+        new_entry.terminator = terminator
+        return self.replace_format(format_entry, new_entry)
 
     def append_format(self, name, formatter):
         """Add a new format entry
@@ -340,9 +316,44 @@ class BaseAtom(object):
 
         Returns
         -------
-        format_entry : tuple
+        format_entry : ValenceFormatter
             Format entry
         """
-        format_entry = (name, formatter)
+        format_entry = ValenceFormatter(name, format_char=formatter)
         self._fmt.append(format_entry)
         return format_entry
+
+    def replace_format(self, old_ref, new_entry, pop=True):
+        """Replace an old format entry with a new one
+
+        Parameters
+        ----------
+        old_ref : string or ValenceFormatter
+            Item to replace
+        new_entry : ValenceFormatter
+            New format entry
+        pop : bool
+            If pop is True, remove new_entry from format list
+        """
+        if pop:
+            self.remove_format(new_entry)
+        if isinstance(old_ref, ValenceFormatter):
+            index = self._fmt.index(old_ref)
+            self._fmt[index] = new_entry
+        else:
+            self._fmt = [new_entry if fmt.name == old_ref else fmt
+                         for fmt in self._fmt]
+        return new_entry
+
+    def remove_format(self, old_ref):
+        """Remove a format entry by reference
+
+        Parameters
+        ----------
+        old_ref : string or ValenceFormatter
+            Reference to item or item's name to remove
+        """
+        if isinstance(old_ref, ValenceFormatter):
+            self._fmt.remove(old_ref)
+        else:
+            self._fmt = [fmt for fmt in self._fmt if fmt.name != old_ref]
