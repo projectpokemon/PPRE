@@ -40,7 +40,7 @@ class AtomicInstance(object):
         return self._attrs.keys()
 
     def freeze(self):
-        self._frozen = True
+        super(AtomicInstance, self).__setattr__('_frozen', True)
         return self
 
     def __getattr__(self, name):
@@ -75,7 +75,8 @@ class ValenceFormatter(object):
     pack_one : function
         Takes a value and formats it to a string
     unpack_one : function
-        Takes a string and pulls out the value and remaining string from it
+        Takes a string and pulls out the value and remaining string from it.
+        If value is None, it should not be considered.
 
     Attributes
     ----------
@@ -85,6 +86,8 @@ class ValenceFormatter(object):
         Array length for field
     terminator : int
         Array terminator value
+    ignore : bool
+        If set to True, do not add to Atomic attributes (ex, padding)
     """
     def __init__(self, name, format_char=None, array_item=None):
         self.name = name
@@ -96,6 +99,7 @@ class ValenceFormatter(object):
             self.formatter = array_item
             self.unpack_one = self.unpack_array
             # self.pack_one = self.pack_array
+        self.ignore = False
 
     def unpack_char(self, data):
         if not self.format_char.strip('x'):
@@ -147,7 +151,9 @@ class BaseAtom(object):
         data = data[:]
         unpacked = {}
         for entry in self.format_iterator():
-            unpacked[entry.name], data = entry.unpack_one(data)
+            value, data = entry.unpack_one(data)
+            if value is not None:
+                unpacked[entry.name] = value
         return unpacked
 
     def pack(self, attrs):
@@ -280,7 +286,9 @@ class BaseAtom(object):
         return self.append_format(name, 'I')
 
     def padding(self, length):
-        return self.append_format(None, 'x'*length)
+        entry = self.append_format(None, 'x'*length)
+        entry.ignore = True
+        return entry
 
     def array(self, format_entry, count=None, terminator=None):
         """Parse field array
