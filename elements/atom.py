@@ -408,3 +408,18 @@ class BaseAtom(object):
             self._fmt.remove(old_ref)
         else:
             self._fmt = [fmt for fmt in self._fmt if fmt.name != old_ref]
+
+    def pop_format(self, index=-1):
+        """Pops off the last (or specified) formatter
+
+        Paramters
+        ---------
+        index : int, optional
+            Index to remove
+
+        Returns
+        -------
+        formatter : ValenceFormatter
+            Popped formatter
+        """
+        return self._fmt.pop(index)
