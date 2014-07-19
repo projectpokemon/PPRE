@@ -19,6 +19,7 @@
 '\xff\xff\x64\x00'
 
 """
+import abc
 from itertools import izip
 import struct
 
@@ -62,7 +63,20 @@ class AtomicInstance(object):
         return self.keys()
 
 
-class ValenceFormatter(object):
+class Packer(object):
+    __metaclass__ = abc.ABCMeta
+
+    def pack(self, attrs):
+        packed = ''
+        for entry in self.format_iterator():
+            if not entry.ignore:
+                packed += entry.pack_one(attrs[entry.name])
+            else:
+                packed += entry.pack_one(None)
+        return packed
+
+
+class ValenceFormatter(Packer):
     """Formatter that extends struct's functionality
 
     Methods
@@ -120,16 +134,6 @@ class ValenceFormatter(object):
     def format_iterator(self):
         return self.sub_formats
 
-    def pack(self, attrs):
-        # Compat for atomic.__str__
-        packed = ''
-        for entry in self.format_iterator():
-            if not entry.ignore:
-                packed += entry.pack_one(attrs[entry.name])
-            else:
-                packed += entry.pack_one(None)
-        return packed
-
     def unpack_char(self, data):
         if not self.format_char.strip('x'):
             value = None
@@ -181,7 +185,7 @@ class ValenceFormatter(object):
         return str(atomic)
 
 
-class BaseAtom(object):
+class BaseAtom(Packer):
     """Base class for single element entries.
 
     This is used to read and build data formats.
@@ -207,15 +211,6 @@ class BaseAtom(object):
             if not entry.ignore:
                 unpacked[entry.name] = value
         return unpacked
-
-    def pack(self, attrs):
-        packed = ''
-        for entry in self.format_iterator():
-            if not entry.ignore:
-                packed += entry.pack_one(attrs[entry.name])
-            else:
-                packed += entry.pack_one(None)
-        return packed
 
     def keys(self):
         return [entry.name for entry in self._fmt if entry.name]
