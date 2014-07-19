@@ -201,6 +201,8 @@ class BaseAtom(Packer):
     def __call__(self, data):
         # unpacked = struct.unpack(self.format_string(), data)
         # return self.atomic(self, dict(izip(self.keys(), unpacked)))
+        if self._subfmts:
+            raise RuntimeError('Subatoms have not returned fully')
         return self.atomic(self, self.unpack(data))
 
     def unpack(self, data):
