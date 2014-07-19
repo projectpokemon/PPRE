@@ -113,7 +113,7 @@ class ValenceFormatter(object):
                                      for entry in self.sub_formats]
         new_formatter = ValenceFormatter(**kwargs)
         for attr, value in self.__dict__.items():
-            if not hasattr(value, '__call__'):
+            if attr in ['subatomic'] or not hasattr(value, '__call__'):
                 setattr(new_formatter, attr, value)
         return new_formatter
 
