@@ -89,8 +89,10 @@ class ValenceFormatter(object):
     def __init__(self, name, format_char=None, array_item=None,
                  sub_formats=None):
         self.name = name
+        self.format_char = format_char
+        self.array_item = array_item
+        self.sub_formats = sub_formats
         if format_char is not None:
-            self.format_char = format_char
             self.unpack_one = self.unpack_char
             self.pack_one = self.pack_char
         elif array_item is not None:
@@ -98,10 +100,25 @@ class ValenceFormatter(object):
             self.unpack_one = self.unpack_array
             self.pack_one = self.pack_array
         elif sub_formats is not None:
-            self.format_iterator = lambda: sub_formats
             self.unpack_one = self.unpack_multi
             self.pack_one = self.pack_multi
         self.ignore = False
+
+    def copy(self):
+        kwargs = dict(name=self.name, format_char=self.format_char)
+        if self.array_item:
+            kwargs['array_item'] = self.array_item.copy()
+        if self.sub_formats:
+            kwargs['sub_formats'] = [entry.copy()
+                                     for entry in self.sub_formats]
+        new_formatter = ValenceFormatter(**kwargs)
+        for attr, value in self.__dict__.items():
+            if not hasattr(value, '__call__'):
+                setattr(new_formatter, attr, value)
+        return new_formatter
+
+    def format_iterator(self):
+        return self.sub_formats
 
     def pack(self, attrs):
         # Compat for atomic.__str__
