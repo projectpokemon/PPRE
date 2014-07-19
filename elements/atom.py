@@ -233,7 +233,7 @@ class BaseAtom(Packer):
         format_entry : tuple
             Format entry
         """
-        return self.append_format(name, 'b')
+        return self.append_format(ValenceFormatter(name, 'b'))
 
     def uint8(self, name):
         """Parse named field as uint8
@@ -248,7 +248,7 @@ class BaseAtom(Packer):
         format_entry : tuple
             Format entry
         """
-        return self.append_format(name, 'B')
+        return self.append_format(ValenceFormatter(name, 'B'))
 
     def int16(self, name):
         """Parse named field as int16
@@ -263,7 +263,7 @@ class BaseAtom(Packer):
         format_entry : tuple
             Format entry
         """
-        return self.append_format(name, 'h')
+        return self.append_format(ValenceFormatter(name, 'h'))
 
     def uint16(self, name):
         """Parse named field as uint16
@@ -278,7 +278,7 @@ class BaseAtom(Packer):
         format_entry : tuple
             Format entry
         """
-        return self.append_format(name, 'H')
+        return self.append_format(ValenceFormatter(name, 'H'))
 
     def int32(self, name):
         """Parse named field as int32
@@ -293,7 +293,7 @@ class BaseAtom(Packer):
         format_entry : tuple
             Format entry
         """
-        return self.append_format(name, 'i')
+        return self.append_format(ValenceFormatter(name, 'i'))
 
     def uint32(self, name):
         """Parse named field as uint32
@@ -308,12 +308,12 @@ class BaseAtom(Packer):
         format_entry : tuple
             Format entry
         """
-        return self.append_format(name, 'I')
+        return self.append_format(ValenceFormatter(name, 'I'))
 
     def padding(self, length):
-        entry = self.append_format(None, 'x'*length)
+        entry = ValenceFormatter(None, 'x'*length)
         entry.ignore = True
-        return entry
+        return self.append_format(entry)
 
     def array(self, format_entry, count=None, terminator=None):
         """Parse field array
@@ -345,31 +345,25 @@ class BaseAtom(Packer):
         name, self._fmt = self._subfmts.pop()
         format_entry = ValenceFormatter(name, sub_formats=sub_fmt)
         format_entry.subatomic = self.subatomic
-        return self.add_format(format_entry)
+        return self.append_format(format_entry)
 
-    def append_format(self, name, formatter):
+    def append_format(self, formatter):
         """Add a new format entry
 
         Parameters
         ----------
         name : string
             Field name
-        formatter : string or function(data)
-            Describes how to format a section of data. If a string, this should
-            be parsed using struct.pack
+        formatter : ValenceFormatter
+            Describes how to format a section of data.
 
         Returns
         -------
-        format_entry : ValenceFormatter
+        formatter : ValenceFormatter
             Format entry
         """
-        format_entry = ValenceFormatter(name, format_char=formatter)
-        self._fmt.append(format_entry)
-        return format_entry
-
-    def add_format(self, format_entry):
-        self._fmt.append(format_entry)
-        return format_entry
+        self._fmt.append(formatter)
+        return formatter
 
     def replace_format(self, old_ref, new_entry, pop=True):
         """Replace an old format entry with a new one
