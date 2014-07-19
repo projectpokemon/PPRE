@@ -32,12 +32,16 @@ class AtomicInstance(object):
     keys : list
         Get the valent attributes/keys of this atom
     """
-    def __init__(self, atom, attrs):
-        super(AtomicInstance, self).__setattr__('_attrs', attrs)
+    def __init__(self, atom):
+        super(AtomicInstance, self).__setattr__('_frozen', False)
+        super(AtomicInstance, self).__setattr__('_attrs', {})
         super(AtomicInstance, self).__setattr__('_atom', atom)
 
     def keys(self):
         return self._attrs.keys()
+
+    def freeze(self):
+        super(AtomicInstance, self).__setattr__('_frozen', True)
 
     def __getattr__(self, name):
         return self._attrs[name]
@@ -46,7 +50,7 @@ class AtomicInstance(object):
         return self.__getattr__(key)
 
     def __setattr__(self, name, value):
-        if name not in self._attrs:
+        if self._frozen and name not in self._attrs:
             raise KeyError(name)
         self._attrs[name] = value
 
@@ -68,7 +72,7 @@ class Packer(object):
 
     def pack(self, attrs):
         packed = ''
-        for entry in self.format_iterator():
+        for entry in self.format_iterator(None):
             if not entry.ignore:
                 packed += entry.pack_one(attrs[entry.name])
             else:
@@ -131,7 +135,7 @@ class ValenceFormatter(Packer):
                 setattr(new_formatter, attr, value)
         return new_formatter
 
-    def format_iterator(self):
+    def format_iterator(self, atomic):
         return self.sub_formats
 
     def unpack_char(self, data):
@@ -175,11 +179,13 @@ class ValenceFormatter(Packer):
     def unpack_multi(self, data):
         data = data[:]
         unpacked = {}
-        for entry in self.format_iterator():
+        atomic = self.subatomic(self)
+        for entry in self.format_iterator(atomic):
             value, data = entry.unpack_one(data)
             if not entry.ignore:
-                unpacked[entry.name] = value
-        return self.subatomic(self, unpacked), data
+                atomic[entry.name] = value
+        atomic.freeze()
+        return atomic, data
 
     def pack_multi(self, atomic):
         return str(atomic)
@@ -203,21 +209,20 @@ class BaseAtom(Packer):
         # return self.atomic(self, dict(izip(self.keys(), unpacked)))
         if self._subfmts:
             raise RuntimeError('Subatoms have not returned fully')
-        return self.atomic(self, self.unpack(data))
-
-    def unpack(self, data):
+        atomic = self.atomic(self)
         data = data[:]
         unpacked = {}
-        for entry in self.format_iterator():
+        for entry in self.format_iterator(atomic):
             value, data = entry.unpack_one(data)
             if not entry.ignore:
-                unpacked[entry.name] = value
-        return unpacked
+                atomic[entry.name] = value
+        atomic.freeze()
+        return atomic
 
     def keys(self):
         return [entry.name for entry in self._fmt if entry.name]
 
-    def format_iterator(self):
+    def format_iterator(self, atomic):
         return self._fmt
 
     def int8(self, name):
