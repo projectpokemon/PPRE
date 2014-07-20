@@ -165,6 +165,7 @@ class ValenceFormatter(Packer):
                     and value == self.terminator:
                 break
             arr.append(value)
+            total += 1
         return arr, data
 
     def pack_array(self, arr):
