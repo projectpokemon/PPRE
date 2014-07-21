@@ -41,6 +41,10 @@ class AtomicInstance(object):
     def keys(self):
         return self._attrs.keys()
 
+    @property
+    def data(self):
+        return self._data
+
     def freeze(self):
         super(AtomicInstance, self).__setattr__('_frozen', True)
 
@@ -200,14 +204,14 @@ class ValenceFormatter(Packer):
     def format_iterator(self, atomic):
         return self.sub_formats
 
-    def unpack_char(self, data):
+    def unpack_char(self, atomic):
         if not self.format_char.strip('x'):
             value = None
             consume = len(self.format_char)
-            data[:consume]
+            atomic.data[:consume]
         else:
             consume = struct.calcsize(self.format_char)
-            value = struct.unpack(self.format_char, data[:consume])[0]
+            value = struct.unpack(self.format_char, atomic.data[:consume])[0]
         return value
 
     def pack_char(self, value):
@@ -217,13 +221,13 @@ class ValenceFormatter(Packer):
             data = struct.pack(self.format_char, value)
         return data
 
-    def unpack_array(self, data):
+    def unpack_array(self, atomic):
         total = 0
         arr = []
         while 1:
             if self.count is not None and total >= self.count:
                 break
-            value = self.formatter.unpack_one(data)
+            value = self.formatter.unpack_one(atomic)
             if self.terminator is not None \
                     and value == self.terminator:
                 break
@@ -240,16 +244,16 @@ class ValenceFormatter(Packer):
         # TODO: count validation
         return data
 
-    def unpack_multi(self, data):
-        data = DataConsumer(data)
+    def unpack_multi(self, atomic):
+        data = DataConsumer(atomic.data)
         unpacked = {}
-        atomic = self.subatomic(self, data)
-        for entry in self.format_iterator(atomic):
-            value = entry.unpack_one(data)
+        subatomic = self.subatomic(self, data)
+        for entry in self.format_iterator(subatomic):
+            value = entry.unpack_one(subatomic)
             if not entry.ignore:
-                atomic[entry.name] = value
-        atomic.freeze()
-        return atomic, data
+                subatomic[entry.name] = value
+        subatomic.freeze()
+        return subatomic
 
     def pack_multi(self, atomic):
         return str(atomic)
@@ -269,15 +273,13 @@ class BaseAtom(Packer):
         self._subfmts = []
 
     def __call__(self, data):
-        # unpacked = struct.unpack(self.format_string(), data)
-        # return self.atomic(self, dict(izip(self.keys(), unpacked)))
         if self._subfmts:
             raise RuntimeError('Subatoms have not returned fully')
         data = DataConsumer(data)
         atomic = self.atomic(self, data)
         unpacked = {}
         for entry in self.format_iterator(atomic):
-            value = entry.unpack_one(data)
+            value = entry.unpack_one(atomic)
             if not entry.ignore:
                 atomic[entry.name] = value
         atomic.freeze()
