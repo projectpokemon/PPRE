@@ -32,10 +32,11 @@ class AtomicInstance(object):
     keys : list
         Get the valent attributes/keys of this atom
     """
-    def __init__(self, atom):
+    def __init__(self, atom, consumer):
         super(AtomicInstance, self).__setattr__('_frozen', False)
         super(AtomicInstance, self).__setattr__('_attrs', {})
         super(AtomicInstance, self).__setattr__('_atom', atom)
+        super(AtomicInstance, self).__setattr__('_data', consumer)
 
     def keys(self):
         return self._attrs.keys()
@@ -87,7 +88,7 @@ class DataConsumer(object):
     data : buffer
         Read-only data buffer
     offset : int
-        Offset of buffer
+        Current offset of buffer
     """
     def __init__(self, parent_or_buffer):
         try:
@@ -188,10 +189,11 @@ class ValenceFormatter(Packer):
         if not self.format_char.strip('x'):
             value = None
             consume = len(self.format_char)
+            data[:consume]
         else:
             consume = struct.calcsize(self.format_char)
             value = struct.unpack(self.format_char, data[:consume])[0]
-        return value, data[consume:]
+        return value
 
     def pack_char(self, value):
         if not self.format_char.strip('x'):
@@ -206,13 +208,13 @@ class ValenceFormatter(Packer):
         while 1:
             if self.count is not None and total >= self.count:
                 break
-            value, data = self.formatter.unpack_one(data)
+            value = self.formatter.unpack_one(data)
             if self.terminator is not None \
                     and value == self.terminator:
                 break
             arr.append(value)
             total += 1
-        return arr, data
+        return arr
 
     def pack_array(self, arr):
         data = ''
@@ -224,11 +226,11 @@ class ValenceFormatter(Packer):
         return data
 
     def unpack_multi(self, data):
-        data = data[:]
+        data = DataConsumer(data)
         unpacked = {}
-        atomic = self.subatomic(self)
+        atomic = self.subatomic(self, data)
         for entry in self.format_iterator(atomic):
-            value, data = entry.unpack_one(data)
+            value = entry.unpack_one(data)
             if not entry.ignore:
                 atomic[entry.name] = value
         atomic.freeze()
@@ -256,11 +258,11 @@ class BaseAtom(Packer):
         # return self.atomic(self, dict(izip(self.keys(), unpacked)))
         if self._subfmts:
             raise RuntimeError('Subatoms have not returned fully')
-        atomic = self.atomic(self)
-        data = data[:]
+        data = DataConsumer(data)
+        atomic = self.atomic(self, data)
         unpacked = {}
         for entry in self.format_iterator(atomic):
-            value, data = entry.unpack_one(data)
+            value = entry.unpack_one(data)
             if not entry.ignore:
                 atomic[entry.name] = value
         atomic.freeze()
