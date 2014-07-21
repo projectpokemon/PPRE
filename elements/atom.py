@@ -316,6 +316,9 @@ class BaseAtom(Packer):
         """
         return self.append_format(ValenceFormatter(name, 'I'))
 
+    def string(self, name, count=0):
+        return self.append_format(ValenceFormatter(name, '%ds' % count))
+
     def padding(self, length):
         entry = ValenceFormatter(None, 'x'*length)
         entry.ignore = True
