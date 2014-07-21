@@ -90,6 +90,10 @@ class DataConsumer(object):
     offset : int
         Current offset of buffer
     """
+    SEEK_RELATIVE = -1
+    SEEK_ROOT = -2
+    SEEK_TOP = 0
+
     def __init__(self, parent_or_buffer):
         try:
             self._data = parent_or_buffer.data
@@ -125,6 +129,17 @@ class DataConsumer(object):
         data = self.data[start:end]
         self.offset = end
         return data
+
+    def seek(self, offset, whence=SEEK_RELATIVE):
+        if whence == self.SEEK_RELATIVE:
+            self.offset += offset
+        elif whence == self.SEEK_ROOT:
+            self.offset = 0 + offset
+        else:
+            target = self
+            for i in xrange(whence):
+                target = target.parent
+            self.offset = target.base_offset + offset
 
 
 class ValenceFormatter(Packer):
