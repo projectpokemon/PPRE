@@ -80,6 +80,52 @@ class Packer(object):
         return packed
 
 
+class DataConsumer(object):
+    """
+    Attributes
+    ----------
+    data : buffer
+        Read-only data buffer
+    offset : int
+        Offset of buffer
+    """
+    def __init__(self, parent_or_buffer):
+        try:
+            self._data = parent_or_buffer.data
+            self.parent = parent_or_buffer
+            self.offset = self.base_offset = self.parent.offset
+        except:
+            self._data = parent_or_buffer[:]
+            self.parent = None
+            self.offset = self.base_offset = 0
+
+    @property
+    def data(self):
+        """Read-only data"""
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        raise TypeError('data is immutable')
+
+    def __len__(self):
+        return len(self.data)-self.offset
+
+    def __getitem__(self, key):
+        """Get a slice"""
+        try:
+            if not key.start:
+                start = self.offset
+            else:
+                start = self.offset + key.start
+            end = self.offset + key.stop
+        except:
+            raise TypeError('DataConsumer only accepts slice objects')
+        data = self.data[start:end]
+        self.offset = end
+        return data
+
+
 class ValenceFormatter(Packer):
     """Formatter that extends struct's functionality
 
