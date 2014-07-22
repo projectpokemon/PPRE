@@ -117,6 +117,13 @@ class DataConsumer(object):
     def data(self, value):
         raise TypeError('data is immutable')
 
+    def consume(self, amount):
+        self.offset += amount
+
+    @property
+    def exhausted(self):
+        return self.offset-self.base_offset
+
     def __len__(self):
         return len(self.data)-self.offset
 
@@ -208,7 +215,7 @@ class ValenceFormatter(Packer):
         if not self.format_char.strip('x'):
             value = None
             consume = len(self.format_char)
-            atomic.data[:consume]
+            atomic.data.consume(consume)
         else:
             consume = struct.calcsize(self.format_char)
             value = struct.unpack(self.format_char, atomic.data[:consume])[0]
@@ -253,6 +260,7 @@ class ValenceFormatter(Packer):
             if not entry.ignore:
                 subatomic[entry.name] = value
         subatomic.freeze()
+        atomic.data.consume(subatomic.data.exhausted)
         return subatomic
 
     def pack_multi(self, atomic):
