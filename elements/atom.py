@@ -168,7 +168,7 @@ class ValenceFormatter(Packer):
     ----------
     format_char : string
         Struct format string for field
-    count : int
+    count : int or function(atomic)
         Array length for field
     terminator : int
         Array terminator value
@@ -241,12 +241,20 @@ class ValenceFormatter(Packer):
     def unpack_array(self, atomic):
         total = 0
         arr = []
+        try:
+            count = self.count(atomic)
+        except:
+            count = self.count
+        try:
+            terminator = self.terminator(atomic)
+        except:
+            terminator = self.terminator
         while 1:
-            if self.count is not None and total >= self.count:
+            if count is not None and total >= count:
                 break
             value = self.formatter.unpack_one(atomic)
-            if self.terminator is not None \
-                    and value == self.terminator:
+            if terminator is not None \
+                    and value == terminator:
                 break
             arr.append(value)
             total += 1
@@ -422,7 +430,7 @@ class BaseAtom(Packer):
             Name of field
         format_entry
             Formatter (result of self.int8(name), etc)
-        count : int or None
+        count : int, function, or None
             if not None, array stops growing at this size.
         terminator : int or None
             if not None, array stops when a value matching this shows up.

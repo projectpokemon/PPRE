@@ -8,8 +8,9 @@ class SeekValence(ValenceFormatter):
         super(SeekValence, self).__init__(None)
         self.field = field
         self.ignore = True
+        self.unpack_one = self.unpack_one_seek
 
-    def unpack_one(self, atomic):
+    def unpack_one_seek(self, atomic):
         if hasattr(self.field, '__call__'):
             atomic.data.seek(self.field(atomic), 0)
         else:
@@ -80,22 +81,14 @@ class BTXAtom(BaseAtom):
         self.uint8('left')
         self.uint8('right')
         self.uint8('index')
-        self.array(self.sub_pop(), count=0)
+        self.array(self.sub_pop(), count=lambda atomic: atomic.num)
 
         self.append_format(SeekValence('refofs'))
         self.uint16('sizeunit')
         self.uint16('nameofs')
-        self.array(self.uint8('data'), count=0)
+        self.array(self.uint8('data'), count=lambda atomic:
+                   atomic.num*atomic.sizeunit)
         # self.append_format(SeekValence('nameofs'))
-        self.array(self.string('names', 16), count=0)
+        self.array(self.string('names', 16), count=lambda atomic: atomic.num)
 
-        lookup = self.sub_pop()
-
-        def format_iterator(atomic):
-            for fmt in lookup.sub_formats:
-                if fmt.name == 'nodes' or fmt.name == 'names':
-                    fmt.count = atomic.num
-                elif fmt.name == 'data':
-                    fmt.count = atomic.num*atomic.sizeunit
-                yield fmt
-        lookup.format_iterator = format_iterator
+        self.sub_pop()
