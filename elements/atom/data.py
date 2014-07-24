@@ -1,4 +1,11 @@
 
+__all__ = ['DataConsumer']
+
+SEEK_RELATIVE = -1
+SEEK_ROOT = -2
+SEEK_TOP = 0
+
+
 class DataConsumer(object):
     """
     Attributes
@@ -8,9 +15,6 @@ class DataConsumer(object):
     offset : int
         Current offset of buffer
     """
-    SEEK_RELATIVE = -1
-    SEEK_ROOT = -2
-    SEEK_TOP = 0
 
     def __init__(self, parent_or_buffer):
         try:
@@ -56,9 +60,9 @@ class DataConsumer(object):
         return data
 
     def seek(self, offset, whence=SEEK_RELATIVE):
-        if whence == self.SEEK_RELATIVE:
+        if whence == SEEK_RELATIVE:
             self.offset += offset
-        elif whence == self.SEEK_ROOT:
+        elif whence == SEEK_ROOT:
             self.offset = 0 + offset
         else:
             target = self
