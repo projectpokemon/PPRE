@@ -47,6 +47,18 @@ class ValenceFormatter(Packer):
             self.pack_one = self.pack_multi
         self.ignore = False
 
+    def set_param(self, key, value):
+        if key in self.valid_params:
+            self.params[key] = value
+        else:
+            raise ValueError('%s is not a valid parameter' % key)
+
+    def get_param(self, key, atomic):
+        value = self.params[key]
+        if hasattr(value, '__call__'):
+            return value(atomic)
+        return value
+
     def copy(self):
         kwargs = dict(name=self.name, format_char=self.format_char)
         if self.array_item:
