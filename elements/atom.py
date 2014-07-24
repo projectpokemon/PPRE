@@ -212,16 +212,26 @@ class ValenceFormatter(Packer):
         return self.sub_formats
 
     def unpack_char(self, atomic):
-        if not self.format_char.strip('x'):
+        """Unpacks the format_char string from atomic.data
+
+        If self.format_char is a function, this will be called with atomic as
+        the first argument to generate the format string
+        """
+        try:
+            format_char = self.format_char(atomic)
+        except:
+            format_char = self.format_char
+        if not format_char.strip('x'):
             value = None
-            consume = len(self.format_char)
+            consume = len(format_char)
             atomic.data.consume(consume)
         else:
-            consume = struct.calcsize(self.format_char)
-            value = struct.unpack(self.format_char, atomic.data[:consume])[0]
+            consume = struct.calcsize(format_char)
+            value = struct.unpack(format_char, atomic.data[:consume])[0]
         return value
 
     def pack_char(self, value):
+        # TODO: format_char as function
         if not self.format_char.strip('x'):
             data = struct.pack(self.format_char)
         else:
@@ -389,8 +399,11 @@ class BaseAtom(Packer):
         """
         return self.append_format(ValenceFormatter(name, 'I'))
 
-    def string(self, name, count=0):
-        return self.append_format(ValenceFormatter(name, '%ds' % count))
+    def string(self, name, count):
+        formatter = self.append_format(ValenceFormatter(name, '%ds' % count))
+        if hasattr(count, '__call__'):
+            formatter.format_char = lambda atomic: '%ds' % count(atomic)
+        return formatter
     data = string
 
     def padding(self, length):
