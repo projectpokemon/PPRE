@@ -26,8 +26,24 @@ class BTXAtom(BaseAtom):
         self.texinfo('tex4x4info')
         self.uint32('tex4x4info_paletteofs')
         self.texinfo('palinfo', True)
-        self.append_format(SeekValence(lambda atomic: atomic.texinfo.lookupofs))
+        self.append_format(SeekValence(lambda atomic:
+                                       atomic.texinfo.lookupofs))
         self.lookupdict('texdict')
+        self.append_format(SeekValence(lambda atomic:
+                                       atomic.palinfo.lookupofs))
+        self.lookupdict('paldict')
+
+        self.append_format(SeekValence(lambda atomic:
+                                       atomic.texinfo.dataofs))
+        self.data('texdata', lambda atomic: atomic.texinfo.datasize << 3)
+
+        self.append_format(SeekValence(lambda atomic:
+                                       atomic.tex4x4info.dataofs))
+        self.data('tex4x4data', lambda atomic: atomic.tex4x4info.datasize << 3)
+
+        self.append_format(SeekValence(lambda atomic:
+                                       atomic.palinfo.dataofs))
+        self.data('paldata', lambda atomic: atomic.palinfo.datasize << 3)
 
     def texinfo(self, name, late_lookup=False):
         """
