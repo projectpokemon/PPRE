@@ -400,9 +400,11 @@ class BaseAtom(Packer):
         return self.append_format(ValenceFormatter(name, 'I'))
 
     def string(self, name, count):
-        formatter = self.append_format(ValenceFormatter(name, '%ds' % count))
         if hasattr(count, '__call__'):
-            formatter.format_char = lambda atomic: '%ds' % count(atomic)
+            format_char = lambda atomic: '%ds' % count(atomic)
+        else:
+            format_char = '%ds' % count
+        formatter = self.append_format(ValenceFormatter(name, format_char))
         return formatter
     data = string
 
