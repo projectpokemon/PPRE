@@ -147,3 +147,38 @@ class ValenceFormatter(Packer):
 
     def pack_multi(self, atomic):
         return str(atomic)
+
+
+class ValenceMulti(ValenceFormatter):
+    """Multiple SubValence container Valence
+
+    For grouping multiple valences together
+
+    Parameters
+    ----------
+    sub_valences : list(ValenceFormatter)
+        List of contained ValenceFormatters
+    """
+    valid_params = ['sub_valences']
+
+    def __init__(self, name, sub_valences):
+        super(ValenceMulti, self).__init__(name)
+        self.set_param('sub_valences', sub_valences)
+
+    def format_iterator(self, atomic):
+        return self.get_param('sub_valences', atomic)
+
+    def unpack_one(self, atomic):
+        data = DataConsumer(atomic.data)
+        unpacked = {}
+        subatomic = self.subatomic(self, data)
+        for entry in self.format_iterator(subatomic):
+            value = entry.unpack_one(subatomic)
+            if not entry.ignore:
+                subatomic[entry.name] = value
+        subatomic.freeze()
+        atomic.data.consume(subatomic.data.exhausted)
+        return subatomic
+
+    def pack_one(self, atomic):
+        return str(atomic)
