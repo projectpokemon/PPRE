@@ -29,6 +29,8 @@ class ValenceFormatter(Packer):
     ignore : bool
         If set to True, do not add to Atomic attributes (ex, padding)
     """
+    valid_params = ['value']
+
     def __init__(self, name, format_char=None, array_item=None,
                  sub_formats=None):
         self.name = name
@@ -159,7 +161,7 @@ class ValenceMulti(ValenceFormatter):
     sub_valences : list(ValenceFormatter)
         List of contained ValenceFormatters
     """
-    valid_params = ['sub_valences']
+    valid_params = ValenceFormatter.valid_params+['sub_valences']
 
     def __init__(self, name, sub_valences):
         super(ValenceMulti, self).__init__(name)
@@ -182,3 +184,41 @@ class ValenceMulti(ValenceFormatter):
 
     def pack_one(self, atomic):
         return str(atomic)
+
+
+class ValenceArray(ValenceFormatter):
+    valid_params = ValenceFormatter.valid_params + \
+        ['sub_valence', 'count', 'terminator']
+
+    def __init__(self, name, sub_valence, count=None, terminator=None):
+        super(ValenceArray, self).__init__(name)
+        self.set_param('sub_valence', sub_valence)
+        self.set_param('count', count)
+        self.set_param('terminator', terminator)
+
+    def unpack_array(self, atomic):
+        total = 0
+        arr = []
+        count = self.get_param('count', atomic)
+        terminator = self.get_param('terminator', atomic)
+        while 1:
+            if count is not None and total >= count:
+                break
+            value = self.formatter.unpack_one(atomic)
+            if terminator is not None \
+                    and value == terminator:
+                break
+            arr.append(value)
+            total += 1
+        return arr
+
+    def pack_array(self, arr):
+        data = ''
+        terminator = self.get_param('terminator', None)
+        for value in arr:
+            data += self.formatter.pack_one(value)
+        if self.terminator is not None:
+            data += self.formatter.pack_one(self.terminator)
+        # TODO: count validation
+        return data
+
