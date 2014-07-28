@@ -189,7 +189,7 @@ class ValenceMulti(ValenceFormatter):
         return subatomic
 
     def pack_one(self, atomic):
-        return str(atomic)
+        return str(self.get_value(atomic))
 
 
 class ValenceArray(ValenceFormatter):
@@ -240,10 +240,10 @@ class ValenceArray(ValenceFormatter):
             total += 1
         return arr
 
-    def pack_one(self, arr):
+    def pack_one(self, atomic):
         data = ''
         terminator = self.get_param('terminator', None)
-        for value in arr:
+        for value in self.get_value(atomic):
             data += self.sub_valence.pack_one(value)
         if self.terminator is not None:
             data += self.sub_valence.pack_one(self.terminator)
