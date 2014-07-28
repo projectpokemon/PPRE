@@ -61,6 +61,12 @@ class ValenceFormatter(Packer):
             return value(atomic)
         return value
 
+    def get_value(self, atomic):
+        return atomic[self.name]
+
+    def set_value(self, atomic, value):
+        atomic[self.name] = value
+
     def copy(self):
         kwargs = dict(name=self.name, format_char=self.format_char)
         if self.array_item:
@@ -192,19 +198,41 @@ class ValenceArray(ValenceFormatter):
 
     def __init__(self, name, sub_valence, count=None, terminator=None):
         super(ValenceArray, self).__init__(name)
-        self.set_param('sub_valence', sub_valence)
-        self.set_param('count', count)
+        self.sub_valence = sub_valence
+        if isinstance(count, ValenceFormatter):
+            self._get_count = count.get_value
+            count.get_value = self.get_count
+        else:
+            self._get_count = lambda atomic: count
         self.set_param('terminator', terminator)
 
-    def unpack_array(self, atomic):
+    def _get_count(self, atomic):
+        return None
+
+    def get_count(self, atomic):
+        """Gets the number of entries of the stored value
+
+        Returns
+        -------
+        count : int
+            Number of entries
+        count : None
+            No limit found yet
+        """
+        try:
+            return len(self.get_value(atomic))
+        except:
+            return self._get_count(atomic)
+
+    def unpack_one(self, atomic):
         total = 0
         arr = []
-        count = self.get_param('count', atomic)
+        count = self.get_count(atomic)
         terminator = self.get_param('terminator', atomic)
         while 1:
             if count is not None and total >= count:
                 break
-            value = self.formatter.unpack_one(atomic)
+            value = self.sub_valence.unpack_one(atomic)
             if terminator is not None \
                     and value == terminator:
                 break
@@ -212,13 +240,12 @@ class ValenceArray(ValenceFormatter):
             total += 1
         return arr
 
-    def pack_array(self, arr):
+    def pack_one(self, arr):
         data = ''
         terminator = self.get_param('terminator', None)
         for value in arr:
-            data += self.formatter.pack_one(value)
+            data += self.sub_valence.pack_one(value)
         if self.terminator is not None:
-            data += self.formatter.pack_one(self.terminator)
+            data += self.sub_valence.pack_one(self.terminator)
         # TODO: count validation
         return data
-
