@@ -69,3 +69,46 @@ class DataConsumer(object):
             for i in xrange(whence):
                 target = target.parent
             self.offset = target.base_offset + offset
+
+
+class DataBuilder(object):
+    """
+    Attributes
+    ----------
+    data : buffer
+    offset : int
+        Current offset of buffer
+    """
+    def __init__(self):
+        self._data = ''
+        self.offset = 0
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        raise TypeError('data cannot be set directly')
+
+    def __len__(self):
+        return self.offset
+
+    def __iadd__(self, data):
+        data = str(data)
+        self.data += data
+        self.offset += len(data)
+        return self
+
+    def __str__(self):
+        return self.data
+
+    def __setitem__(self, key, value):
+        try:
+            if not key.start:
+                start = self.offset
+            else:
+                start = self.offset + key.start
+            end = self.offset + key.stop
+        except:
+            raise TypeError('DataBuilder only accepts slice objects')
