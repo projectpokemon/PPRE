@@ -4,7 +4,8 @@ import struct
 from rawdb.elements.atom.atomic import AtomicInstance
 from rawdb.elements.atom.packer import Packer
 from rawdb.elements.atom.data import DataConsumer
-from rawdb.elements.atom.valence import ValenceFormatter
+from rawdb.elements.atom.valence import ValenceFormatter, ValenceArray, \
+    ValenceMulti
 
 
 class BaseAtom(Packer):
@@ -157,11 +158,8 @@ class BaseAtom(Packer):
         terminator : int or None
             if not None, array stops when a value matching this shows up.
         """
-
-        new_entry = ValenceFormatter(format_entry.name,
-                                     array_item=format_entry)
-        new_entry.count = count
-        new_entry.terminator = terminator
+        new_entry = ValenceArray(format_entry.name, format_entry, count,
+                                 terminator)
         return self.replace_format(format_entry, new_entry, pop=False)
 
     def sub_push(self, name):
@@ -171,7 +169,7 @@ class BaseAtom(Packer):
     def sub_pop(self):
         sub_fmt = self._fmt
         name, self._fmt = self._subfmts.pop()
-        format_entry = ValenceFormatter(name, sub_formats=sub_fmt)
+        format_entry = ValenceMulti(name, sub_fmt)
         format_entry.subatomic = self.subatomic
         return self.append_format(format_entry)
 
