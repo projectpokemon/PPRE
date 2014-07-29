@@ -48,6 +48,7 @@ class ValenceFormatter(Packer):
             self.unpack_one = self.unpack_multi
             self.pack_one = self.pack_multi
         self.ignore = False
+        self.params = {}
 
     def set_param(self, key, value):
         if key in self.valid_params:
