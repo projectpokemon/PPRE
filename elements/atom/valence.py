@@ -102,12 +102,12 @@ class ValenceFormatter(Packer):
             value = struct.unpack(format_char, atomic.data[:consume])[0]
         return value
 
-    def pack_char(self, value):
+    def pack_char(self, atomic):
         # TODO: format_char as function
         if not self.format_char.strip('x'):
             data = struct.pack(self.format_char)
         else:
-            data = struct.pack(self.format_char, value)
+            data = struct.pack(self.format_char, self.get_value(atomic))
         return data
 
     def unpack_array(self, atomic):
