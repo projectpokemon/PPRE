@@ -81,7 +81,6 @@ class DataBuilder(object):
     """
     def __init__(self):
         self._data = ''
-        self.offset = 0
 
     @property
     def data(self):
@@ -91,24 +90,30 @@ class DataBuilder(object):
     def data(self, value):
         raise TypeError('data cannot be set directly')
 
+    @property
+    def offset(self):
+        return len(self)
+
     def __len__(self):
-        return self.offset
+        return len(self.data)
 
     def __iadd__(self, data):
         data = str(data)
         self.data += data
-        self.offset += len(data)
         return self
 
     def __str__(self):
         return self.data
 
     def __setitem__(self, key, value):
+        value = str(value)
         try:
             if not key.start:
-                start = self.offset
+                start = 0
             else:
-                start = self.offset + key.start
-            end = self.offset + key.stop
+                start = key.start
+            end = start + key.stop
         except:
-            raise TypeError('DataBuilder only accepts slice objects')
+            start = key
+            end = start + len(value)
+        self.data = self.data[:start]+value+self.data[end:]
