@@ -43,9 +43,9 @@ class AtomicInstance(object):
     def __str__(self):
         consumer = self._data
         data = DataBuilder()
-        self._data = data
+        super(AtomicInstance, self).__setattr__('_data', data)
         value = str(self._atom.pack(self, data))
-        self._data = consumer
+        super(AtomicInstance, self).__setattr__('_data', consumer)
         return value
 
     def __dict__(self):

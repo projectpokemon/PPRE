@@ -80,15 +80,7 @@ class DataBuilder(object):
         Current offset of buffer
     """
     def __init__(self):
-        self._data = ''
-
-    @property
-    def data(self):
-        return self._data
-
-    @data.setter
-    def data(self, value):
-        raise TypeError('data cannot be set directly')
+        self.data = ''
 
     @property
     def offset(self):
