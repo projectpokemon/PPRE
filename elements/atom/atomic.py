@@ -1,4 +1,7 @@
 
+from rawdb.elements.atom.data import DataBuilder
+
+
 class AtomicInstance(object):
     """
 
@@ -38,7 +41,12 @@ class AtomicInstance(object):
         return self.__setattr__(key, value)
 
     def __str__(self):
-        return self._atom.pack(self._attrs)
+        consumer = self._data
+        data = DataBuilder()
+        self._data = data
+        value = str(self._atom.pack(self, data))
+        self._data = consumer
+        return value
 
     def __dict__(self):
         return self._attrs
