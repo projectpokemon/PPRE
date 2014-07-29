@@ -63,11 +63,7 @@ class ValenceFormatter(Packer):
         return value
 
     def get_value(self, atomic):
-        try:
-            return atomic[self.name]
-        except TypeError:
-            # Atomic is a value
-            return atomic
+        return atomic[self.name]
 
     def set_value(self, atomic, value):
         atomic[self.name] = value
@@ -249,6 +245,7 @@ class ValenceArray(ValenceFormatter):
         data = ''
         terminator = self.get_param('terminator', None)
         for value in self.get_value(atomic):
+            self.sub_valence.get_value = lambda atomic: value
             data += self.sub_valence.pack_one(value)
         if terminator is not None:
             data += self.sub_valence.pack_one(terminator)
