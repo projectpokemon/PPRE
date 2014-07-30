@@ -259,6 +259,14 @@ class ValenceSeek(ValenceFormatter):
         if isinstance(offset, ValenceFormatter):
             self._get_offset = offset.get_value
             offset.get_value = lambda atomic: 0
+            tmp_pack = offset.pack_one
+
+            def pack_one(atomic, update=True):
+                if update:
+                    atomic.data.seek_map[offset] = atomic.data.offset
+                return tmp_pack(atomic)
+            start.pack_one = pack_one
+            self.offset_valence = offset
         else:
             self._get_offset = lambda atomic: offset
         if isinstance(start, ValenceFormatter):
@@ -276,6 +284,9 @@ class ValenceSeek(ValenceFormatter):
     def get_offset(self, atomic):
         return self._get_offset(atomic)
 
+    def get_write_offset(self, atomic):
+        return None
+
     def get_start(self, atomic):
         return self._get_start(atomic)
 
@@ -285,3 +296,10 @@ class ValenceSeek(ValenceFormatter):
             atomic.data.offset = start+self.get_offset(atomic)
         else:
             atomic.data.offset += self.get_offset(atomic)
+
+    def pack_one(self, atomic):
+        # TODO: if offset is static, pad to start+offset.
+        self.offset_valence.get_value = lambda atomic: atomic.data.offset
+        atomic.data[atomic.data.seek_map[self.offset_valence]] = \
+            self.offset_valence.pack_one(atomic, False)
+        return ''
