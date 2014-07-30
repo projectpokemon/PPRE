@@ -5,6 +5,9 @@ from rawdb.elements.atom.packer import Packer
 from rawdb.elements.atom.data import DataConsumer
 
 
+VALUE_ZERO_FUNC = lambda atomic: 0
+
+
 class ValenceFormatter(Packer):
     """Formatter that extends struct's functionality
 
@@ -259,24 +262,33 @@ class ValenceSeek(ValenceFormatter):
         if isinstance(offset, ValenceFormatter):
             self._get_offset = offset.get_value
             offset.get_value = lambda atomic: 0
-            tmp_pack = offset.pack_one
+            tmp_pack1 = offset.pack_one
 
-            def pack_one(atomic, update=True):
-                if update:
+            def pack_one(atomic):
+                if offset.pack_one.update:
                     atomic.data.seek_map[offset] = atomic.data.offset
-                return tmp_pack(atomic)
-            start.pack_one = pack_one
+                return tmp_pack1(atomic)
+            offset.pack_one = pack_one
+            offset.pack_one.update = True
             self.offset_valence = offset
         else:
             self._get_offset = lambda atomic: offset
         if isinstance(start, ValenceFormatter):
             # TODO: Check memory leaking in atomic.data
             tmp_unpack = start.unpack_one
+            tmp_pack2 = start.pack_one
 
             def unpack_one(atomic):
                 atomic.data.seek_map[start] = atomic.data.offset
                 return tmp_unpack(atomic)
+
+            def pack_one(atomic):
+                if start.pack_one.update:
+                    atomic.data.seek_map[start] = atomic.data.offset
+                return tmp_pack2(atomic)
             start.unpack_one = unpack_one
+            start.pack_one = pack_one
+            start.pack_one.update = True
             self._get_start = lambda atomic: atomic.data.seek_map[start]
         else:
             self._get_start = lambda atomic: start
@@ -299,7 +311,12 @@ class ValenceSeek(ValenceFormatter):
 
     def pack_one(self, atomic):
         # TODO: if offset is static, pad to start+offset.
-        self.offset_valence.get_value = lambda atomic: atomic.data.offset
+        self.offset_valence.get_value = lambda atomic: atomic.data.offset - \
+            self.get_start(atomic)
+        update = self.offset_valence.pack_one.update  # TODO: with context
+        self.offset_valence.pack_one.update = False
         atomic.data[atomic.data.seek_map[self.offset_valence]] = \
-            self.offset_valence.pack_one(atomic, False)
+            self.offset_valence.pack_one(atomic)
+        self.offset_valence.pack_one.update = update
+        self.offset_valence.get_value = VALUE_ZERO_FUNC
         return ''
