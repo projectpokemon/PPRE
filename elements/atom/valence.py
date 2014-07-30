@@ -161,6 +161,38 @@ class ValenceFormatter(Packer):
         return str(atomic)
 
 
+class ValencePadding(ValenceFormatter):
+    """Padding
+
+    Parameters
+    ----------
+    length : int
+        How many characters the padding should be
+    align : int
+        What offset the data must align to after adding padded length
+    pad_string : string
+        Characters to pad on. Last characters get removed if they do not fit.
+    """
+    def __init__(self, length=0, pad_string='\x00', align=0):
+        super(ValencePadding, self).__init__(None)
+        self.length = length
+        self.pad_string = pad_string
+        self.align = align
+
+    def unpack_one(self, atomic):
+        atomic.data.offset += self.length
+        return None
+
+    def pack_one(self, atomic):
+        offset = end = atomic.data.offset
+        end += self.length
+        if self.align:
+            if end % self.align:
+                end += self.align - (end % self.align)
+        data = self.pad_string*((end-offset)/len(self.pad_string)+1)
+        return data[:end-offset]
+
+
 class ValenceMulti(ValenceFormatter):
     """Multiple SubValence container Valence
 
@@ -186,7 +218,7 @@ class ValenceMulti(ValenceFormatter):
         subatomic = self.subatomic(self, data)
         for entry in self.format_iterator(subatomic):
             value = entry.unpack_one(subatomic)
-            if not entry.ignore:
+            if entry.name:
                 subatomic[entry.name] = value
         subatomic.freeze()
         atomic.data.consume(subatomic.data.exhausted)

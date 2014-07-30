@@ -5,7 +5,7 @@ from rawdb.elements.atom.atomic import AtomicInstance
 from rawdb.elements.atom.packer import Packer
 from rawdb.elements.atom.data import DataConsumer
 from rawdb.elements.atom.valence import ValenceFormatter, ValenceArray, \
-    ValenceMulti, ValenceSeek
+    ValenceMulti, ValenceSeek, ValencePadding
 
 
 class BaseAtom(Packer):
@@ -29,7 +29,7 @@ class BaseAtom(Packer):
         unpacked = {}
         for entry in self.format_iterator(atomic):
             value = entry.unpack_one(atomic)
-            if not entry.ignore:
+            if entry.name:
                 atomic[entry.name] = value
         atomic.freeze()
         return atomic
@@ -139,10 +139,8 @@ class BaseAtom(Packer):
         return formatter
     data = string
 
-    def padding(self, length):
-        entry = ValenceFormatter(None, 'x'*length)
-        entry.ignore = True
-        return self.append_format(entry)
+    def padding(self, length=0, pad_string='\x00', align=0):
+        return self.append_format(ValencePadding(length, pad_string, align))
 
     def array(self, format_entry, count=None, terminator=None):
         """Parse field array
