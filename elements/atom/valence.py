@@ -251,3 +251,37 @@ class ValenceArray(ValenceFormatter):
             data += self.sub_valence.pack_one(terminator)
         # TODO: count validation
         return data
+
+
+class ValenceSeek(ValenceFormatter):
+    def __init__(self, offset, start=None):
+        super(ValenceSeek, self).__init__(None)
+        if isinstance(offset, ValenceFormatter):
+            self._get_offset = offset.get_value
+            offset.get_value = lambda atomic: 0
+        else:
+            self._get_offset = lambda atomic: offset
+        if isinstance(start, ValenceFormatter):
+            # TODO: Check memory leaking in atomic.data
+            tmp_unpack = start.unpack_one
+
+            def unpack_one(atomic):
+                atomic.data.seek_map[start] = atomic.data.offset
+                return tmp_unpack(atomic)
+            start.unpack_one = unpack_one
+            self._get_start = lambda atomic: atomic.data.seek_map[start]
+        else:
+            self._get_start = lambda atomic: start
+
+    def get_offset(self, atomic):
+        return self._get_offset(atomic)
+
+    def get_start(self, atomic):
+        return self._get_start(atomic)
+
+    def unpack_one(self, atomic):
+        start = self.get_start(atomic)
+        if start is not None:
+            atomic.data.offset = start+self.get_offset()
+        else:
+            atomic.data.offset += self.get_offset()
