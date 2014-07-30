@@ -282,6 +282,6 @@ class ValenceSeek(ValenceFormatter):
     def unpack_one(self, atomic):
         start = self.get_start(atomic)
         if start is not None:
-            atomic.data.offset = start+self.get_offset()
+            atomic.data.offset = start+self.get_offset(atomic)
         else:
-            atomic.data.offset += self.get_offset()
+            atomic.data.offset += self.get_offset(atomic)

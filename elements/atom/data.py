@@ -25,6 +25,7 @@ class DataConsumer(object):
             self._data = parent_or_buffer[:]
             self.parent = None
             self.offset = self.base_offset = 0
+        self.seek_map = {}
 
     @property
     def data(self):
