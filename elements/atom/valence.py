@@ -193,6 +193,31 @@ class ValencePadding(ValenceFormatter):
         return data[:end-offset]
 
 
+class SubValenceWrapper(ValenceFormatter):
+    def __init__(self, base, target):
+        for attr in dir(target):
+            target_attr = getattr(target, attr)
+            if hasattr(target_attr, '__call__'):
+
+                def target_func(target_attr):
+
+                    def wraps(*args, **kwargs):
+                        func_code = target_attr.func_code
+                        kwargs.update(dict(zip(func_code.co_varnames[
+                            1:func_code.co_argcount], args)))
+                        if 'atomic' in kwargs:
+                            kwargs['atomic'] = kwargs['atomic'][base.name]
+                        bound = target_attr.__get__(self, self.__class__)
+                        return bound(**kwargs)
+                    return wraps
+                try:
+                    setattr(self, attr, target_func(target_attr))
+                except TypeError:
+                    continue
+            elif attr[:2] != '__':  # dict, weakref, etc.
+                setattr(self, attr, target_attr)
+
+
 class ValenceMulti(ValenceFormatter):
     """Multiple SubValence container Valence
 
@@ -207,10 +232,10 @@ class ValenceMulti(ValenceFormatter):
 
     def __init__(self, name, sub_valences):
         super(ValenceMulti, self).__init__(name)
-        self.set_param('sub_valences', sub_valences)
+        self.sub_valences = sub_valences
 
     def format_iterator(self, atomic):
-        return self.get_param('sub_valences', atomic)
+        return self.sub_valences
 
     def unpack_one(self, atomic):
         data = DataConsumer(atomic.data)
@@ -226,6 +251,12 @@ class ValenceMulti(ValenceFormatter):
 
     def pack_one(self, atomic):
         return str(self.get_value(atomic))
+
+    def __getattr__(self, name):
+        for entry in self.sub_valences:
+            if entry.name == name:
+                return SubValenceWrapper(self, entry)
+        return super(ValenceMulti, self).__getattr__(name)
 
 
 class ValenceArray(ValenceFormatter):
@@ -264,6 +295,7 @@ class ValenceArray(ValenceFormatter):
         total = 0
         arr = []
         count = self.get_count(atomic)
+        print(count)
         terminator = self.get_param('terminator', atomic)
         while 1:
             if count is not None and total >= count:
