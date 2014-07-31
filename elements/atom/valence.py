@@ -84,6 +84,9 @@ class ValenceFormatter(Packer):
                 setattr(new_formatter, attr, value)
         return new_formatter
 
+    def identity(self):
+        return id(self)
+
     def format_iterator(self, atomic):
         return self.sub_formats
 
@@ -193,29 +196,33 @@ class ValencePadding(ValenceFormatter):
         return data[:end-offset]
 
 
-class SubValenceWrapper(ValenceFormatter):
+class SubValenceWrapper(object):
     def __init__(self, base, target):
-        for attr in dir(target):
-            target_attr = getattr(target, attr)
-            if hasattr(target_attr, '__call__'):
+        super(SubValenceWrapper, self).__setattr__('_base', base)
+        super(SubValenceWrapper, self).__setattr__('_target', target)
 
-                def target_func(target_attr):
+    def __getattr__(self, name):
+        target_attr = getattr(self._target, name)
+        if hasattr(target_attr, '__call__'):
 
-                    def wraps(*args, **kwargs):
-                        func_code = target_attr.func_code
-                        kwargs.update(dict(zip(func_code.co_varnames[
-                            1:func_code.co_argcount], args)))
-                        if 'atomic' in kwargs:
-                            kwargs['atomic'] = kwargs['atomic'][base.name]
-                        bound = target_attr.__get__(self, self.__class__)
-                        return bound(**kwargs)
-                    return wraps
-                try:
-                    setattr(self, attr, target_func(target_attr))
-                except TypeError:
-                    continue
-            elif attr[:2] != '__':  # dict, weakref, etc.
-                setattr(self, attr, target_attr)
+            def target_func(*args, **kwargs):
+                func_code = target_attr.func_code
+                kwargs.update(dict(zip(func_code.co_varnames[
+                    1:func_code.co_argcount], args)))
+                if 'atomic' in kwargs:
+                    # FIXME
+                    # This works as long as there are no collisions of names
+                    # It pulls the subatom out, then it tries the actual
+                    try:
+                        kwargs['atomic'] = kwargs['atomic'][self._base.name]
+                    except:
+                        pass
+                return target_attr(**kwargs)
+            return target_func
+        return target_attr
+
+    def __setattr__(self, name, value):
+        setattr(self._target, name, value)
 
 
 class ValenceMulti(ValenceFormatter):
@@ -266,10 +273,10 @@ class ValenceArray(ValenceFormatter):
     def __init__(self, name, sub_valence, count=None, terminator=None):
         super(ValenceArray, self).__init__(name)
         self.sub_valence = sub_valence
-        if isinstance(count, ValenceFormatter):
+        try:
             self._get_count = count.get_value
             count.get_value = self.get_count
-        else:
+        except AttributeError:
             self._get_count = lambda atomic: count
         self.set_param('terminator', terminator)
 
@@ -295,7 +302,6 @@ class ValenceArray(ValenceFormatter):
         total = 0
         arr = []
         count = self.get_count(atomic)
-        print(count)
         terminator = self.get_param('terminator', atomic)
         while 1:
             if count is not None and total >= count:
@@ -323,38 +329,41 @@ class ValenceArray(ValenceFormatter):
 class ValenceSeek(ValenceFormatter):
     def __init__(self, offset, start=None):
         super(ValenceSeek, self).__init__(None)
-        if isinstance(offset, ValenceFormatter):
+        try:
             self._get_offset = offset.get_value
             offset.get_value = lambda atomic: 0
             tmp_pack1 = offset.pack_one
 
             def pack_one(atomic):
                 if offset.pack_one.update:
-                    atomic.data.seek_map[offset] = atomic.data.offset
+                    atomic.data.seek_map[offset.identity()] = \
+                        atomic.data.offset
                 return tmp_pack1(atomic)
             offset.pack_one = pack_one
             offset.pack_one.update = True
             self.offset_valence = offset
-        else:
+        except AttributeError:
             self._get_offset = lambda atomic: offset
-        if isinstance(start, ValenceFormatter):
+        try:
             # TODO: Check memory leaking in atomic.data
             tmp_unpack = start.unpack_one
             tmp_pack2 = start.pack_one
 
             def unpack_one(atomic):
-                atomic.data.seek_map[start] = atomic.data.offset
+                atomic.data.seek_map[start.identity()] = atomic.data.offset
                 return tmp_unpack(atomic)
 
             def pack_one(atomic):
                 if start.pack_one.update:
-                    atomic.data.seek_map[start] = atomic.data.offset
+                    atomic.data.seek_map[start.identity()] = \
+                        atomic.data.offset
                 return tmp_pack2(atomic)
             start.unpack_one = unpack_one
             start.pack_one = pack_one
             start.pack_one.update = True
-            self._get_start = lambda atomic: atomic.data.seek_map[start]
-        else:
+            self._get_start = lambda atomic: atomic.data.seek_map[
+                start.identity()]
+        except AttributeError:
             self._get_start = lambda atomic: start
 
     def get_offset(self, atomic):
@@ -379,7 +388,8 @@ class ValenceSeek(ValenceFormatter):
             self.get_start(atomic)
         update = self.offset_valence.pack_one.update  # TODO: with context
         self.offset_valence.pack_one.update = False
-        atomic.data[atomic.data.seek_map[self.offset_valence]] = \
+        print(atomic.data.seek_map, self.offset_valence.identity(), id(self.offset_valence))
+        atomic.data[atomic.data.seek_map[self.offset_valence.identity()]] = \
             self.offset_valence.pack_one(atomic)
         self.offset_valence.pack_one.update = update
         self.offset_valence.get_value = VALUE_ZERO_FUNC
