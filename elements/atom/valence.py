@@ -196,6 +196,30 @@ class ValencePadding(ValenceFormatter):
         return data[:end-offset]
 
 
+class ValenceShell(ValenceFormatter):
+    """Combines two ValenceFormatters"""
+    OP_ADD = 1
+    OP_SUBTRACT = 2
+
+    def __init__(self, one, *others):
+        self.first = one
+        self.others = others
+
+    def _get_value(self, sub_format, atomic):
+        try:
+            return sub_format.get_value(atomic)
+        except:
+            return sub_format
+
+    def get_value(self, atomic):
+        value = self.first.get_value(atomic)
+        for sub, operation in self.others:
+            if operation == self.OP_ADD:
+                value += self._get_value(sub, atomic)
+            elif operation == self.OP_SUBTRACT:
+                value -= self._get_value(sub, atomic)
+
+
 class SubValenceWrapper(object):
     def __init__(self, base, target):
         super(SubValenceWrapper, self).__setattr__('_base', base)
