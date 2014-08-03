@@ -42,11 +42,13 @@ class AtomicInstance(object):
         return self.__setattr__(key, value)
 
     def __str__(self):
-        consumer = self._data
-        data = DataBuilder()
-        super(AtomicInstance, self).__setattr__('_data', data)
-        value = str(self._atom.pack(self, data))
-        super(AtomicInstance, self).__setattr__('_data', consumer)
+        consumer = None
+        if not isinstance(self.data, DataBuilder):
+            consumer = self.data
+            super(AtomicInstance, self).__setattr__('_data', DataBuilder())
+        value = str(self._atom.pack(self, self.data))
+        if consumer is not None:
+            super(AtomicInstance, self).__setattr__('_data', consumer)
         return value
 
     def __dict__(self):
