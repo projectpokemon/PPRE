@@ -236,8 +236,12 @@ class SubValenceWrapper(object):
 
             def target_func(*args, **kwargs):
                 func_code = target_attr.func_code
-                kwargs.update(dict(zip(func_code.co_varnames[
-                    1:func_code.co_argcount], args)))
+                argnames = list(func_code.co_varnames[0:func_code.co_argcount])
+                try:
+                    argnames.remove('self')
+                except:
+                    pass
+                kwargs.update(dict(zip(argnames, args)))
                 if 'atomic' in kwargs:
                     # FIXME
                     # This works as long as there are no collisions of names
@@ -245,8 +249,7 @@ class SubValenceWrapper(object):
                     kwargs['atomic'] = self.get_atomic(kwargs['atomic'],
                                                        self._base.namespace)
                 return target_attr(**kwargs)
-            target_func.__setattr__ = target_attr.__setattr__
-            target_func.__getattr__ = target_attr.__getattr__
+            target_func.func_dict = target_attr.func_dict
             return target_func
         return target_attr
 
