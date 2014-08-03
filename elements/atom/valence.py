@@ -236,6 +236,7 @@ class SubValenceWrapper(object):
         if hasattr(target_attr, '__call__'):
 
             def target_func(*args, **kwargs):
+                builder = None
                 func_code = target_attr.func_code
                 argnames = list(func_code.co_varnames[0:func_code.co_argcount])
                 try:
@@ -244,12 +245,15 @@ class SubValenceWrapper(object):
                     pass
                 kwargs.update(dict(zip(argnames, args)))
                 if 'atomic' in kwargs:
-                    # FIXME
-                    # This works as long as there are no collisions of names
-                    # It pulls the subatom out, then it tries the actual
+                    if not isinstance(kwargs['atomic'].data, DataConsumer):
+                        builder = kwargs['atomic'].data
                     kwargs['atomic'] = self.get_atomic(kwargs['atomic'],
                                                        self._base.namespace)
-                return target_attr(**kwargs)
+                if builder is not None:
+                    with temporary_attr(kwargs['atomic'], '_data', builder, True):
+                        return target_attr(**kwargs)
+                else:
+                    return target_attr(**kwargs)
             target_func.func_dict = target_attr.func_dict
             return target_func
         return target_attr
@@ -383,22 +387,21 @@ class ValenceSeek(ValenceFormatter):
         except AttributeError:
             self._get_offset = lambda atomic: offset
         try:
-            # TODO: Check memory leaking in atomic.data
             tmp_unpack = start.unpack_one
             tmp_pack2 = start.pack_one
 
-            def unpack_one(atomic):
+            def unpack_one_start(atomic):
                 atomic.data.seek_map[start.identity()] = atomic.data.offset
                 return tmp_unpack(atomic)
 
-            def pack_one(atomic):
-                if pack_one.update:
+            def pack_one_start(atomic):
+                if pack_one_start.update:
                     atomic.data.seek_map[start.identity()] = \
                         atomic.data.offset
                 return tmp_pack2(atomic)
-            start.unpack_one = unpack_one
-            start.pack_one = pack_one
-            start.pack_one.update = True
+            pack_one_start.update = True
+            start.unpack_one = unpack_one_start
+            start.pack_one = pack_one_start
             self._get_start = lambda atomic: atomic.data.seek_map[
                 start.identity()]
         except AttributeError:
@@ -424,7 +427,6 @@ class ValenceSeek(ValenceFormatter):
         # TODO: if offset is static, pad to start+offset.
         self.offset_valence.get_value = lambda atomic: atomic.data.offset - \
             self.get_start(atomic)
-        print(atomic.data.seek_map, self.offset_valence.identity(), id(self.offset_valence))
         with temporary_attr(self.offset_valence.pack_one, 'update', False):
             atomic.data[atomic.data.seek_map[self.offset_valence.identity()]] = \
                 self.offset_valence.pack_one(atomic)
