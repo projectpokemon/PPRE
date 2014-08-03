@@ -15,7 +15,7 @@ class TemporaryAttr(object):
             self.setattr = setattr
             self.getattr = getattr
 
-    def __start__(self):
+    def __enter__(self):
         self.old = self.getattr(self.inst, self.attr)
         self.setattr(self.inst, self.attr, self.value)
 
