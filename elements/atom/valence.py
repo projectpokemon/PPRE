@@ -291,7 +291,9 @@ class ValenceMulti(ValenceFormatter):
         return subatomic
 
     def pack_one(self, atomic):
-        return str(self.get_value(atomic))
+        value = self.get_value(atomic)
+        with temporary_attr(value, '_data', atomic.data, True):
+            return str(value)
 
     def __getattr__(self, name):
         for entry in self.sub_valences:
