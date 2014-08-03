@@ -245,6 +245,8 @@ class SubValenceWrapper(object):
                     kwargs['atomic'] = self.get_atomic(kwargs['atomic'],
                                                        self._base.namespace)
                 return target_attr(**kwargs)
+            target_func.__setattr__ = target_attr.__setattr__
+            target_func.__getattr__ = target_attr.__getattr__
             return target_func
         return target_attr
 
@@ -363,7 +365,7 @@ class ValenceSeek(ValenceFormatter):
             tmp_pack1 = offset.pack_one
 
             def pack_one(atomic):
-                if offset.pack_one.update:
+                if pack_one.update:
                     atomic.data.seek_map[offset.identity()] = \
                         atomic.data.offset
                 return tmp_pack1(atomic)
@@ -382,7 +384,7 @@ class ValenceSeek(ValenceFormatter):
                 return tmp_unpack(atomic)
 
             def pack_one(atomic):
-                if start.pack_one.update:
+                if pack_one.update:
                     atomic.data.seek_map[start.identity()] = \
                         atomic.data.offset
                 return tmp_pack2(atomic)
