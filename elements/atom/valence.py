@@ -360,10 +360,10 @@ class ValenceArray(ValenceFormatter):
         terminator = self.get_param('terminator', None)
         for value in self.get_value(atomic):
             self.sub_valence.get_value = lambda atomic: value
-            data += self.sub_valence.pack_one(value)
+            data += self.sub_valence.pack_one(atomic)
         if terminator is not None:
             self.sub_valence.get_value = lambda atomic: terminator
-            data += self.sub_valence.pack_one(terminator)
+            data += self.sub_valence.pack_one(atomic)
         # TODO: count validation
         return ''
 
