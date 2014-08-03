@@ -225,6 +225,11 @@ class SubValenceWrapper(object):
         super(SubValenceWrapper, self).__setattr__('_base', base)
         super(SubValenceWrapper, self).__setattr__('_target', target)
 
+    def get_atomic(self, atomic, namespace):
+        while atomic._namespace != namespace:
+            atomic = atomic[namespace[len(atomic._namespace)]]
+        return atomic
+
     def __getattr__(self, name):
         target_attr = getattr(self._target, name)
         if hasattr(target_attr, '__call__'):
@@ -237,10 +242,8 @@ class SubValenceWrapper(object):
                     # FIXME
                     # This works as long as there are no collisions of names
                     # It pulls the subatom out, then it tries the actual
-                    try:
-                        kwargs['atomic'] = kwargs['atomic'][self._base.name]
-                    except:
-                        pass
+                    kwargs['atomic'] = self.get_atomic(kwargs['atomic'],
+                                                       self._base.namespace)
                 return target_attr(**kwargs)
             return target_func
         return target_attr
@@ -261,9 +264,10 @@ class ValenceMulti(ValenceFormatter):
     """
     valid_params = ValenceFormatter.valid_params+['sub_valences']
 
-    def __init__(self, name, sub_valences):
+    def __init__(self, name, sub_valences, namespace):
         super(ValenceMulti, self).__init__(name)
         self.sub_valences = sub_valences
+        self.namespace = namespace
 
     def format_iterator(self, atomic):
         return self.sub_valences
@@ -271,7 +275,7 @@ class ValenceMulti(ValenceFormatter):
     def unpack_one(self, atomic):
         data = DataConsumer(atomic.data)
         unpacked = {}
-        subatomic = self.subatomic(self, data)
+        subatomic = self.subatomic(self, data, namespace=self.namespace)
         for entry in self.format_iterator(subatomic):
             value = entry.unpack_one(subatomic)
             if entry.name:

@@ -169,8 +169,9 @@ class BaseAtom(Packer):
 
     def sub_pop(self):
         sub_fmt = self._fmt
+        namespace = [entry[0] for entry in self._subfmts]
         name, self._fmt = self._subfmts.pop()
-        format_entry = ValenceMulti(name, sub_fmt)
+        format_entry = ValenceMulti(name, sub_fmt, namespace)
         format_entry.subatomic = self.subatomic
         return self.append_format(format_entry)
 

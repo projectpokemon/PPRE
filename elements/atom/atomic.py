@@ -10,11 +10,12 @@ class AtomicInstance(object):
     keys : list
         Get the valent attributes/keys of this atom
     """
-    def __init__(self, atom, consumer):
+    def __init__(self, atom, consumer, namespace=None):
         super(AtomicInstance, self).__setattr__('_frozen', False)
         super(AtomicInstance, self).__setattr__('_attrs', {})
         super(AtomicInstance, self).__setattr__('_atom', atom)
         super(AtomicInstance, self).__setattr__('_data', consumer)
+        super(AtomicInstance, self).__setattr__('_namespace', namespace or [])
 
     def keys(self):
         return self._attrs.keys()
