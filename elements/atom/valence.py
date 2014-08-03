@@ -352,7 +352,7 @@ class ValenceArray(ValenceFormatter):
         return arr
 
     def pack_one(self, atomic):
-        data = ''
+        data = atomic.data
         terminator = self.get_param('terminator', None)
         for value in self.get_value(atomic):
             self.sub_valence.get_value = lambda atomic: value
@@ -361,7 +361,7 @@ class ValenceArray(ValenceFormatter):
             self.sub_valence.get_value = lambda atomic: terminator
             data += self.sub_valence.pack_one(terminator)
         # TODO: count validation
-        return data
+        return ''
 
 
 class ValenceSeek(ValenceFormatter):
