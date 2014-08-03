@@ -358,6 +358,7 @@ class ValenceArray(ValenceFormatter):
             self.sub_valence.get_value = lambda atomic: value
             data += self.sub_valence.pack_one(value)
         if terminator is not None:
+            self.sub_valence.get_value = lambda atomic: terminator
             data += self.sub_valence.pack_one(terminator)
         # TODO: count validation
         return data
