@@ -3,6 +3,7 @@ import struct
 
 from rawdb.elements.atom.packer import Packer
 from rawdb.elements.atom.data import DataConsumer
+from rawdb.util import temporary_attr
 
 
 VALUE_ZERO_FUNC = lambda atomic: 0
@@ -419,11 +420,9 @@ class ValenceSeek(ValenceFormatter):
         # TODO: if offset is static, pad to start+offset.
         self.offset_valence.get_value = lambda atomic: atomic.data.offset - \
             self.get_start(atomic)
-        update = self.offset_valence.pack_one.update  # TODO: with context
-        self.offset_valence.pack_one.update = False
         print(atomic.data.seek_map, self.offset_valence.identity(), id(self.offset_valence))
-        atomic.data[atomic.data.seek_map[self.offset_valence.identity()]] = \
-            self.offset_valence.pack_one(atomic)
-        self.offset_valence.pack_one.update = update
+        with temporary_attr(self.offset_valence.pack_one, 'update', False):
+            atomic.data[atomic.data.seek_map[self.offset_valence.identity()]] = \
+                self.offset_valence.pack_one(atomic)
         self.offset_valence.get_value = VALUE_ZERO_FUNC
         return ''
