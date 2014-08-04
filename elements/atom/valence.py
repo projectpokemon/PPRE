@@ -440,6 +440,16 @@ class ValenceArray(ValenceFormatter):
         return ''
 
 
+class ValenceData(ValenceArray):
+    # Kinda slow to use arrays here, but it works
+    def __init__(self, name, length=None, terminator=None):
+        super(ValenceData, self).__init__(name, ValenceFormatter(None, 'c'),
+                                          length, terminator)
+
+    def unpack_one(self, atomic):
+        return ''.join(super(ValenceData, self).unpack_one(atomic))
+
+
 class ValenceSeek(ValenceFormatter):
     def __init__(self, offset, start=None):
         super(ValenceSeek, self).__init__(None)

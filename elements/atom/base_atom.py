@@ -5,7 +5,7 @@ from rawdb.elements.atom.atomic import AtomicInstance
 from rawdb.elements.atom.packer import Packer
 from rawdb.elements.atom.data import DataConsumer
 from rawdb.elements.atom.valence import ValenceFormatter, ValenceArray, \
-    ValenceMulti, ValenceSeek, ValencePadding
+    ValenceMulti, ValenceData, ValenceSeek, ValencePadding
 
 
 class BaseAtom(Packer):
@@ -130,14 +130,8 @@ class BaseAtom(Packer):
         """
         return self.append_format(ValenceFormatter(name, 'I'))
 
-    def string(self, name, count):
-        try:
-            count.get_value
-            format_char = lambda atomic: '%ds' % count.get_value(atomic)
-        except:
-            format_char = '%ds' % count
-        formatter = self.append_format(ValenceFormatter(name, format_char))
-        return formatter
+    def string(self, name, count, null_byte=None):
+        return self.append_format(ValenceData(name, count, null_byte))
     data = string
 
     def padding(self, length=0, pad_string='\x00', align=0):
