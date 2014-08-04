@@ -134,11 +134,14 @@ class ValenceFormatter(Valence):
         return value
 
     def pack_char(self, atomic):
-        # TODO: format_char as function
-        if not self.format_char.strip('x'):
-            data = struct.pack(self.format_char)
+        try:
+            format_char = self.format_char(atomic)
+        except:
+            format_char = self.format_char
+        if not format_char.strip('x'):
+            data = struct.pack(format_char)
         else:
-            data = struct.pack(self.format_char, self.get_value(atomic))
+            data = struct.pack(format_char, self.get_value(atomic))
         return data
 
     def unpack_array(self, atomic):
