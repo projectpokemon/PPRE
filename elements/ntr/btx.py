@@ -68,8 +68,8 @@ class BTXAtom(BaseAtom):
         self.seek(refofs, start=start)
         sizeunit = self.uint16('sizeunit')
         nameofs = self.uint16('nameofs')
-        self.array(self.uint8('data'), count=num*sizeunit)
-        self.seek(nameofs, start=start)
+        data = self.array(self.uint8('data'), count=num*sizeunit)
+        self.seek(nameofs, start=sizeunit)
         self.array(self.string('names', 16), count=num)
 
         return self.sub_pop()
