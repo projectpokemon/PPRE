@@ -27,6 +27,10 @@ class AtomicInstance(object):
     def freeze(self):
         super(AtomicInstance, self).__setattr__('_frozen', True)
 
+    @property
+    def writing(self):
+        return isinstance(self.data, DataBuilder)
+
     def __getattr__(self, name):
         return self._attrs[name]
 
