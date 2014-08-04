@@ -23,7 +23,7 @@ class BTXAtom(BaseAtom):
         self.data('texdata', texinfo.datasize << 3)
 
         self.seek(tex4x4info.dataofs, start=start)
-        self.data('tex4x4data', tex4x4info.datasize << 3)
+        self.data('tex4x4data', tex4x4info.datasize << 2)
 
         self.seek(palinfo.dataofs, start=start)
         self.data('paldata', palinfo.datasize << 3)
