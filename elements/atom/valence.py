@@ -245,7 +245,7 @@ class ValenceShell(Valence):
     def get_value(self, atomic):
         value = self.first.get_value(atomic)
         direction = -1 if atomic.writing else 1
-        for sub, operation in self.others:
+        for operation, sub in self.others:
             if operation*direction == self.OP_ADD:
                 value += self._get_value(sub, atomic)
             elif operation*direction == self.OP_SUBTRACT:
