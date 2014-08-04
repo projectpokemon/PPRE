@@ -21,15 +21,12 @@ class BTXAtom(BaseAtom):
 
         self.seek(texinfo.dataofs, start=start)
         self.data('texdata', texinfo.datasize << 3)
-        # self.data('texdata', texinfo.datasize)
 
         self.seek(tex4x4info.dataofs, start=start)
-        # self.data('tex4x4data', tex4x4info.datasize << 3)
-        self.data('tex4x4data', tex4x4info.datasize)
+        self.data('tex4x4data', tex4x4info.datasize << 3)
 
         self.seek(palinfo.dataofs, start=start)
-        # self.data('paldata', palinfo.datasize << 3)
-        self.data('paldata', palinfo.datasize)
+        self.data('paldata', palinfo.datasize << 3)
 
     def texinfo(self, name, late_lookup=False):
         """
@@ -71,8 +68,7 @@ class BTXAtom(BaseAtom):
         self.seek(refofs, start=start)
         sizeunit = self.uint16('sizeunit')
         nameofs = self.uint16('nameofs')
-        # self.array(self.uint8('data'), count=num*sizeunit)
-        self.array(self.uint8('data'), count=num)
+        self.array(self.uint8('data'), count=num*sizeunit)
         self.seek(nameofs, start=start)
         self.array(self.string('names', 16), count=num)
 
