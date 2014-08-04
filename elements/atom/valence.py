@@ -289,13 +289,15 @@ class SubValenceWrapper(Valence):
         super(SubValenceWrapper, self).__setattr__('_base', base)
         super(SubValenceWrapper, self).__setattr__('_target', target)
 
+    @property
+    def get_value(self):
+        # Use __getattr__ properly
+        raise AttributeError
+
     def get_atomic(self, atomic, namespace):
         while atomic._namespace != namespace:
             atomic = atomic[namespace[len(atomic._namespace)]]
         return atomic
-
-    def get_value(self, atomic):
-        return self.__getattr__('get_value')(atomic)
 
     def __getattr__(self, name):
         target_attr = getattr(self._target, name)
@@ -321,6 +323,7 @@ class SubValenceWrapper(Valence):
                 else:
                     return target_attr(**kwargs)
             target_func.func_dict = target_attr.func_dict
+            target_func.func_name = target_attr.func_name
             return target_func
         return target_attr
 
