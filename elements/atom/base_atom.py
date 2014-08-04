@@ -243,3 +243,20 @@ class BaseAtom(Packer):
             Popped formatter
         """
         return self._fmt.pop(index)
+
+    def find_format(self, name):
+        """Get a format by known name
+
+        Parameters
+        ----------
+        name : string
+            Name of format
+
+        Returns
+        -------
+        formatter : ValenceFormatter
+        """
+        for fmt in self._fmt:
+            if fmt.name == name:
+                return fmt
+        return None
