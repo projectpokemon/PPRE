@@ -437,7 +437,7 @@ class ValenceArray(ValenceFormatter):
 class ValenceSeek(ValenceFormatter):
     def __init__(self, offset, start=None):
         super(ValenceSeek, self).__init__(None)
-        try:
+        if isinstance(offset, Valence):
             self._get_offset = offset.get_value
             offset.get_value = lambda atomic: 0
             tmp_pack1 = offset.pack_one
@@ -450,9 +450,9 @@ class ValenceSeek(ValenceFormatter):
             offset.pack_one = pack_one
             offset.pack_one.update = True
             self.offset_valence = offset
-        except AttributeError:
+        else:
             self._get_offset = lambda atomic: offset
-        try:
+        if isinstance(offset, Valence):
             tmp_unpack = start.unpack_one
             tmp_pack2 = start.pack_one
 
@@ -470,7 +470,7 @@ class ValenceSeek(ValenceFormatter):
             start.pack_one = pack_one_start
             self._get_start = lambda atomic: atomic.data.seek_map[
                 start.identity()]
-        except AttributeError:
+        else:
             self._get_start = lambda atomic: start
 
     def get_offset(self, atomic):
