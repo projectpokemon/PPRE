@@ -38,6 +38,8 @@ class AtomicInstance(object):
         return self.__getattr__(key)
 
     def __setattr__(self, name, value):
+        if hasattr(self, name):
+            return super(AtomicInstance, self).__setattr__(name, value)
         if self._frozen and name not in self._attrs:
             raise KeyError(name)
         self._attrs[name] = value
@@ -54,9 +56,6 @@ class AtomicInstance(object):
         if consumer is not None:
             super(AtomicInstance, self).__setattr__('_data', consumer)
         return value
-
-    def __dict__(self):
-        return self._attrs
 
     def __dir__(self):
         return self.keys()
