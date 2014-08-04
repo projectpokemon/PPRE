@@ -10,6 +10,5 @@ class Packer(object):
             data += entry.pack_one(atomic)
         return data
 
-    @abc.abstractmethod
     def format_iterator(self, atomic=None):
-        pass
+        return []

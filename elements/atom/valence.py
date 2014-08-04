@@ -9,7 +9,30 @@ from rawdb.util import temporary_attr
 VALUE_ZERO_FUNC = lambda atomic: 0
 
 
-class ValenceFormatter(Packer):
+class Valence(Packer):
+    def get_value(self, atomic):
+        raise NotImplementedError
+
+    def __add__(self, other):
+        return ValenceShell(self, (ValenceShell.OP_ADD, other))
+
+    def __sub__(self, other):
+        return ValenceShell(self, (ValenceShell.OP_SUBTRACT, other))
+
+    def __mul__(self, other):
+        return ValenceShell(self, (ValenceShell.OP_MULTIPLY, other))
+
+    def __div__(self, other):
+        return ValenceShell(self, (ValenceShell.OP_DIVIDE, other))
+
+    def __lshift__(self, other):
+        return ValenceShell(self, (ValenceShell.OP_LSHIFT, other))
+
+    def __rshift__(self, other):
+        return ValenceShell(self, (ValenceShell.OP_RSHIFT, other))
+
+
+class ValenceFormatter(Valence):
     """Formatter that extends struct's functionality
 
     Methods
@@ -197,10 +220,14 @@ class ValencePadding(ValenceFormatter):
         return data[:end-offset]
 
 
-class ValenceShell(ValenceFormatter):
+class ValenceShell(Valence):
     """Combines two ValenceFormatters"""
     OP_ADD = 1
-    OP_SUBTRACT = 2
+    OP_SUBTRACT = -1
+    OP_MULTIPLY = 2
+    OP_DIVIDE = -2
+    OP_LSHIFT = 3
+    OP_RSHIFT = -3
 
     def __init__(self, one, *others):
         self.first = one
@@ -214,14 +241,50 @@ class ValenceShell(ValenceFormatter):
 
     def get_value(self, atomic):
         value = self.first.get_value(atomic)
+        direction = -1 if atomic.writing else 1
         for sub, operation in self.others:
-            if operation == self.OP_ADD:
+            if operation*direction == self.OP_ADD:
                 value += self._get_value(sub, atomic)
-            elif operation == self.OP_SUBTRACT:
+            elif operation*direction == self.OP_SUBTRACT:
                 value -= self._get_value(sub, atomic)
+            elif operation*direction == self.OP_MULTIPLY:
+                value *= self._get_value(sub, atomic)
+            elif operation*direction == self.OP_DIVIDE:
+                # Careful here...
+                value /= self._get_value(sub, atomic)
+            elif operation*direction == self.OP_LSHIFT:
+                value <<= self._get_value(sub, atomic)
+            elif operation*direction == self.OP_RSHIFT:
+                # Careful here...
+                value >>= self._get_value(sub, atomic)
+        return value
+
+    def __add__(self, other):
+        return ValenceShell(self.first,
+                            *(self.others+[(ValenceShell.OP_ADD, other)]))
+
+    def __sub__(self, other):
+        return ValenceShell(self.first,
+                            *(self.others+[(ValenceShell.OP_SUBTRACT, other)]))
+
+    def __mul__(self, other):
+        return ValenceShell(self.first,
+                            *(self.others+[(ValenceShell.OP_MULTIPLY, other)]))
+
+    def __div__(self, other):
+        return ValenceShell(self.first,
+                            *(self.others+[(ValenceShell.OP_DIVIDE, other)]))
+
+    def __lshift__(self, other):
+        return ValenceShell(self.first,
+                            *(self.others+[(ValenceShell.OP_LSHIFT, other)]))
+
+    def __rshift__(self, other):
+        return ValenceShell(self.first,
+                            *(self.others+[(ValenceShell.OP_RSHIFT, other)]))
 
 
-class SubValenceWrapper(object):
+class SubValenceWrapper(Valence):
     def __init__(self, base, target):
         super(SubValenceWrapper, self).__setattr__('_base', base)
         super(SubValenceWrapper, self).__setattr__('_target', target)
@@ -230,6 +293,9 @@ class SubValenceWrapper(object):
         while atomic._namespace != namespace:
             atomic = atomic[namespace[len(atomic._namespace)]]
         return atomic
+
+    def get_value(self, atomic):
+        return self.__getattr__('get_value')(atomic)
 
     def __getattr__(self, name):
         target_attr = getattr(self._target, name)
