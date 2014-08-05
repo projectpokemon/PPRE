@@ -2,6 +2,8 @@
 
 import struct
 
+from PIL import Image
+
 from rawdb.elements.atom import BaseAtom, AtomicInstance
 
 
@@ -11,6 +13,40 @@ class BTXAtomicInstance(AtomicInstance):
         images = []
         for param in self.texparams:
             images.append(0)
+            data = ''
+            pal = [chr(i)*4 for i in xrange(256)]
+            if param['format'] == 1:  # A3I5
+                block = self.texdata[param['ofs']:param['ofs'] +
+                                     param['width']*param['height']]
+                for value in block:
+                    value = ord(value)
+                    index = value & 0x1F
+                    alpha = ((value >> 5) & 0x7)*36
+                    data += pal[index][:3]+chr(alpha)
+                img = Image.frombytes('RGBA',
+                                      (param['width'], param['height']), data)
+                images.append(img)
+            continue
+            for i in xrange(param['width']*param['height']):
+                value = ord(self.texdata[param['ofs']+i])
+                if param['format'] == 1:  # A3I5
+                    index = value & 0x1F
+                    alpha = ((value >> 5) & 0x7)*36
+                    data.append(pal[index][:3]+[alpha])
+                elif param['format'] == 3:  # 16 colors
+                    index = value & 0xF
+                    if index or param['color0']:
+                        data.append(pal[index])
+                    else:
+                        data.append([255, 255, 255, 0])
+                    index = (value >> 4) & 0xF
+                    if index or param['color0']:
+                        data.append(pal[index])
+                    else:
+                        data.append([255, 255, 255, 0])
+                else:
+                    continue
+                    raise RuntimeError('No such format: %d' % param['format'])
         return images
 
     @property
@@ -22,10 +58,10 @@ class BTXAtomicInstance(AtomicInstance):
                                             self.texdict.data_[i*8:i*8+8])
             params.append({
                 'ofs': (imgParam & 0xFFFF) << 3,
-                'width': (imgParam >> 20) & 0x7,
-                'height': (imgParam >> 23) & 0x7,
+                'width': 8 << ((imgParam >> 20) & 0x7),
+                'height': 8 << ((imgParam >> 23) & 0x7),
                 'format': (imgParam >> 26) & 0x7,
-                'enable': (imgParam >> 29) & 0x1
+                'color0': (imgParam >> 29) & 0x1
             })
         return params
 
