@@ -27,9 +27,6 @@ class BTXAtomicInstance(AtomicInstance):
                         data += pal[index][:3]+chr(alpha)
                     else:
                         data += COLOR0
-                img = Image.frombytes('RGBA',
-                                      (param['width'], param['height']), data)
-                images.append(img)
             elif param['format'] == 2:  # I2 4 colors
                 block = self.texdata[param['ofs']:param['ofs'] +
                                      (param['width']*param['height'] >> 2)]
@@ -41,9 +38,6 @@ class BTXAtomicInstance(AtomicInstance):
                             data += pal[index]
                         else:
                             data += COLOR0
-                img = Image.frombytes('RGBA',
-                                      (param['width'], param['height']), data)
-                images.append(img)
             elif param['format'] == 3:  # I4 16 colors
                 block = self.texdata[param['ofs']:param['ofs'] +
                                      (param['width']*param['height'] >> 1)]
@@ -55,9 +49,6 @@ class BTXAtomicInstance(AtomicInstance):
                             data += pal[index]
                         else:
                             data += COLOR0
-                img = Image.frombytes('RGBA',
-                                      (param['width'], param['height']), data)
-                images.append(img)
             elif param['format'] == 4:  # I8 256 colors
                 block = self.texdata[param['ofs']:param['ofs'] +
                                      param['width']*param['height']]
@@ -67,30 +58,20 @@ class BTXAtomicInstance(AtomicInstance):
                         data += pal[index]
                     else:
                         data += COLOR0
-                img = Image.frombytes('RGBA',
-                                      (param['width'], param['height']), data)
-                images.append(img)
-            continue
-            for i in xrange(param['width']*param['height']):
-                value = ord(self.texdata[param['ofs']+i])
-                if param['format'] == 1:  # A3I5
-                    index = value & 0x1F
-                    alpha = ((value >> 5) & 0x7)*36
-                    data.append(pal[index][:3]+[alpha])
-                elif param['format'] == 3:  # 16 colors
-                    index = value & 0xF
+            elif param['format'] == 6:  # A5I3
+                block = self.texdata[param['ofs']:param['ofs'] +
+                                     param['width']*param['height']]
+                for value in block:
+                    value = ord(value)
+                    index = value & 0x7
+                    alpha = ((value >> 3) & 0x1F)*8
                     if index or param['color0']:
-                        data.append(pal[index])
+                        data += pal[index][:3]+chr(alpha)
                     else:
-                        data.append([255, 255, 255, 0])
-                    index = (value >> 4) & 0xF
-                    if index or param['color0']:
-                        data.append(pal[index])
-                    else:
-                        data.append([255, 255, 255, 0])
-                else:
-                    continue
-                    raise RuntimeError('No such format: %d' % param['format'])
+                        data += COLOR0
+            img = Image.frombytes('RGBA', (param['width'], param['height']),
+                                  data)
+            images.append(img)
         for i, img in enumerate(images):
             img.save('%d.png' % i)
         return images
