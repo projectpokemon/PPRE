@@ -6,13 +6,14 @@ from PIL import Image
 
 from rawdb.elements.atom import BaseAtom, AtomicInstance
 
+COLOR0 = '\x00\x00\x00\x00'
+
 
 class BTXAtomicInstance(AtomicInstance):
     @property
     def images(self):
         images = []
         for param in self.texparams:
-            images.append(0)
             data = ''
             pal = [chr(i)*4 for i in xrange(256)]
             if param['format'] == 1:  # A3I5
@@ -22,7 +23,50 @@ class BTXAtomicInstance(AtomicInstance):
                     value = ord(value)
                     index = value & 0x1F
                     alpha = ((value >> 5) & 0x7)*36
-                    data += pal[index][:3]+chr(alpha)
+                    if index or param['color0']:
+                        data += pal[index][:3]+chr(alpha)
+                    else:
+                        data += COLOR0
+                img = Image.frombytes('RGBA',
+                                      (param['width'], param['height']), data)
+                images.append(img)
+            elif param['format'] == 2:  # I2 4 colors
+                block = self.texdata[param['ofs']:param['ofs'] +
+                                     (param['width']*param['height'] >> 2)]
+                for value in block:
+                    value = ord(value)
+                    for shift in xrange(0, 8, 2):
+                        index = value >> shift & 0x3
+                        if index or param['color0']:
+                            data += pal[index]
+                        else:
+                            data += COLOR0
+                img = Image.frombytes('RGBA',
+                                      (param['width'], param['height']), data)
+                images.append(img)
+            elif param['format'] == 3:  # I4 16 colors
+                block = self.texdata[param['ofs']:param['ofs'] +
+                                     (param['width']*param['height'] >> 1)]
+                for value in block:
+                    value = ord(value)
+                    for shift in xrange(0, 8, 4):
+                        index = value >> shift & 0xF
+                        if index or param['color0']:
+                            data += pal[index]
+                        else:
+                            data += COLOR0
+                img = Image.frombytes('RGBA',
+                                      (param['width'], param['height']), data)
+                images.append(img)
+            elif param['format'] == 4:  # I8 256 colors
+                block = self.texdata[param['ofs']:param['ofs'] +
+                                     param['width']*param['height']]
+                for value in block:
+                    index = ord(value)
+                    if index or param['color0']:
+                        data += pal[index]
+                    else:
+                        data += COLOR0
                 img = Image.frombytes('RGBA',
                                       (param['width'], param['height']), data)
                 images.append(img)
@@ -47,6 +91,8 @@ class BTXAtomicInstance(AtomicInstance):
                 else:
                     continue
                     raise RuntimeError('No such format: %d' % param['format'])
+        for i, img in enumerate(images):
+            img.save('%d.png' % i)
         return images
 
     @property
