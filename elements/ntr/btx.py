@@ -103,6 +103,22 @@ class BTXAtomicInstance(AtomicInstance):
             })
         return params
 
+    @property
+    def palettes(self):
+        data = self.paldata
+        palettes = []
+        for param in self.palparams:
+            palette = []
+            values = struct.unpack('256H', self.paldata[param['ofs']:
+                                                        param['ofs']+512])
+            for value in values:
+                palette.append(struct.pack('4B',
+                                           (value >> 0 & 0x1F) << 3,
+                                           (value >> 5 & 0x1F) << 3,
+                                           (value >> 10 & 0x1F) << 3,
+                                           255))
+            palettes.append(palette)
+        return palettes
 
 class BTXAtom(BaseAtom):
     atomic = BTXAtomicInstance
