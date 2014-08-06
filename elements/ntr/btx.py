@@ -90,6 +90,17 @@ class BTXAtomicInstance(AtomicInstance):
                 'format': (imgParam >> 26) & 0x7,
                 'color0': (imgParam >> 29) & 0x1
             })
+
+    @property
+    def palparams(self):
+        # 4 bytes per param
+        params = []
+        for i in xrange(self.paldict.num):
+            offset, flag = struct.unpack('HH', self.paldict.data_[i*4:i*4+4])
+            params.append({
+                'ofs': offset << 3,
+                'count4': flag
+            })
         return params
 
 
