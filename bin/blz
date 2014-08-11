@@ -1,0 +1,2 @@
+# Temporary compat
+wine blz.exe $*
