@@ -1,6 +1,8 @@
 """Texture Atoms"""
 
+from cStringIO import StringIO
 import struct
+import zipfile
 
 from PIL import Image
 
@@ -175,6 +177,16 @@ class BTXAtomicInstance(AtomicInstance):
             images.append(Image.frombytes('RGBA', (len(row), len(bitmap)),
                                           data))
         return images
+
+    def export(self, handle):
+        """An archive with all files"""
+        with zipfile.ZipFile(handle, 'w') as archive:
+            for idx, image in enumerate(self.images):
+                buffer = StringIO()
+                image.save(buffer, format='PNG')
+                archive.writestr('%03d.png' % idx, buffer.getvalue())
+                buffer.close()
+        return handle
 
 
 class BTXAtom(BaseAtom):
