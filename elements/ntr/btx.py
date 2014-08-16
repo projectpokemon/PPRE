@@ -11,11 +11,14 @@ COLOR0 = '\x00\x00\x00\x00'
 
 class BTXAtomicInstance(AtomicInstance):
     @property
-    def images(self):
-        images = []
+    def bitmaps(self):
+        """List of 2d bitmaps
+
+        Each pixel is a tuple of (index, alpha)
+        """
+        bitmaps = []
         for param in self.texparams:
-            data = ''
-            pal = [chr(i)*4 for i in xrange(256)]
+            pixels = []  # 1d
             if param['format'] == 1:  # A3I5
                 block = self.texdata[param['ofs']:param['ofs'] +
                                      param['width']*param['height']]
@@ -23,10 +26,9 @@ class BTXAtomicInstance(AtomicInstance):
                     value = ord(value)
                     index = value & 0x1F
                     alpha = ((value >> 5) & 0x7)*36
-                    if index or param['color0']:
-                        data += pal[index][:3]+chr(alpha)
-                    else:
-                        data += COLOR0
+                    if not index and not param['color0']:
+                        alpha = 0
+                    pixels += [(index, alpha)]
             elif param['format'] == 2:  # I2 4 colors
                 block = self.texdata[param['ofs']:param['ofs'] +
                                      (param['width']*param['height'] >> 2)]
@@ -34,10 +36,10 @@ class BTXAtomicInstance(AtomicInstance):
                     value = ord(value)
                     for shift in xrange(0, 8, 2):
                         index = value >> shift & 0x3
-                        if index or param['color0']:
-                            data += pal[index]
-                        else:
-                            data += COLOR0
+                        alpha = None
+                        if not index and not param['color0']:
+                            alpha = 0
+                        pixels += [(index, alpha)]
             elif param['format'] == 3:  # I4 16 colors
                 block = self.texdata[param['ofs']:param['ofs'] +
                                      (param['width']*param['height'] >> 1)]
@@ -45,19 +47,19 @@ class BTXAtomicInstance(AtomicInstance):
                     value = ord(value)
                     for shift in xrange(0, 8, 4):
                         index = value >> shift & 0xF
-                        if index or param['color0']:
-                            data += pal[index]
-                        else:
-                            data += COLOR0
+                        alpha = None
+                        if not index and not param['color0']:
+                            alpha = 0
+                        pixels += [(index, alpha)]
             elif param['format'] == 4:  # I8 256 colors
                 block = self.texdata[param['ofs']:param['ofs'] +
                                      param['width']*param['height']]
                 for value in block:
                     index = ord(value)
-                    if index or param['color0']:
-                        data += pal[index]
-                    else:
-                        data += COLOR0
+                    alpha = None
+                    if not index and not param['color0']:
+                        alpha = 0
+                    pixels += [(index, alpha)]
             elif param['format'] == 6:  # A5I3
                 block = self.texdata[param['ofs']:param['ofs'] +
                                      param['width']*param['height']]
@@ -65,16 +67,15 @@ class BTXAtomicInstance(AtomicInstance):
                     value = ord(value)
                     index = value & 0x7
                     alpha = ((value >> 3) & 0x1F)*8
-                    if index or param['color0']:
-                        data += pal[index][:3]+chr(alpha)
-                    else:
-                        data += COLOR0
-            img = Image.frombytes('RGBA', (param['width'], param['height']),
-                                  data)
-            images.append(img)
-        for i, img in enumerate(images):
-            img.save('%d.png' % i)
-        return images
+                    if not index and not param['color0']:
+                        alpha = 0
+                    pixels += [(index, alpha)]
+            pixels2d = [pixels[i:i+param['width']]
+                        for i in xrange(0, len(pixels), param['width'])]
+            # img = Image.frombytes('RGBA', (param['width'], param['height']),
+            #                       data)
+            bitmaps.append(pixels2d)
+        return bitmaps
 
     @property
     def texparams(self):
@@ -90,6 +91,7 @@ class BTXAtomicInstance(AtomicInstance):
                 'format': (imgParam >> 26) & 0x7,
                 'color0': (imgParam >> 29) & 0x1
             })
+        return params
 
     @property
     def palparams(self):
@@ -109,8 +111,8 @@ class BTXAtomicInstance(AtomicInstance):
         palettes = []
         for param in self.palparams:
             palette = []
-            values = struct.unpack('256H', self.paldata[param['ofs']:
-                                                        param['ofs']+512])
+            values = [ord(b) for b in self.paldata[param['ofs']:
+                                                   param['ofs']+512]]
             for value in values:
                 palette.append(struct.pack('4B',
                                            (value >> 0 & 0x1F) << 3,
@@ -119,6 +121,61 @@ class BTXAtomicInstance(AtomicInstance):
                                            255))
             palettes.append(palette)
         return palettes
+
+    @property
+    def imagemap(self):
+        """List of (bitmap, palette) pairs
+        """
+        try:
+            return self._imagemap
+        except:
+            imagemap = []
+            if self.paldict.num == self.texdict.num:
+                imagemap = zip(xrange(self.texdict.num),
+                               xrange(self.paldict.num))
+            else:  # Mtx Merger
+                for texidx, texname in enumerate(self.texdict.names):
+                    match = 0
+                    best = 0
+                    for palidx, palname in enumerate(self.paldict.names):
+                        for c in xrange(16):
+                            try:
+                                if palname[c] != texname[c]:
+                                    break
+                            except:
+                                break
+                        if c > match:
+                            match = c
+                            best = palidx
+                    imagemap.append((texidx, best))
+            super(AtomicInstance, self).__setattr__('_imagemap', imagemap)
+            return imagemap
+
+    @imagemap.setter
+    def imagemap(self, value):
+        super(AtomicInstance, self).__setattr__('_imagemap', value)
+
+    @property
+    def images(self):
+        """List of PIL Images as built from self.imagemap
+        """
+        palettes = self.palettes
+        bitmaps = self.bitmaps
+        images = []
+        for palidx, texidx in self.imagemap:
+            palette = palettes[palidx]
+            bitmap = bitmaps[texidx]
+            data = ''
+            for row in bitmap:
+                for pix in row:
+                    if pix[1] is None:
+                        data += palette[pix[0]]
+                    else:
+                        data += palette[pix[0]][:3] + chr(pix[1])
+            images.append(Image.frombytes('RGBA', (len(row), len(bitmap)),
+                                          data))
+        return images
+
 
 class BTXAtom(BaseAtom):
     atomic = BTXAtomicInstance
