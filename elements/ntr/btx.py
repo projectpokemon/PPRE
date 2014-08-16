@@ -28,7 +28,7 @@ class BTXAtomicInstance(AtomicInstance):
                     value = ord(value)
                     index = value & 0x1F
                     alpha = ((value >> 5) & 0x7)*36
-                    if not index and not param['color0']:
+                    if not index and param['color0']:
                         alpha = 0
                     pixels += [(index, alpha)]
             elif param['format'] == 2:  # I2 4 colors
@@ -39,7 +39,7 @@ class BTXAtomicInstance(AtomicInstance):
                     for shift in xrange(0, 8, 2):
                         index = value >> shift & 0x3
                         alpha = None
-                        if not index and not param['color0']:
+                        if not index and param['color0']:
                             alpha = 0
                         pixels += [(index, alpha)]
             elif param['format'] == 3:  # I4 16 colors
@@ -50,7 +50,7 @@ class BTXAtomicInstance(AtomicInstance):
                     for shift in xrange(0, 8, 4):
                         index = value >> shift & 0xF
                         alpha = None
-                        if not index and not param['color0']:
+                        if not index and param['color0']:
                             alpha = 0
                         pixels += [(index, alpha)]
             elif param['format'] == 4:  # I8 256 colors
@@ -59,7 +59,7 @@ class BTXAtomicInstance(AtomicInstance):
                 for value in block:
                     index = ord(value)
                     alpha = None
-                    if not index and not param['color0']:
+                    if not index and param['color0']:
                         alpha = 0
                     pixels += [(index, alpha)]
             elif param['format'] == 6:  # A5I3
@@ -69,7 +69,7 @@ class BTXAtomicInstance(AtomicInstance):
                     value = ord(value)
                     index = value & 0x7
                     alpha = ((value >> 3) & 0x1F)*8
-                    if not index and not param['color0']:
+                    if not index and param['color0']:
                         alpha = 0
                     pixels += [(index, alpha)]
             pixels2d = [pixels[i:i+param['width']]
@@ -113,8 +113,9 @@ class BTXAtomicInstance(AtomicInstance):
         palettes = []
         for param in self.palparams:
             palette = []
-            values = [ord(b) for b in self.paldata[param['ofs']:
-                                                   param['ofs']+512]]
+            data = self.paldata[param['ofs']:param['ofs']+512]
+            values = [struct.unpack('H', data[i:i+2])[0]
+                      for i in xrange(0, len(data), 2)]
             for value in values:
                 palette.append(struct.pack('4B',
                                            (value >> 0 & 0x1F) << 3,
@@ -164,7 +165,7 @@ class BTXAtomicInstance(AtomicInstance):
         palettes = self.palettes
         bitmaps = self.bitmaps
         images = []
-        for palidx, texidx in self.imagemap:
+        for texidx, palidx in self.imagemap:
             palette = palettes[palidx]
             bitmap = bitmaps[texidx]
             data = ''
