@@ -7,11 +7,19 @@ import zipfile
 from PIL import Image
 
 from rawdb.elements.atom import BaseAtom, AtomicInstance
+from rawdb.elements.atom.atomic import ThinAtomicInstance
 
 COLOR0 = '\x00\x00\x00\x00'
 
 
+def log2(x):
+    """Integer log2"""
+    return x.bit_length()-1
+
+
 class BTXAtomicInstance(AtomicInstance):
+    PALETTE_BRUTE_FORCE = 1  # Unoptimized horrible palette blob... that works
+
     @property
     def bitmaps(self):
         """List of 2d bitmaps
@@ -162,6 +170,10 @@ class BTXAtomicInstance(AtomicInstance):
     def images(self):
         """List of PIL Images as built from self.imagemap
         """
+        try:
+            return self._images
+        except:
+            pass
         palettes = self.palettes
         bitmaps = self.bitmaps
         images = []
@@ -177,7 +189,12 @@ class BTXAtomicInstance(AtomicInstance):
                         data += palette[pix[0]][:3] + chr(pix[1])
             images.append(Image.frombytes('RGBA', (len(row), len(bitmap)),
                                           data))
+        super(AtomicInstance, self).__setattr__('_images', images)
         return images
+
+    @images.setter
+    def images(self, value):
+        super(AtomicInstance, self).__setattr__('_images', value)
 
     def export(self, handle):
         """An archive with all files"""
@@ -188,6 +205,89 @@ class BTXAtomicInstance(AtomicInstance):
                 archive.writestr('%03d.png' % idx, buffer.getvalue())
                 buffer.close()
         return handle
+
+    def load(self, handle):
+        """Build images from an archive"""
+        with zipfile.ZipFile(handle, 'r') as archive:
+            images = []
+            for name in archive.namelist():
+                # TODO: sanitize sizes, etc.
+                img = Image.open(StringIO(archive.read(name)))
+                images.append(img.convert('RGBA'))
+        self.images = images
+        self.build_from_images()
+
+    def build_from_images(self):
+        """Take the modified image dictionary and commit changes to
+        the other data structures
+        """
+        processed = 0
+        images = self.images
+        imagemap = zip(xrange(len(images)), [0]*len(images))
+        pal0 = ['\x00\x00']*256
+        pal1idx = 1  # max 32
+        pal4idx = 255  # min pal1idx
+        self.texdata = ''  # Delete old images
+        self.texdict.data_ = ''
+        for texidx, palidx in imagemap:
+            tex = []
+            format = 4
+            for pix in images[texidx].getdata():
+                alpha = pix[3]
+                if not alpha:  # color0=1
+                    tex.append(0)
+                    continue
+                color = (pix[0] >> 3) << 0 |\
+                    (pix[1] >> 3) << 5 |\
+                    (pix[2] >> 3) << 10
+                color = struct.pack('H', color)
+                if alpha < 216:  # 216 = 6*36 (max non-solid value for A3I5)
+                    try:
+                        index = pal0[:32].index(color)
+                    except ValueError:
+                        pal0[pal1idx] = color
+                        index = pal1idx
+                        pal1idx += 1
+                        if pal1idx > 32:
+                            raise OverflowError('Too many colors with alphas.'
+                                                ' Max 32 for all images.')
+                    format = 1
+                else:
+                    try:
+                        index = pal0.index(color)
+                    except ValueError:
+                        pal0[pal4idx] = color
+                        index = pal4idx
+                        pal4idx -= 1
+                if pal4idx < pal1idx:
+                    raise OverflowError('Cannot have more than 256 colors'
+                                        ' for all images')
+                tex.append(index)
+            ofs = len(self.texdata) >> 3
+            size = images[texidx].size
+            self.texdict.data_ += struct.pack('II', ofs |
+                                              (log2(size[0] >> 3) << 20) |
+                                              (log2(size[1] >> 3) << 23) |
+                                              (format << 26) | (1 << 29), 0)
+            self.texdata += ''.join([chr(c) for c in tex])
+            ofs = len(self.texdata)
+            self.texdata += '\x00'*(8 - (ofs % 8))  # Align
+        self.paldata = ''.join(pal0)
+        self.imagemap = imagemap
+        self.texdict.num = len(images)
+        self.paldict.num = len(images)
+        self.paldict.data_ = '\x00\x00'*self.paldict.num
+        self.paldict.names = ['palette_all_%03d\x00' % i for i in xrange(self.paldict.num)]
+        self.texdict.names = ['image_%03d\x00\x00\x00\x00\x00\x00\x00' % i
+                              for i in xrange(self.texdict.num)]
+        self.paldict.nodes = [ThinAtomicInstance('\x00\x00\x00\x00')] * \
+            self.paldict.num
+        self.texdict.sizeunit = 8
+        self.paldict.sizeunit = 4
+
+    def __str__(self):
+        # self.build_from_images()
+        return super(BTXAtomicInstance, self).__str__()
 
 
 class BTXAtom(BaseAtom):
