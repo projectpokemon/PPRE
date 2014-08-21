@@ -59,3 +59,14 @@ class AtomicInstance(object):
 
     def __dir__(self):
         return self.keys()
+
+
+class ThinAtomicInstance(AtomicInstance):
+    def __init__(self, value):
+        super(AtomicInstance, self).__setattr__('_value', value)
+        super(AtomicInstance, self).__setattr__('_attrs', {})
+        super(AtomicInstance, self).__setattr__('_data', None)
+        super(AtomicInstance, self).__setattr__('_frozen', True)
+
+    def __str__(self):
+        return self._value
