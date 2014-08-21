@@ -141,7 +141,12 @@ class ValenceFormatter(Valence):
         if not format_char.strip('x'):
             data = struct.pack(format_char)
         else:
-            data = struct.pack(format_char, self.get_value(atomic))
+            value = self.get_value(atomic)
+            try:
+                data = struct.pack(format_char, value)
+            except:
+                raise ValueError('Could not pack value for %s: %s' %
+                                 (self.name, repr(value)))
         return data
 
     def unpack_array(self, atomic):
