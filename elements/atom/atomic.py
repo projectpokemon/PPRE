@@ -38,7 +38,7 @@ class AtomicInstance(object):
         return self.__getattr__(key)
 
     def __setattr__(self, name, value):
-        if hasattr(self, name):
+        if hasattr(self, name) and name not in self._attrs:
             return super(AtomicInstance, self).__setattr__(name, value)
         if self._frozen and name not in self._attrs:
             raise KeyError(name)
