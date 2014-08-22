@@ -96,7 +96,7 @@ class ValenceFormatter(Valence):
         atomic[self.name] = value
 
     def copy(self):
-        kwargs = dict(name=self.name, format_char=self.format_char)
+        kwargs = dict(name=self.name[:], format_char=self.format_char)
         if self.array_item:
             kwargs['array_item'] = self.array_item.copy()
         if self.sub_formats:

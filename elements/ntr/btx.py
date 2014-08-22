@@ -296,7 +296,7 @@ class BTXAtom(BaseAtom):
     def __init__(self):
         super(BTXAtom, self).__init__()
         start = self.uint32('magic')
-        self.uint32('size')
+        size = self.uint32('size')
         texinfo = self.texinfo('texinfo')
         tex4x4info = self.texinfo('tex4x4info')
         self.uint32('tex4x4info_paletteofs')
@@ -316,6 +316,7 @@ class BTXAtom(BaseAtom):
 
         self.seek(palinfo.dataofs, start=start)
         self.data('paldata', palinfo.datasize << 3)
+        self.seek(size, start=start)
 
     def texinfo(self, name, late_lookup=False):
         """
