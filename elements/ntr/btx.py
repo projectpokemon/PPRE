@@ -243,7 +243,7 @@ class BTXAtomicInstance(AtomicInstance):
                 color = struct.pack('H', color)
                 if alpha < 216:  # 216 = 6*36 (max non-solid value for A3I5)
                     try:
-                        index = pal0[:32].index(color)
+                        index = pal0[:32].index(color, 1)
                     except ValueError:
                         pal0[pal1idx] = color
                         index = pal1idx
@@ -254,7 +254,7 @@ class BTXAtomicInstance(AtomicInstance):
                     format = 1
                 else:
                     try:
-                        index = pal0.index(color)
+                        index = pal0.index(color, 1)
                     except ValueError:
                         pal0[pal4idx] = color
                         index = pal4idx
@@ -276,7 +276,7 @@ class BTXAtomicInstance(AtomicInstance):
         self.imagemap = imagemap
         self.texdict.num = len(images)
         self.paldict.num = len(images)
-        self.paldict.data_ = '\x00\x00'*self.paldict.num
+        self.paldict.data_ = '\x00\x00\x00\x00'*self.paldict.num
         self.paldict.names = ['palette_all_%03d\x00' % i for i in xrange(self.paldict.num)]
         self.texdict.names = ['image_%03d\x00\x00\x00\x00\x00\x00\x00' % i
                               for i in xrange(self.texdict.num)]
@@ -351,7 +351,7 @@ class BTXAtom(BaseAtom):
         self.sub_push(name)
         start = self.uint8('version')
         num = self.uint8('num')
-        self.uint16('size')
+        dictsize = self.uint16('size')
         self.uint16('dummy0')
         refofs = self.uint16('refofs')
 
@@ -368,5 +368,6 @@ class BTXAtom(BaseAtom):
         self.data('data_', num*sizeunit)
         self.seek(nameofs, start=sizeunit)
         self.array(self.string('names', 16), count=num)
+        self.seek(dictsize, start=start)
 
         return self.sub_pop()
