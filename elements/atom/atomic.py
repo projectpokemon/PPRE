@@ -69,4 +69,6 @@ class ThinAtomicInstance(AtomicInstance):
         super(AtomicInstance, self).__setattr__('_frozen', True)
 
     def __str__(self):
+        if self._data is not None:
+            self._data += self._value
         return self._value
