@@ -280,10 +280,17 @@ class BTXAtomicInstance(AtomicInstance):
         self.paldict.names = ['palette_all_%03d\x00' % i for i in xrange(self.paldict.num)]
         self.texdict.names = ['image_%03d\x00\x00\x00\x00\x00\x00\x00' % i
                               for i in xrange(self.texdict.num)]
+        self.texdict.nodes = [ThinAtomicInstance('\x00\x00\x00\x00')] * \
+            self.texdict.num
         self.paldict.nodes = [ThinAtomicInstance('\x00\x00\x00\x00')] * \
             self.paldict.num
         self.texdict.sizeunit = 8
         self.paldict.sizeunit = 4
+        self.texdict.version = 0xFF
+        self.paldict.version = 0xFF
+        # HACK: Correction for datasize not being updated on save
+        self.texinfo.datasize = len(self.texdata) >> 3
+        self.palinfo.datasize = len(self.paldata) >> 3
 
     def __str__(self):
         # self.build_from_images()
