@@ -389,7 +389,8 @@ class ValenceSubAtom(ValenceFormatter):
     def __init__(self, name, atom):
         super(ValenceSubAtom, self).__init__(name)
         self.atom = atom
-        self.namespace = [name]
+        self.namespace = []
+        self.name = name
 
     def unpack_one(self, atomic):
         return self.atom(atomic.data, namespace=self.namespace)

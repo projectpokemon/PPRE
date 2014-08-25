@@ -18,7 +18,7 @@ def log2(x):
     return x.bit_length()-1
 
 
-class BTXAtomicInstance(AtomicInstance):
+class TEXAtomicInstance(AtomicInstance):
     PALETTE_BRUTE_FORCE = 1  # Unoptimized horrible palette blob... that works
 
     @property
@@ -361,14 +361,14 @@ class BTXAtomicInstance(AtomicInstance):
 
     def __str__(self):
         # self.build_from_images()
-        return super(BTXAtomicInstance, self).__str__()
+        return super(TEXAtomicInstance, self).__str__()
 
 
-class BTXAtom(BaseAtom):
-    atomic = BTXAtomicInstance
+class TEXAtom(BaseAtom):
+    atomic = TEXAtomicInstance
 
     def __init__(self):
-        super(BTXAtom, self).__init__()
+        super(TEXAtom, self).__init__()
         start = self.uint32('magic')
         size = self.uint32('size')
         texinfo = self.texinfo('texinfo')
@@ -413,3 +413,20 @@ class BTXAtom(BaseAtom):
         self.uint16('dummy0')
         self.uint32('dataofs')
         return self.sub_pop()
+
+
+class BTXAtom(BaseAtom):
+    def __init__(self):
+        super(BTXAtom, self).__init__()
+        start = self.uint32('magic')
+        self.int16('endian')
+        self.uint16('version')
+        size = self.uint32('size')
+        headersize = self.uint16('headersize')
+        self.uint16('numblocks')  # Always 1 for BTX
+
+        self.seek(headersize, start=start)
+        texoffset = self.uint32('texoffset')  # Should be an array (of 1)
+        self.seek(texoffset, start=start)
+        self.sub_atom('tex', TEXAtom())
+        self.seek(size, start=start)
