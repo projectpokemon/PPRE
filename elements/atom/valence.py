@@ -384,6 +384,29 @@ class ValenceMulti(ValenceFormatter):
         return super(ValenceMulti, self).__getattr__(name)
 
 
+class ValenceSubAtom(ValenceFormatter):
+
+    def __init__(self, name, atom):
+        super(ValenceSubAtom, self).__init__(name)
+        self.atom = atom
+        self.namespace = [name]
+
+    def unpack_one(self, atomic):
+        return self.atom(atomic.data, namespace=self.namespace)
+
+    def pack_one(self, atomic):
+        value = self.get_value(atomic)
+        with temporary_attr(value, '_data', atomic.data, True):
+            str(value)
+            return ''
+
+    def __getattr__(self, name):
+        entry = self.atom.find_format(name)
+        if entry is not None:
+            return SubValenceWrapper(self, entry)
+        return super(ValenceSubAtom, self).__getattr__(name)
+
+
 class ValenceArray(ValenceFormatter):
     valid_params = ValenceFormatter.valid_params + \
         ['sub_valence', 'count', 'terminator']

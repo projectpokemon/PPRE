@@ -5,7 +5,7 @@ from rawdb.elements.atom.atomic import AtomicInstance
 from rawdb.elements.atom.packer import Packer
 from rawdb.elements.atom.data import DataConsumer
 from rawdb.elements.atom.valence import ValenceFormatter, ValenceArray, \
-    ValenceMulti, ValenceData, ValenceSeek, ValencePadding
+    ValenceMulti, ValenceData, ValenceSeek, ValencePadding, ValenceSubAtom
 
 
 class BaseAtom(Packer):
@@ -21,11 +21,11 @@ class BaseAtom(Packer):
         self._fmt = []
         self._subfmts = []
 
-    def __call__(self, data):
+    def __call__(self, data, **kwargs):
         if self._subfmts:
             raise RuntimeError('Subatoms have not returned fully')
         data = DataConsumer(data)
-        atomic = self.atomic(self, data)
+        atomic = self.atomic(self, data, **kwargs)
         unpacked = {}
         for entry in self.format_iterator(atomic):
             value = entry.unpack_one(atomic)
@@ -168,6 +168,17 @@ class BaseAtom(Packer):
         name, self._fmt = self._subfmts.pop()
         format_entry = ValenceMulti(name, sub_fmt, namespace)
         format_entry.subatomic = self.subatomic
+        return self.append_format(format_entry)
+
+    def sub_atom(self, name, atom):
+        """Use an existing atom as a subatom
+
+        Parameters
+        ----------
+        atom: BaseAtom instance
+            Instance of an atom
+        """
+        format_entry = ValenceSubAtom(name, atom)
         return self.append_format(format_entry)
 
     def append_format(self, formatter):
