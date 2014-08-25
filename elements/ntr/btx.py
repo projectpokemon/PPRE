@@ -217,9 +217,11 @@ class BTXAtomicInstance(AtomicInstance):
         self.images = images
         self.build_from_images()
 
-    def build_from_images(self):
+    def build_from_images_41(self):
         """Take the modified image dictionary and commit changes to
         the other data structures
+
+        This version produces either format=4 or 1 (256-color or A3I5)
         """
         processed = 0
         images = self.images
@@ -278,6 +280,70 @@ class BTXAtomicInstance(AtomicInstance):
         self.paldict.num = len(images)
         self.paldict.data_ = '\x00\x00\x00\x00'*self.paldict.num
         self.paldict.names = ['palette_all_%03d\x00' % i for i in xrange(self.paldict.num)]
+        self.texdict.names = ['image_%03d\x00\x00\x00\x00\x00\x00\x00' % i
+                              for i in xrange(self.texdict.num)]
+        self.texdict.nodes = [ThinAtomicInstance('\x00\x00\x00\x00')] * \
+            self.texdict.num
+        self.paldict.nodes = [ThinAtomicInstance('\x00\x00\x00\x00')] * \
+            self.paldict.num
+        self.texdict.sizeunit = 8
+        self.paldict.sizeunit = 4
+        self.texdict.version = 0xFF
+        self.paldict.version = 0xFF
+        # HACK: Correction for datasize not being updated on save
+        self.texinfo.datasize = len(self.texdata) >> 3
+        self.palinfo.datasize = len(self.paldata) >> 3
+
+    def build_from_images(self):
+        """Take the modified image dictionary and commit changes to
+        the other data structures
+        """
+        images = self.images
+        imagemap = zip(xrange(len(images)), [0]*len(images))
+        pal0 = ['\x00\x00']*16
+        pal2idx = 1  # max 15
+        self.texdata = ''  # Delete old images
+        self.texdict.data_ = ''
+        for texidx, palidx in imagemap:
+            tex = []
+            format = 2
+            for pix in images[texidx].getdata():
+                alpha = pix[3]
+                if not alpha:  # color0=1
+                    tex.append(0)
+                    continue
+                color = (pix[0] >> 3) << 0 |\
+                    (pix[1] >> 3) << 5 |\
+                    (pix[2] >> 3) << 10
+                color = struct.pack('H', color)
+                try:
+                    index = pal0.index(color, 1)
+                except ValueError:
+                    pal0[pal2idx] = color
+                    index = pal2idx
+                    pal2idx += 1
+                    if pal2idx > 16:
+                        raise OverflowError('Cannot have more than 16 colors'
+                                            ' for all images')
+                tex.append(index)
+            ofs = len(self.texdata) >> 3
+            size = images[texidx].size
+            self.texdict.data_ += struct.pack('II', ofs |
+                                              (log2(size[0] >> 3) << 20) |
+                                              (log2(size[1] >> 3) << 23) |
+                                              (format << 26) | (1 << 29), 0)
+            self.texdata += ''.join([chr(tex[n] | (tex[n+1] << 4))
+                                     for n in xrange(0, len(tex), 2)])
+            ofs = len(self.texdata)
+            if ofs % 8:
+                self.texdata += '\x00'*(8 - (ofs % 8))  # Align
+        self.paldata = ''.join(pal0)
+        self.imagemap = imagemap
+        self.texdict.num = len(images)
+        self.paldict.num = len(images)
+        self.paldict.data_ = '\x00\x00\x00\x00'*self.paldict.num
+        self.paldict.names = ['palette_all_%03d\x00' % i
+                              for i in xrange(self.paldict.num)]
         self.texdict.names = ['image_%03d\x00\x00\x00\x00\x00\x00\x00' % i
                               for i in xrange(self.texdict.num)]
         self.texdict.nodes = [ThinAtomicInstance('\x00\x00\x00\x00')] * \
