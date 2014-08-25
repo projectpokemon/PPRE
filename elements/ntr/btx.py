@@ -8,6 +8,7 @@ from PIL import Image
 
 from rawdb.elements.atom import BaseAtom, AtomicInstance
 from rawdb.elements.atom.atomic import ThinAtomicInstance
+from rawdb.elements.ntr.resdict import G3DResDict
 
 COLOR0 = '\x00\x00\x00\x00'
 
@@ -376,10 +377,10 @@ class BTXAtom(BaseAtom):
         palinfo = self.texinfo('palinfo', True)
 
         self.seek(texinfo.lookupofs, start=start)
-        self.lookupdict('texdict')
+        self.sub_atom('texdict', G3DResDict())
 
         self.seek(palinfo.lookupofs, start=start)
-        self.lookupdict('paldict')
+        self.sub_atom('paldict', G3DResDict())
 
         self.seek(texinfo.dataofs, start=start)
         self.data('texdata', texinfo.datasize << 3)
@@ -411,29 +412,4 @@ class BTXAtom(BaseAtom):
             self.uint16('lookupofs')
         self.uint16('dummy0')
         self.uint32('dataofs')
-        return self.sub_pop()
-
-    def lookupdict(self, name):
-        self.sub_push(name)
-        start = self.uint8('version')
-        num = self.uint8('num')
-        dictsize = self.uint16('size')
-        self.uint16('dummy0')
-        refofs = self.uint16('refofs')
-
-        self.sub_push('nodes')
-        self.uint8('ref')
-        self.uint8('left')
-        self.uint8('right')
-        self.uint8('index')
-        self.array(self.sub_pop(), count=num)
-
-        self.seek(refofs, start=start)
-        sizeunit = self.uint16('sizeunit')
-        nameofs = self.uint16('nameofs')
-        self.data('data_', num*sizeunit)
-        self.seek(nameofs, start=sizeunit)
-        self.array(self.string('names', 16), count=num)
-        self.seek(dictsize, start=start)
-
         return self.sub_pop()
