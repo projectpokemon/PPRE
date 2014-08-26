@@ -292,6 +292,20 @@ class ValenceShell(Valence):
                             *(self.others+[(ValenceShell.OP_RSHIFT, other)]))
 
 
+class ValenceCopy(Valence):
+    """Wrapper that serves as a modifiable copy of an existing valence
+
+    It will get any attribute not set to it specifically from its base
+
+    It will set any attribute on itself.
+    """
+    def __init__(self, base):
+        self._base_copy = base
+
+    def __getattr__(self, name):
+        return getattr(self._base_copy, name)
+
+
 class SubValenceWrapper(Valence):
     def __init__(self, base, target):
         super(SubValenceWrapper, self).__setattr__('_base', base)
