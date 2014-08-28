@@ -158,17 +158,19 @@ class BaseAtom(Packer):
     def seek(self, offset, start=None):
         return self.append_format(ValenceSeek(offset, start))
 
-    def sub_push(self, name):
-        self._subfmts.append((name, self._fmt))
-        self._fmt = []
+    def sub_push(self, name, subatomic=None):
+        namespace = [entry[0].name for entry in self._subfmts]+[name]
+        format_entry = ValenceMulti(name, [], namespace)
+        format_entry.subatomic = subatomic if subatomic is not None else \
+            self.subatomic
+        self.append_format(format_entry)
+        self._subfmts.append((format_entry, self._fmt))
+        self._fmt = format_entry.sub_valences
+        return format_entry
 
     def sub_pop(self):
-        sub_fmt = self._fmt
-        namespace = [entry[0] for entry in self._subfmts]
-        name, self._fmt = self._subfmts.pop()
-        format_entry = ValenceMulti(name, sub_fmt, namespace)
-        format_entry.subatomic = self.subatomic
-        return self.append_format(format_entry)
+        format_entry, self._fmt = self._subfmts.pop()
+        return format_entry
 
     def sub_atom(self, name, atom):
         """Use an existing atom as a subatom
