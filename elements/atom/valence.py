@@ -376,7 +376,8 @@ class ValenceMulti(ValenceFormatter):
     def unpack_one(self, atomic):
         data = DataConsumer(atomic.data)
         unpacked = {}
-        subatomic = self.subatomic(self, data, namespace=self.namespace)
+        subatomic = self.subatomic(self, data, parent=atomic,
+                                   namespace=self.namespace)
         for entry in self.format_iterator(subatomic):
             value = entry.unpack_one(subatomic)
             if entry.name:

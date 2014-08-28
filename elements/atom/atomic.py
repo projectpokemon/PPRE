@@ -10,11 +10,12 @@ class AtomicInstance(object):
     keys : list
         Get the valent attributes/keys of this atom
     """
-    def __init__(self, atom, consumer, namespace=None):
+    def __init__(self, packer, consumer, parent=None, namespace=None):
         super(AtomicInstance, self).__setattr__('_frozen', False)
         super(AtomicInstance, self).__setattr__('_attrs', {})
-        super(AtomicInstance, self).__setattr__('_atom', atom)
+        super(AtomicInstance, self).__setattr__('_packer', packer)
         super(AtomicInstance, self).__setattr__('_data', consumer)
+        super(AtomicInstance, self).__setattr__('_parent', parent)
         super(AtomicInstance, self).__setattr__('_namespace', namespace or [])
 
     def keys(self):
@@ -52,7 +53,7 @@ class AtomicInstance(object):
         if not isinstance(self.data, DataBuilder):
             consumer = self.data
             super(AtomicInstance, self).__setattr__('_data', DataBuilder())
-        value = str(self._atom.pack(self, self.data))
+        value = str(self._packer.pack(self, self.data))
         if consumer is not None:
             super(AtomicInstance, self).__setattr__('_data', consumer)
         return value
