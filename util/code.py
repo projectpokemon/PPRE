@@ -1,14 +1,11 @@
 
+import inspect
 import linecache
 import sys
+import types
 
 
-def _c():
-    """No-op"""
-    pass
-
-
-code = type(_c.func_code)  # : Code type
+code = types.CodeType
 
 
 def poison(func, from_func, name=None):
@@ -26,6 +23,18 @@ def poison(func, from_func, name=None):
     return func
 
 
+def get_func_code(target):
+    if inspect.isclass(target):
+        target = target.__init__
+        # TODO: classes with no init using empty code object
+    if inspect.ismethod(target.__call__):
+        target = target.__call__.im_func
+    if inspect.ismethod(target):
+        target = target.im_func
+    if inspect.isfunction(target):
+        return target.func_code
+
+
 def print_helpful_traceback():
     """Prints traceback with local variables.
 
@@ -36,15 +45,14 @@ def print_helpful_traceback():
     while frame is not None:  # Build reversed stack of frames
         stack.append(frame.tb_frame)
         frame = frame.tb_next
-    stack.reverse()
+    # stack.reverse()
+    print('\033[91mTraceback (most recent call last):\033[0m')
     for frame in stack:
         code = frame.f_code
-        print('  File "%s", line %d, in %s' % (code.co_filename,
-                                               frame.f_lineno,
-                                               code.co_name))
+        print('\033[94m  File "%s", line %d, in %s\033[0m' %
+              (code.co_filename, frame.f_lineno, code.co_name))
         line = linecache.getline(code.co_filename, frame.f_lineno)
-        if line:
-            line = line.strip()
-            print('\t'+line)
         for key, value in frame.f_locals.items():
-            print('\t\t%s = %r' % (key, value))
+            print('\t%s = %r' % (key, value))
+        if line:
+            print('\033[96m\t\t%s\033[0m' % line.strip())
