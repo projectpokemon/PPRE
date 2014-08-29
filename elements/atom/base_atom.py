@@ -1,6 +1,7 @@
 
 import struct
 
+from rawdb.util import code
 from rawdb.elements.atom.atomic import AtomicInstance
 from rawdb.elements.atom.packer import Packer
 from rawdb.elements.atom.data import DataConsumer
@@ -20,6 +21,7 @@ class BaseAtom(Packer):
     def __init__(self):
         self._fmt = []
         self._subfmts = []
+        self._valence_parent = self
 
     def __call__(self, data, **kwargs):
         if self._subfmts:
@@ -27,10 +29,14 @@ class BaseAtom(Packer):
         data = DataConsumer(data)
         atomic = self.atomic(self, data, **kwargs)
         unpacked = {}
-        for entry in self.format_iterator(atomic):
-            value = entry.unpack_one(atomic)
-            if entry.name:
-                atomic[entry.name] = value
+        try:
+            for entry in self.format_iterator(atomic):
+                value = entry.unpack_one(atomic)
+                if entry.name:
+                    atomic[entry.name] = value
+        except Exception as err:
+            code.print_helpful_traceback()
+            raise Exception('Could not generate atomic instance: %s' % err)
         atomic.freeze()
         return atomic
 
@@ -166,10 +172,15 @@ class BaseAtom(Packer):
         self.append_format(format_entry)
         self._subfmts.append((format_entry, self._fmt))
         self._fmt = format_entry.sub_valences
+        self._valence_parent = format_entry
         return format_entry
 
     def sub_pop(self):
         format_entry, self._fmt = self._subfmts.pop()
+        try:
+            self._valence_parent = self._subfmts[-1][0]
+        except:
+            self._valence_parent = self
         return format_entry
 
     def sub_atom(self, name, atom):
@@ -198,6 +209,7 @@ class BaseAtom(Packer):
         formatter : ValenceFormatter
             Format entry
         """
+        formatter.valence_parent = self._valence_parent
         self._fmt.append(formatter)
         return formatter
 
