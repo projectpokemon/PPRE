@@ -21,7 +21,7 @@ class BaseAtom(Packer):
     def __init__(self):
         self._fmt = []
         self._subfmts = []
-        self._valence_parent = self
+        self.valence_parent = self
 
     def __call__(self, data, **kwargs):
         if self._subfmts:
@@ -172,15 +172,15 @@ class BaseAtom(Packer):
         self.append_format(format_entry)
         self._subfmts.append((format_entry, self._fmt))
         self._fmt = format_entry.sub_valences
-        self._valence_parent = format_entry
+        self.valence_parent = format_entry
         return format_entry
 
     def sub_pop(self):
         format_entry, self._fmt = self._subfmts.pop()
         try:
-            self._valence_parent = self._subfmts[-1][0]
+            self.valence_parent = self._subfmts[-1][0]
         except:
-            self._valence_parent = self
+            self.valence_parent = self
         return format_entry
 
     def sub_atom(self, name, atom):
@@ -209,7 +209,7 @@ class BaseAtom(Packer):
         formatter : ValenceFormatter
             Format entry
         """
-        formatter.valence_parent = self._valence_parent
+        formatter.valence_parent = self.valence_parent
         self._fmt.append(formatter)
         return formatter
 

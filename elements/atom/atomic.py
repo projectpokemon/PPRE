@@ -58,6 +58,10 @@ class AtomicInstance(object):
             super(AtomicInstance, self).__setattr__('_data', consumer)
         return value
 
+    def __repr__(self):
+        return 'Atomic instance at 0x%x (keys=%s)' % (id(self),
+                                                      repr(self.keys()))
+
     def __dir__(self):
         return self.keys()
 

@@ -24,3 +24,39 @@ class TemporaryAttr(object):
 
 
 temporary_attr = TemporaryAttr  # Export as function
+
+
+def getattr_override(target, name):
+    return object.__getattribute__(target, name)
+
+
+def setattr_override(target, name, value):
+    return object.__setattr__(target, name, value)
+
+
+def detattr_override(target, name):
+    return object.__delattr__(target, name)
+
+
+def de_attr(*args, **kwargs):
+    raise AttributeError
+
+
+class AttrClone(object):
+    """Wrapper that serves as a modifiable copy of an existing valence
+
+    It will get any attribute not set to it specifically from its base
+
+    It will set any attribute on itself.
+    """
+    def __init__(self, base):
+        setattr_override(self, '_base_copy', base)
+        setattr_override(self, '__repr__', de_attr)
+        setattr_override(self, '__str__', de_attr)
+
+    def __getattr__(self, name):
+        return getattr(getattr_override(self, '_base_copy'), name)
+
+    def __setattr__(self, name, value):
+        return getattr(getattr_override(self, '_base_copy'), name, value)
+

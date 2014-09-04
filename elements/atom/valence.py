@@ -3,10 +3,112 @@ import struct
 
 from rawdb.elements.atom.packer import Packer
 from rawdb.elements.atom.data import DataConsumer
-from rawdb.util import temporary_attr
+from rawdb.util import attr, code, temporary_attr
 
 
 VALUE_ZERO_FUNC = lambda atomic: 0
+
+
+def resolve_atomic_broken(atomic, valence):
+    """Pick a suitable atomic for this valence
+
+    Parameters
+    ----------
+    atomic : AtomicInstance
+        base atomic instance to be traversed
+    valence : ValenceFormatter
+        Target valence
+
+    Returns
+    -------
+    atomic : AtomicInstance
+        Appropriate atomic instance to use with supplied valence
+    """
+    print(atomic, valence)
+    _getattr = getattr
+    target = valence
+    while True:
+        valence = target
+        matched = False
+        while not matched:
+            if atomic._packer == valence:
+                matched = True
+            valence = valence.valence_parent
+            if valence == valence.valence_parent:
+                break
+        else:
+            break
+        if not atomic._parent:
+            break
+        atomic = atomic._parent
+    valence_stack = []
+    valent = target
+    while valence != valent and valent != valent.valence_parent:
+        valence_stack.insert(0, valent)
+        valent = valent.valence_parent
+    print(repr(atomic))
+    print(valence_stack)
+    valence_stack.pop()
+    for valence in valence_stack:
+        atomic = atomic[valence.name]
+    return atomic
+
+
+def resolve_atomic(atomic, valence):
+    """Pick a suitable atomic for this valence
+
+    Parameters
+    ----------
+    atomic : AtomicInstance
+        base atomic instance to be traversed
+    valence : ValenceFormatter
+        Target valence
+
+    Returns
+    -------
+    atomic : AtomicInstance
+        Appropriate atomic instance to use with supplied valence
+    """
+    dest_atomic = atomic
+    while dest_atomic._parent:
+        dest_atomic = dest_atomic._parent
+    valence_stack = []
+    valent = valence
+    while valent != dest_atomic._packer:
+        valence_stack.append(valent)
+        valent = valent.valence_parent
+    for valent in valence_stack[:0:-1]:
+        dest_atomic = dest_atomic[valent.name]
+    return dest_atomic
+
+
+def auto_atomic(target_attr):
+    """Decorator for methods that take an atomic parameter
+    """
+
+    def wrapper_func(self, *args, **kwargs):
+        old_args = (args, kwargs.copy())
+        builder = None
+        func_code = target_attr.func_code
+        vars = func_code.co_varnames
+        argnames = list(func_code.co_varnames[1:func_code.co_argcount])
+        """try:
+            argnames.remove('self')
+        except:
+            pass"""
+        kwargs.update(dict(zip(argnames, args)))
+        if 'atomic' in kwargs:
+            if not isinstance(kwargs['atomic'].data, DataConsumer):
+                builder = kwargs['atomic'].data
+            atomic = kwargs['atomic'] = resolve_atomic(kwargs['atomic'], self)
+        args = args[len(argnames):]
+        args = [kwargs.pop(arg) for arg in argnames]+list(args)
+        if builder is not None:
+            with temporary_attr(atomic, '_data', builder, True):
+                return target_attr(self, *args, **kwargs)
+        else:
+            return target_attr(self, *args, **kwargs)
+    return wrapper_func
 
 
 class Valence(Packer):
@@ -30,6 +132,50 @@ class Valence(Packer):
 
     def __rshift__(self, other):
         return ValenceShell(self, (ValenceShell.OP_RSHIFT, other))
+
+    def __getattribute__z(self, name):
+        target_attr = super(Valence, self).__getattribute__(name)
+        if hasattr(target_attr, '__call__'):
+
+            def wrapper_func(*args, **kwargs):
+                old_args = (args, kwargs.copy())
+                builder = None
+                base = target_attr._base_copy
+                func_code = code.get_func_code(target_attr)
+                vars = func_code.co_varnames
+                argnames = list(func_code.co_varnames[0:func_code.co_argcount])
+                try:
+                    argnames.remove('self')
+                except:
+                    pass
+                kwargs.update(dict(zip(argnames, args)))
+                print(target_attr, kwargs)
+                if 'atomic' in kwargs:
+                    if not isinstance(kwargs['atomic'].data, DataConsumer):
+                        builder = kwargs['atomic'].data
+                    kwargs['atomic'] = resolve_atomic(kwargs['atomic'], self)
+                args = args[len(argnames):]
+                args = [kwargs.pop(arg) for arg in argnames]+list(args)
+                if builder is not None:
+                    with temporary_attr(kwargs['atomic'], '_data', builder, True):
+                        return target_attr(*args, **kwargs)
+                else:
+                    return target_attr(*args, **kwargs)
+            """try:
+                # wrapper_func.func_dict = target_attr.func_dict
+                wrapper_func.func_name = target_attr.func_name
+            except AttributeError:
+                try:
+                    # wrapper_func.func_dict = dict(target_attr.__dict__)
+                    wrapper_func.func_name = target_attr.__class__.__name__
+                except AttributeError:
+                    pass
+            wrapper_func.__getattribute__ = target_attr.__getattribute__
+            wrapper_func.__setattr__ = target_attr.__setattr__"""
+            target_attr = attr.AttrClone(target_attr)
+            attr.setattr_override(target_attr, '__call__', wrapper_func)
+            return wrapper_func
+        return target_attr
 
 
 class ValenceFormatter(Valence):
@@ -61,6 +207,7 @@ class ValenceFormatter(Valence):
     def __init__(self, name, format_char=None, array_item=None,
                  sub_formats=None):
         self.name = name
+        self.valence_parent = None
         self.format_char = format_char
         self.array_item = array_item
         self.sub_formats = sub_formats
@@ -77,6 +224,22 @@ class ValenceFormatter(Valence):
         self.ignore = False
         self.params = {}
 
+    def __eq__(self, other):
+        try:
+            return self.valence_parent == other.valence_parent and \
+                self.name == other.name
+        except:
+            return False
+
+    def __repr__(self):
+        name = self.name
+        valence = self.valence_parent
+        while valence != valence.valence_parent:
+            name = valence.name + '.' + name
+            valence = valence.valence_parent
+        return '%s at 0x%x (name=%s)' % (self.__class__.__name__, id(self),
+                                         repr(name))
+
     def set_param(self, key, value):
         if key in self.valid_params:
             self.params[key] = value
@@ -89,9 +252,11 @@ class ValenceFormatter(Valence):
             return value(atomic)
         return value
 
+    @auto_atomic
     def get_value(self, atomic):
         return atomic[self.name]
 
+    @auto_atomic
     def set_value(self, atomic, value):
         atomic[self.name] = value
 
@@ -339,11 +504,13 @@ class SubValenceWrapper(Valence):
                         builder = kwargs['atomic'].data
                     kwargs['atomic'] = self.get_atomic(kwargs['atomic'],
                                                        self._base.namespace)
+                args = args[len(argnames):]
+                args = [kwargs.pop(arg) for arg in argnames]+list(args)
                 if builder is not None:
                     with temporary_attr(kwargs['atomic'], '_data', builder, True):
-                        return target_attr(**kwargs)
+                        return target_attr(*args, **kwargs)
                 else:
-                    return target_attr(**kwargs)
+                    return target_attr(*args, **kwargs)
             target_func.func_dict = target_attr.func_dict
             target_func.func_name = target_attr.func_name
             return target_func
