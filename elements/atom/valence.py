@@ -79,6 +79,8 @@ def resolve_atomic(atomic, valence):
         valent = valent.valence_parent
     for valent in valence_stack[:0:-1]:
         dest_atomic = dest_atomic[valent.name]
+        if valent.cindex is not None:
+            dest_atomic = dest_atomic[valent.cindex]
     return dest_atomic
 
 
@@ -208,6 +210,7 @@ class ValenceFormatter(Valence):
                  sub_formats=None):
         self.name = name
         self.valence_parent = None
+        self.cindex = None
         self.format_char = format_char
         self.array_item = array_item
         self.sub_formats = sub_formats
@@ -643,8 +646,10 @@ class ValenceArray(ValenceFormatter):
     def pack_one(self, atomic):
         data = atomic.data
         terminator = self.get_param('terminator', None)
-        for value in self.get_value(atomic):
+        for idx, value in enumerate(self.get_value(atomic)):
             self.sub_valence.get_value = lambda atomic: value
+            self.sub_valence.cindex = idx
+            print(self.sub_valence.name, self.sub_valence.get_value)
             data += self.sub_valence.pack_one(atomic)
         if terminator is not None:
             self.sub_valence.get_value = lambda atomic: terminator
