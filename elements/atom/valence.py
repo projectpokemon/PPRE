@@ -9,51 +9,6 @@ from rawdb.util import attr, code, temporary_attr
 VALUE_ZERO_FUNC = lambda atomic: 0
 
 
-def resolve_atomic_broken(atomic, valence):
-    """Pick a suitable atomic for this valence
-
-    Parameters
-    ----------
-    atomic : AtomicInstance
-        base atomic instance to be traversed
-    valence : ValenceFormatter
-        Target valence
-
-    Returns
-    -------
-    atomic : AtomicInstance
-        Appropriate atomic instance to use with supplied valence
-    """
-    print(atomic, valence)
-    _getattr = getattr
-    target = valence
-    while True:
-        valence = target
-        matched = False
-        while not matched:
-            if atomic._packer == valence:
-                matched = True
-            valence = valence.valence_parent
-            if valence == valence.valence_parent:
-                break
-        else:
-            break
-        if not atomic._parent:
-            break
-        atomic = atomic._parent
-    valence_stack = []
-    valent = target
-    while valence != valent and valent != valent.valence_parent:
-        valence_stack.insert(0, valent)
-        valent = valent.valence_parent
-    print(repr(atomic))
-    print(valence_stack)
-    valence_stack.pop()
-    for valence in valence_stack:
-        atomic = atomic[valence.name]
-    return atomic
-
-
 def resolve_atomic(atomic, valence):
     """Pick a suitable atomic for this valence
 
