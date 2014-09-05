@@ -159,6 +159,7 @@ class BaseAtom(Packer):
         """
         new_entry = ValenceArray(format_entry.name, format_entry, count,
                                  terminator)
+        new_entry.valence_parent = self.valence_parent
         return self.replace_format(format_entry, new_entry, pop=False)
 
     def seek(self, offset, start=None):

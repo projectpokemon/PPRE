@@ -545,6 +545,7 @@ class ValenceMulti(ValenceFormatter):
         unpacked = {}
         subatomic = self.subatomic(self, data, parent=atomic,
                                    namespace=self.namespace)
+        atomic[self.name] = subatomic  # Before processing. Replaced at end
         for entry in self.format_iterator(subatomic):
             value = entry.unpack_one(subatomic)
             if entry.name:
@@ -607,6 +608,7 @@ class ValenceArray(ValenceFormatter):
     def _get_count(self, atomic):
         return None
 
+    @auto_atomic
     def get_count(self, atomic):
         """Gets the number of entries of the stored value
 
