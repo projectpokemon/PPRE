@@ -505,12 +505,12 @@ class SubValenceWrapper(Valence):
                 if 'atomic' in kwargs:
                     if not isinstance(kwargs['atomic'].data, DataConsumer):
                         builder = kwargs['atomic'].data
-                    kwargs['atomic'] = self.get_atomic(kwargs['atomic'],
-                                                       self._base.namespace)
+                    atomic = kwargs['atomic'] = self.get_atomic(
+                        kwargs['atomic'], self._base.namespace)
                 args = args[len(argnames):]
                 args = [kwargs.pop(arg) for arg in argnames]+list(args)
                 if builder is not None:
-                    with temporary_attr(kwargs['atomic'], '_data', builder, True):
+                    with temporary_attr(atomic, '_data', builder, True):
                         return target_attr(*args, **kwargs)
                 else:
                     return target_attr(*args, **kwargs)
@@ -649,7 +649,6 @@ class ValenceArray(ValenceFormatter):
         for idx, value in enumerate(self.get_value(atomic)):
             self.sub_valence.get_value = lambda atomic: value
             self.sub_valence.cindex = idx
-            print(self.sub_valence.name, self.sub_valence.get_value)
             data += self.sub_valence.pack_one(atomic)
         if terminator is not None:
             self.sub_valence.get_value = lambda atomic: terminator
