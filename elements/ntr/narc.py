@@ -31,6 +31,17 @@ class FATBAtom(BaseAtom):
     def __init__(self):
         super(FATBAtom, self).__init__()
 
+        start = self.uint32('magic')
+        size = self.uint32('size')
+        num = self.uint16('num')
+        self.uint16('reserved')
+
+        self.sub_push('entries')
+        self.uint32('start')
+        self.uint32('end')
+        self.array(self.sub_pop(), count=num)
+        self.seek(size, start=start)
+
 
 class FNTBAtom(BaseAtom):
 
