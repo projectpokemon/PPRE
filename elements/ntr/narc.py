@@ -3,7 +3,29 @@ from rawdb.elements.atom import BaseAtom, AtomicInstance
 
 
 class NARCAtomicInstance(AtomicInstance):
-    pass
+    @property
+    def files(self):
+        return self.fimg.files
+
+    @property
+    def fimg(self):
+        fimg = self.__getattr__('fimg')
+        fimg.fatb = self.fatb
+        return fimg
+
+
+class FIMGAtomicInstance(AtomicInstance):
+    @property
+    def btaf(self):
+        return self.local_attr('btaf')
+
+    @btaf.setter
+    def btaf(self, value):
+        return self.local_attr('btaf', value)
+
+    @property
+    def files(self):
+        pass
 
 
 class NARCAtom(BaseAtom):
@@ -48,9 +70,20 @@ class FNTBAtom(BaseAtom):
     def __init__(self):
         super(FNTBAtom, self).__init__()
 
+        start = self.uint32('magic')
+        size = self.uint32('size')
+        self.data('data_', size-8)
+        self.seek(size, start=start)
+
 
 class FIMGAtom(BaseAtom):
+    atomic = FIMGAtomicInstance
 
     def __init__(self):
         super(FIMGAtom, self).__init__()
+
+        start = self.uint32('magic')
+        size = self.uint32('size')
+        self.data('data_', size-8)
+        self.seek(size, start=start)
 
