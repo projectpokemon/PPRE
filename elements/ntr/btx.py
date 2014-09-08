@@ -307,7 +307,7 @@ class TEXAtomicInstance(AtomicInstance):
         self.texdict.data_ = ''
         for texidx, palidx in imagemap:
             tex = []
-            format = 2
+            format = 3  # 16-color
             for pix in images[texidx].getdata():
                 alpha = pix[3]
                 if not alpha:  # color0=1
