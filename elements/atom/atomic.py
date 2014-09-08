@@ -32,6 +32,29 @@ class AtomicInstance(object):
     def writing(self):
         return isinstance(self.data, DataBuilder)
 
+    def local_attr(self, name, *args):
+        """Get/set a local attribute
+
+        Parameters
+        ----------
+        name : str
+            name of parameter
+        value : optional
+            if set, value to change attribute to
+
+        Returns
+        -------
+        value
+            if attribute is being gotten
+        None
+            if attribute is being set
+        """
+        if len(args):
+            return super(AtomicInstance, self).__setattr__('_local_'+name,
+                                                           args[0])
+        else:
+            return super(AtomicInstance, self).__getattr__('_local_'+name)
+
     def __getattr__(self, name):
         return self._attrs[name]
 
