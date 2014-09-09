@@ -34,8 +34,11 @@ def resolve_atomic(atomic, valence):
         dest_atomic = dest_atomic._parent
     valence_stack = []
     valent = valence
+    packer = dest_atomic._packer
     while valent != dest_atomic._packer:
         valence_stack.append(valent)
+        if valent == valent.valence_parent:
+            raise ValueError('looped')
         valent = valent.valence_parent
     for valent in valence_stack[:0:-1]:
         dest_atomic = dest_atomic[valent.name]
@@ -198,7 +201,10 @@ class ValenceFormatter(Valence):
         name = self.name
         valence = self.valence_parent
         while valence != valence.valence_parent:
-            name = valence.name + '.' + name
+            try:
+                name = valence.name + '.' + name
+            except:
+                break
             valence = valence.valence_parent
         return '%s at 0x%x (name=%s)' % (self.__class__.__name__, id(self),
                                          repr(name))
@@ -377,6 +383,8 @@ class ValenceShell(Valence):
 
     def get_value(self, atomic):
         value = self.first.get_value(atomic)
+        if not value:
+            print(self.first, atomic.size, value)
         direction = -1 if atomic.writing else 1
         for operation, sub in self.others:
             if operation*direction == self.OP_ADD:
@@ -393,6 +401,7 @@ class ValenceShell(Valence):
             elif operation*direction == self.OP_RSHIFT:
                 # Careful here...
                 value >>= self._get_value(sub, atomic)
+        print(value, direction, operation)
         return value
 
     def __add__(self, other):
@@ -533,13 +542,16 @@ class ValenceMulti(ValenceFormatter):
 class ValenceSubAtom(ValenceFormatter):
 
     def __init__(self, name, atom):
-        super(ValenceSubAtom, self).__init__(name)
         self.atom = atom
+        for fmt in atom._fmt:
+            assert fmt.valence_parent == atom
+            fmt.valence_parent = self
         self.namespace = []
-        self.name = name
+        super(ValenceSubAtom, self).__init__(name)
 
     def unpack_one(self, atomic):
-        atom = self.atom(atomic.data, namespace=self.namespace)
+        atomic[self.name] = atomic  # Before processing. Replaced at end
+        atom = self.atom(atomic.data, parent=atomic, namespace=self.namespace)
         atomic.data.consume(atom.data.exhausted)
         return atom
 
@@ -548,6 +560,17 @@ class ValenceSubAtom(ValenceFormatter):
         with temporary_attr(value, '_data', atomic.data, True):
             str(value)
             return ''
+
+    @property
+    def valence_parent(self):
+        if self.atom.valence_parent == self.atom:
+            return self
+        else:
+            return self.atom.valence_parent
+
+    @valence_parent.setter
+    def valence_parent(self, value):
+        self.atom.valence_parent = value
 
     def __getattr__(self, name):
         entry = self.atom.find_format(name)
@@ -593,6 +616,7 @@ class ValenceArray(ValenceFormatter):
         total = 0
         arr = []
         count = self.get_count(atomic)
+        print(self, count)
         terminator = self.get_param('terminator', atomic)
         while 1:
             if count is not None and total >= count:

@@ -63,7 +63,7 @@ class FATBAtom(BaseAtom):
         self.uint32('start')
         self.uint32('end')
         self.array(self.sub_pop(), count=num)
-        self.seek(size, start=start)
+        #self.seek(size, start=start)
 
 
 class FNTBAtom(BaseAtom):
@@ -73,8 +73,8 @@ class FNTBAtom(BaseAtom):
 
         start = self.uint32('magic')
         size = self.uint32('size')
-        self.data('data_', size-8)
-        self.seek(size, start=start)
+        #self.data('data_', size-8)
+        #self.seek(size, start=start)
 
 
 class FIMGAtom(BaseAtom):
@@ -85,6 +85,6 @@ class FIMGAtom(BaseAtom):
 
         start = self.uint32('magic')
         size = self.uint32('size')
-        self.data('data_', size-8)
+        #self.data('data_', count=size-8)
         self.seek(size, start=start)
 

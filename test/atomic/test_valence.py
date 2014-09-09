@@ -3,6 +3,7 @@ import unittest
 
 from rawdb.elements.atom.base_atom import BaseAtom
 from rawdb.elements.atom.valence import *
+from rawdb.elements.atom.valence import ValenceCopy, resolve_atomic
 
 
 class ValenceTestCase(unittest.TestCase):
