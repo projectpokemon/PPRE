@@ -47,13 +47,17 @@ class AtomicInstance(object):
         value
             if attribute is being gotten
         None
-            if attribute is being set
+            if attribute is being set or gotten attribute has no value
         """
         if len(args):
             return super(AtomicInstance, self).__setattr__('_local_'+name,
                                                            args[0])
         else:
-            return super(AtomicInstance, self).__getattr__('_local_'+name)
+            try:
+                return super(AtomicInstance,
+                             self).__getattribute__('_local_'+name)
+            except AttributeError:
+                return None
 
     def __getattr__(self, name):
         return self._attrs[name]
@@ -82,8 +86,8 @@ class AtomicInstance(object):
         return value
 
     def __repr__(self):
-        return 'Atomic instance at 0x%x (keys=%s)' % (id(self),
-                                                      repr(self.keys()))
+        return '%s at 0x%x (keys=%s)' % (self.__class__.__name__, id(self),
+                                         repr(self.keys()))
 
     def __dir__(self):
         return self.keys()

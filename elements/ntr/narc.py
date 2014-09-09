@@ -16,16 +16,17 @@ class NARCAtomicInstance(AtomicInstance):
 
 class FIMGAtomicInstance(AtomicInstance):
     @property
-    def btaf(self):
-        return self.local_attr('btaf')
+    def fatb(self):
+        return self.local_attr('fatb')
 
-    @btaf.setter
-    def btaf(self, value):
-        return self.local_attr('btaf', value)
+    @fatb.setter
+    def fatb(self, value):
+        return self.local_attr('fatb', value)
 
     @property
     def files(self):
-        pass
+        return [self.data_[entry.start:entry.end]
+                for entry in self.fatb.entries]
 
 
 class NARCAtom(BaseAtom):
