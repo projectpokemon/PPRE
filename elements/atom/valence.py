@@ -6,6 +6,11 @@ from rawdb.elements.atom.data import DataConsumer
 from rawdb.util import attr, code, temporary_attr
 
 
+__all__ = ['ValenceFormatter', 'ValenceArray',  'ValenceMulti',
+           'ValenceData', 'ValenceSeek', 'ValencePadding',
+           'ValenceSubAtom', 'ValenceDebug']
+
+
 VALUE_ZERO_FUNC = lambda atomic: 0
 
 
@@ -534,7 +539,9 @@ class ValenceSubAtom(ValenceFormatter):
         self.name = name
 
     def unpack_one(self, atomic):
-        return self.atom(atomic.data, namespace=self.namespace)
+        atom = self.atom(atomic.data, namespace=self.namespace)
+        atomic.data.consume(atom.data.exhausted)
+        return atom
 
     def pack_one(self, atomic):
         value = self.get_value(atomic)
@@ -685,4 +692,24 @@ class ValenceSeek(ValenceFormatter):
             atomic.data[atomic.data.seek_map[self.offset_valence.identity()]] = \
                 self.offset_valence.pack_one(atomic)
         self.offset_valence.get_value = VALUE_ZERO_FUNC
+        return ''
+
+
+class ValenceDebug(ValenceFormatter):
+    def __init__(self, unpack_func=None, pack_func=None):
+        super(ValenceDebug, self).__init__(None)
+        self.unpack_func = unpack_func
+        self.pack_func = pack_func
+
+    def debug(self, *args):
+        print(args)
+
+    def pack_one(self, atomic):
+        if self.pack_func:
+            self.debug(self.pack_func(atomic))
+        return ''
+
+    def unpack_one(self, atomic):
+        if self.unpack_func:
+            self.debug(self.unpack_func(atomic))
         return ''

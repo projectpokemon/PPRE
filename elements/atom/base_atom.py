@@ -5,8 +5,7 @@ from rawdb.util import code
 from rawdb.elements.atom.atomic import AtomicInstance
 from rawdb.elements.atom.packer import Packer
 from rawdb.elements.atom.data import DataConsumer
-from rawdb.elements.atom.valence import ValenceFormatter, ValenceArray, \
-    ValenceMulti, ValenceData, ValenceSeek, ValencePadding, ValenceSubAtom
+from rawdb.elements.atom.valence import *
 
 
 class BaseAtom(Packer):
@@ -164,6 +163,9 @@ class BaseAtom(Packer):
 
     def seek(self, offset, start=None):
         return self.append_format(ValenceSeek(offset, start))
+
+    def debug(self, *args):
+        return self.append_format(ValenceDebug(*args))
 
     def sub_push(self, name, subatomic=None):
         namespace = [entry[0].name for entry in self._subfmts]+[name]
