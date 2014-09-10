@@ -26,7 +26,11 @@ class BaseAtom(Packer):
         if self._subfmts:
             raise RuntimeError('Subatoms have not returned fully')
         data = DataConsumer(data)
+        dest_child = kwargs.pop('dest_child', None)
         atomic = self.atomic(self, data, **kwargs)
+        if dest_child:
+            # Patch the parent with this atomic before iterating
+            kwargs['parent'][dest_child] = atomic
         unpacked = {}
         try:
             for entry in self.format_iterator(atomic):
