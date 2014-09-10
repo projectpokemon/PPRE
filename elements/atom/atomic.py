@@ -109,3 +109,12 @@ class ThinAtomicInstance(AtomicInstance):
         if self._data is not None:
             self._data += self._value
         return self._value
+
+
+class DictAtomicInstance(AtomicInstance):
+    def __init__(self, atom, attrs):
+        super(AtomicInstance, self).__setattr__('_attrs', attrs)
+        super(AtomicInstance, self).__setattr__('_packer', atom)
+        super(AtomicInstance, self).__setattr__('_data', None)
+        super(AtomicInstance, self).__setattr__('_frozen', True)
+        super(AtomicInstance, self).__setattr__('_parent', None)

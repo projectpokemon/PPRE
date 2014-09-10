@@ -1,5 +1,5 @@
 
-from rawdb.elements.atom import BaseAtom, AtomicInstance
+from rawdb.elements.atom import BaseAtom, AtomicInstance, DictAtomicInstance
 
 
 class NARCAtomicInstance(AtomicInstance):
@@ -12,6 +12,10 @@ class NARCAtomicInstance(AtomicInstance):
         fimg = self.__getattr__('fimg')
         fimg.fatb = self.fatb
         return fimg
+
+    def __str__(self):
+        self.fimg.update()
+        return super(NARCAtomicInstance, self).__str__()
 
 
 class FIMGAtomicInstance(AtomicInstance):
@@ -27,6 +31,19 @@ class FIMGAtomicInstance(AtomicInstance):
     def files(self):
         return [self.data_[entry.start:entry.end]
                 for entry in self.fatb.entries]
+
+    def update(self):
+        offset = 0
+        entries = []
+        entry = self.fatb._packer.find_format('entries').sub_valence
+        for data in self.files:
+            size = len(data)
+            self.data_ += data
+            entries.append(DictAtomicInstance(
+                self.fatb._packer.find_format('entries').sub_valence,
+                {'start': offset, 'end': offset+size}))
+            offset += size
+        self.fatb.entries = entries
 
 
 class NARCAtom(BaseAtom):

@@ -20,8 +20,9 @@
 
 """
 
-from atomic import AtomicInstance
+from atomic import AtomicInstance, ThinAtomicInstance, DictAtomicInstance
 from base_atom import BaseAtom
 from valence import ValenceFormatter
 
-__all__ = ['AtomicInstance', 'BaseAtom', 'ValenceFormatter']
+__all__ = ['AtomicInstance', 'ThinAtomicInstance', 'DictAtomicInstance',
+           'BaseAtom', 'ValenceFormatter']
