@@ -383,8 +383,6 @@ class ValenceShell(Valence):
 
     def get_value(self, atomic):
         value = self.first.get_value(atomic)
-        if not value:
-            print(self.first, atomic.size, value)
         direction = -1 if atomic.writing else 1
         for operation, sub in self.others:
             if operation*direction == self.OP_ADD:
@@ -401,7 +399,6 @@ class ValenceShell(Valence):
             elif operation*direction == self.OP_RSHIFT:
                 # Careful here...
                 value >>= self._get_value(sub, atomic)
-        print(value, direction, operation)
         return value
 
     def __add__(self, other):
@@ -616,7 +613,6 @@ class ValenceArray(ValenceFormatter):
         total = 0
         arr = []
         count = self.get_count(atomic)
-        print(self, count)
         terminator = self.get_param('terminator', atomic)
         while 1:
             if count is not None and total >= count:
@@ -658,7 +654,7 @@ class ValenceSeek(ValenceFormatter):
         super(ValenceSeek, self).__init__(None)
         if isinstance(offset, Valence):
             self._get_offset = offset.get_value
-            offset.get_value = lambda atomic: 0
+            # offset.get_value = lambda atomic: 0
             tmp_pack1 = offset.pack_one
 
             def pack_one(atomic):
