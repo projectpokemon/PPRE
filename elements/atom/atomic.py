@@ -1,5 +1,6 @@
 
 from rawdb.elements.atom.data import DataBuilder
+from rawdb.util import code
 
 
 class AtomicInstance(object):
@@ -80,7 +81,11 @@ class AtomicInstance(object):
         if not isinstance(self.data, DataBuilder):
             consumer = self.data
             super(AtomicInstance, self).__setattr__('_data', DataBuilder())
-        value = str(self._packer.pack(self, self.data))
+        try:
+            value = str(self._packer.pack(self, self.data))
+        except Exception as err:
+            code.print_helpful_traceback()
+            raise Exception('Could not pack atomic instance: %s' % err)
         if consumer is not None:
             super(AtomicInstance, self).__setattr__('_data', consumer)
         return value

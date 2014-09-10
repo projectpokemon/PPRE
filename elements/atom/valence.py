@@ -581,8 +581,8 @@ class ValenceArray(ValenceFormatter):
         ['sub_valence', 'count', 'terminator']
 
     def __init__(self, name, sub_valence, count=None, terminator=None):
-        super(ValenceArray, self).__init__(name)
         self.sub_valence = sub_valence
+        super(ValenceArray, self).__init__(name)
         try:
             self._get_count = count.get_value
             count.get_value = self.get_count
@@ -608,6 +608,14 @@ class ValenceArray(ValenceFormatter):
             return len(self.get_value(atomic))
         except:
             return self._get_count(atomic)
+
+    @property
+    def valence_parent(self):
+        return self.sub_valence.valence_parent
+
+    @valence_parent.setter
+    def valence_parent(self, value):
+        self.sub_valence.valence_parent = value
 
     def unpack_one(self, atomic):
         total = 0
