@@ -98,3 +98,9 @@ class NARC:
         return ret
     def toFile(self, f):
         f.write(self.toString())
+
+    def __getitem__(self, key):
+        return self.gmif.files[key]
+
+    def __len__(self):
+        return len(self.gmif.files)
