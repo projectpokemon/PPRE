@@ -1,9 +1,13 @@
 
 import struct
-from StringIO import StringIO
+from six import StringIO
+
+__all__ = ['BinaryIO']
 
 
 class StructReaders:
+    """Cached built structs
+    """
     int8 = struct.Struct('b')
     uint8 = struct.Struct('B')
     int16 = struct.Struct('h')
@@ -13,6 +17,18 @@ class StructReaders:
 
 
 class BinaryIO(StringIO):
+    """Reader and Writer for binary data.
+
+    This provides useful methods for reading and writing specific binary
+    types.
+
+    To use a file handle, use BinaryIO.adapter(handle)
+
+    Parameters
+    ----------
+    data : string
+        Binary string to be used
+    """
     def __init__(self, data=''):
         StringIO.__init__(self, data)
 
@@ -52,8 +68,17 @@ class BinaryIO(StringIO):
     def writeInt32(self, value):
         self.write(StructReaders.int32.pack(value))
 
+    @staticmethod
+    def adapter(handle):
+        """Create a BinaryIOAdapter around a file handle"""
+        return BinaryIOAdapter(handle)
+
 
 class BinaryIOAdapter(BinaryIO):
+    """Adapter for file handles
+
+    Allows all of the BinaryIO methods to be used without a stringio object
+    """
     def __init__(self, handle):
         BinaryIO.__init__(self)
         self.handle = handle
