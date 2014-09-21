@@ -16,6 +16,32 @@ class StructReaders:
     uint32 = struct.Struct('I')
 
 
+class SeekReturn(object):
+    """Context for returning to a position after seeking to it
+
+    Example
+    -------
+    >>> writer = BinaryIO()
+    >>> writer.writeUInt32(0)
+    >>> writer.writeUInt32(0)
+    >>> with writer.seek(0):
+    ...     writer.writeUInt8(0xFF)
+    ...
+    >>> writer.writeUInt8(0xEE)
+    >>> writer.getvalue()
+    '\xff\x00\x00\x00\x00\x00\x00\x00\xee'
+    """
+    def __init__(self, handle, position):
+        self.handle = handle
+        self.position = position
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, type_, value, traceback):
+        self.handle.seek(self.position)
+
+
 class BinaryIO(StringIO):
     """Reader and Writer for binary data.
 
@@ -68,6 +94,16 @@ class BinaryIO(StringIO):
     def writeInt32(self, value):
         self.write(StructReaders.int32.pack(value))
 
+    def seek(self, offset, whence=0):
+        """Seeks to the given offset
+
+        If used in a with statement, it returns to the previous position
+        after the context exits.
+        """
+        position = self.tell()
+        StringIO.seek(self, offset, whence)
+        return SeekReturn(self, position)
+
     @staticmethod
     def adapter(handle):
         """Create a BinaryIOAdapter around a file handle"""
@@ -90,7 +126,9 @@ class BinaryIOAdapter(BinaryIO):
         self.handle.write(value)
 
     def seek(self, offset, whence=0):
+        position = self.tell()
         self.handle.seek(offset, whence)
+        return SeekReturn(self, position)
 
     def tell(self):
         return self.handle.tell()
