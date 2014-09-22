@@ -129,3 +129,34 @@ class FNTB(object):
         with writer.seek(sizeofs):
             writer.writeUInt32(size)
         return writer
+
+
+class FIMG(object):
+    def __init__(self, narc):
+        self.narc = narc
+        self.magic = 'GMIF'
+        self.files = []
+
+    def load(self, reader):
+        start = reader.tell()
+        self.magic = reader.read(4)
+        size = reader.readUInt32()
+        data = reader.read(size-8)
+        self.files.extend([data[entry]
+                           for entry in self.narc.fatb.entries_])
+
+    def save(self, writer=None):
+        if writer is None:
+            writer = BinaryIO()
+        start = writer.tell()
+        writer.write(self.magic)
+        sizeofs = writer.tell()
+        writer.writeUInt32(0)
+        data = []
+        for fdata, entry in zip(self.files, self.narc.fatb.entries):
+            data[entry] = fdata
+        writer.write(''.join(data))
+        size = writer.tell()-start
+        with writer.seek(sizeofs):
+            writer.writeUInt32(size)
+        return writer
