@@ -21,5 +21,5 @@ class Archive(object):
     def __len__(self):
         return len(self.files)
 
-    def save(self):
-        pass
+    def save(self, writer=None):
+        return writer
