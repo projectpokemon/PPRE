@@ -1,4 +1,6 @@
 
+from collections import namedtuple
+
 from rawdb.generic.archive import Archive
 from rawdb.util.io import BinaryIO
 
@@ -50,6 +52,52 @@ class NARC(Archive):
         writer = self.fntb.save(writer)
         writer = self.fimg.save(writer)
         writer.writeUInt32(0)
+        size = writer.tell()-start
+        with writer.seek(sizeofs):
+            writer.writeUInt32(size)
+        return writer
+
+
+class FATB(object):
+    def __init__(self, narc):
+        self.narc = narc
+        self.magic = 'BTAF'
+        self.entries_ = []
+
+    @property
+    def num(self):
+        return len(self.narc.files)
+
+    @property
+    def entries(self):
+        """List of slice objects that describe file image locations
+        """
+        pass
+
+    def load(self, reader):
+        start = reader.tell()
+        self.magic = reader.read(4)
+        size = reader.readUInt32()
+        num = reader.readUInt16()
+        reader.readUInt16()
+        for i in xrange(num):
+            self.entries_.append(slice(reader.readUInt32(),
+                                       reader.readUInt32()))
+        if size:
+            reader.seek(start+size)
+
+    def save(self, writer=None):
+        if writer is None:
+            writer = BinaryIO()
+        start = writer.tell()
+        writer.write(self.magic)
+        sizeofs = writer.tell()
+        writer.writeUInt32(0)
+        writer.writeUInt16(self.num)
+        writer.writeUInt16(0)
+        for entry in self.entries:
+            writer.writeUInt32(entry.start)
+            writer.writeUInt32(entry.stop)
         size = writer.tell()-start
         with writer.seek(sizeofs):
             writer.writeUInt32(size)
