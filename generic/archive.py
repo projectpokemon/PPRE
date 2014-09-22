@@ -4,7 +4,7 @@ import abc
 
 class Archive(object):
     __metaclass__ = abc.ABCMeta
-    files = abc.abstractproperty()
+    files = {}
 
     def get(self, ref):
         return self.files[ref]

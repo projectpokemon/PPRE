@@ -59,37 +59,37 @@ class BinaryIO(StringIO):
         StringIO.__init__(self, data)
 
     def readUInt8(self):
-        return StructReaders.uint8.unpack(self.read(1))
+        return StructReaders.uint8.unpack(self.read(1))[0]
 
     def writeUInt8(self, value):
         self.write(StructReaders.uint8.pack(value))
 
     def readInt8(self):
-        return StructReaders.int8.unpack(self.read(1))
+        return StructReaders.int8.unpack(self.read(1))[0]
 
     def writeInt8(self, value):
         self.write(StructReaders.int8.pack(value))
 
     def readUInt16(self):
-        return StructReaders.uint16.unpack(self.read(2))
+        return StructReaders.uint16.unpack(self.read(2))[0]
 
     def writeUInt16(self, value):
         self.write(StructReaders.uint16.pack(value))
 
     def readInt16(self):
-        return StructReaders.int16.unpack(self.read(2))
+        return StructReaders.int16.unpack(self.read(2))[0]
 
     def writeInt16(self, value):
         self.write(StructReaders.int16.pack(value))
 
     def readUInt32(self):
-        return StructReaders.uint32.unpack(self.read(4))
+        return StructReaders.uint32.unpack(self.read(4))[0]
 
     def writeUInt32(self, value):
         self.write(StructReaders.uint32.pack(value))
 
     def readInt32(self):
-        return StructReaders.int32.unpack(self.read(4))
+        return StructReaders.int32.unpack(self.read(4))[0]
 
     def writeInt32(self, value):
         self.write(StructReaders.int32.pack(value))

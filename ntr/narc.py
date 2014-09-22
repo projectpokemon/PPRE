@@ -14,6 +14,7 @@ class NARC(Archive):
         self.fatb = FATB(self)
         self.fntb = FNTB(self)
         self.fimg = FIMG(self)
+        self.files = self.fimg.files
         if reader is not None:
             self.load(reader)
 
