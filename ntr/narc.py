@@ -73,7 +73,13 @@ class FATB(object):
     def entries(self):
         """List of slice objects that describe file image locations
         """
-        pass
+        entries = []
+        start = 0
+        for data in self.narc.fimg.files:
+            stop = start+len(data)
+            entries.append(slice(start, stop))
+            start = stop+((-stop) % 4)
+        return entries
 
     def load(self, reader):
         start = reader.tell()
@@ -155,6 +161,9 @@ class FIMG(object):
         writer.writeUInt32(0)
         data = []
         for fdata, entry in zip(self.files, self.narc.fatb.entries):
+            total = len(data)
+            if entry.start > total:
+                data += '\x00'*(entry.start-total)
             data[entry] = fdata
         writer.write(''.join(data))
         size = writer.tell()-start
