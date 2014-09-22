@@ -102,3 +102,30 @@ class FATB(object):
         with writer.seek(sizeofs):
             writer.writeUInt32(size)
         return writer
+
+
+class FNTB(object):
+    def __init__(self, narc):
+        self.narc = narc
+        self.magic = 'BTNF'
+
+    def load(self, reader):
+        start = reader.tell()
+        self.magic = reader.read(4)
+        size = reader.readUInt32()
+        if size:
+            reader.seek(start+size)
+
+    def save(self, writer=None):
+        if writer is None:
+            writer = BinaryIO()
+        start = writer.tell()
+        writer.write(self.magic)
+        sizeofs = writer.tell()
+        writer.writeUInt32(0)
+        writer.writeUInt32(4)
+        writer.writeUInt32(0x10000)
+        size = writer.tell()-start
+        with writer.seek(sizeofs):
+            writer.writeUInt32(size)
+        return writer
