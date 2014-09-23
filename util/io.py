@@ -94,6 +94,40 @@ class BinaryIO(StringIO):
     def writeInt32(self, value):
         self.write(StructReaders.int32.pack(value))
 
+    def writeAlign(self, alignment=4, char='\x00'):
+        """Writes char multiple times to align the writer
+
+        Parameters
+        ----------
+        alignment : int
+            Positive number to align with. The write buffer will
+            be filled until it is divisible by this number exactly
+        char : string
+            String that will be written to the space. If multiple
+            characters, it will get truncated the last time.
+        """
+        position = self.tell()
+        offset = position+((-position) % alignment)
+        self.writePadding(offset, char)
+
+    def writePadding(self, offset, char='\x00'):
+        """Writes char multiple times until offset is met
+
+        Parameters
+        ----------
+        offset : int
+            Destination offset. The buffer will be here upon
+            completion of the write.
+        char : string
+            String that will be written to the space. If multiple
+            characters, it will get truncated the last time.
+        """
+        position = self.tell()
+        if offset <= position:
+            return
+        data = char*((offset-position)/len(char)+1)
+        self.write(data[:offset-position])
+
     def seek(self, offset, whence=0):
         """Seeks to the given offset
 
