@@ -2,6 +2,7 @@
 from collections import namedtuple
 
 from rawdb.generic.archive import Archive
+from rawdb.ntr.g3d.resdict import G3DResDict
 from rawdb.util.io import BinaryIO
 
 
