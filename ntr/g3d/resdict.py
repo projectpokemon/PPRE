@@ -71,3 +71,4 @@ class G3DResDict(object):
         with writer.seek(sizeofs):
             writer.writeUInt16(size)
             writer.writeUInt16(refofs)
+        return writer
