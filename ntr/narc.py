@@ -9,7 +9,7 @@ class NARC(Archive):
     def __init__(self, reader=None):
         self.magic = 'NARC'
         self.endian = 0xFFFE
-        self.version = 0x100
+        self.version = 0x102
         self.numblocks = 3
         self.fatb = FATB(self)
         self.fntb = FNTB(self)

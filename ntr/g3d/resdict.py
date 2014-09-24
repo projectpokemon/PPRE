@@ -13,6 +13,7 @@ class G3DResDict(object):
         self.data = []
         self.names = []
         self.sizeunit = 4
+        self.version = 2
 
     def load(self, reader):
         start = reader.tell()
