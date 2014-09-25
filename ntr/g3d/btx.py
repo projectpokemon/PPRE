@@ -18,7 +18,7 @@ class TexInfo(object):
 
     def load(self, reader):
         self.vramkey = reader.readUInt32()
-        self._datasize = reader.readUInt16() << 3
+        self._datasize = reader.readUInt16()
         if self.infotype != TexInfo.INFO_PAL:
             self._lookupofs = reader.readUInt16()
         reader.readUInt16()  # Runtime-loaded
@@ -28,6 +28,9 @@ class TexInfo(object):
         self._dataofs = reader.readUInt32()
         if self.infotype == TexInfo.INFO_TEX4X4:
             self._paldataofs = reader.readUInt32()
+            self._datasize <<= 2
+        else:
+            self._datasize <<= 3
 
     def save(self, writer=None):
         """
@@ -51,6 +54,10 @@ class TexInfo(object):
             writer.writeUInt32(0)
 
 
+TexParam = namedtuple('TexParam', 'ofs width height format color0')
+PalParam = namedtuple('PalParam', 'ofs count4')
+
+
 class TEX(Archive):
     def __init__(self, reader=None):
         self.magic = 'TEX0'
@@ -61,7 +68,39 @@ class TEX(Archive):
         self.texdict = G3DResDict()
         self.texdict.sizeunit = 8
         self.paldict = G3DResDict()
+        self.texparams = []
+        self.palparams = []
+        if reader is not None:
+            self.load(reader)
 
     def load(self, reader):
         reader = BinaryIO()
+        start = reader.tell()
+        self.magic = reader.read(4)
+        size = reader.readUInt32()
         self.texinfo.load(reader)
+        self.tex4x4info.load(reader)
+        self.palinfo.load(reader)
+        # Build dicts
+        reader.seek(start+self.texinfo._lookupofs)
+        self.texdict.load(reader)
+        reader.seek(start+self.palinfo._lookupofs)
+        self.paldict.load(reader)
+        # Read data.
+        reader.seek(start+self.texinfo._dataofs)
+        for i in xrange(self.texdict.num):
+            imgParam = reader.readUInt32()
+            extra = reader.readUInt32()
+            self.texparams.append(TexParam((imgParam & 0xFFFF) << 3,
+                                           8 << ((imgParam >> 20) & 0x7),
+                                           8 << ((imgParam >> 23) & 0x7),
+                                           (imgParam >> 26) & 0x7,
+                                           (imgParam >> 29) & 0x1))
+        reader.seek(start+self.palinfo._dataofs)
+        for i in xrange(self.paldict.num):
+            offset = reader.readUInt16()
+            flag = reader.readUInt16()
+            self.palparams.append(PalParam(offset << 3, flag))
+        # TODO 4x4
+        if size:
+            reader.seek(start+size)

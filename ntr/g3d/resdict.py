@@ -15,6 +15,10 @@ class G3DResDict(object):
         self.sizeunit = 4
         self.version = 2
 
+    @property
+    def num(self):
+        return len(self.data)
+
     def load(self, reader):
         start = reader.tell()
         self.version = reader.readUInt8()
