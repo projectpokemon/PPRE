@@ -1,5 +1,6 @@
 
 from collections import namedtuple
+import struct
 
 from rawdb.generic.archive import Archive
 from rawdb.ntr.g3d.resdict import G3DResDict
@@ -91,23 +92,25 @@ class TEX(Archive):
         # Build dicts
         reader.seek(start+self.texinfo._lookupofs)
         self.texdict.load(reader)
-        reader.seek(start+self.palinfo._lookupofs)
-        self.paldict.load(reader)
-        # Read data.
-        reader.seek(start+self.texinfo._dataofs)
+        self.texparams = []
         for i in xrange(self.texdict.num):
-            imgParam = reader.readUInt32()
-            extra = reader.readUInt32()
+            imgParam, extra = struct.unpack('II', self.texdict.data[i])
             self.texparams.append(TexParam((imgParam & 0xFFFF) << 3,
                                            8 << ((imgParam >> 20) & 0x7),
                                            8 << ((imgParam >> 23) & 0x7),
                                            (imgParam >> 26) & 0x7,
                                            (imgParam >> 29) & 0x1))
-        reader.seek(start+self.palinfo._dataofs)
+        reader.seek(start+self.palinfo._lookupofs)
+        self.paldict.load(reader)
+        self.palparams = []
         for i in xrange(self.paldict.num):
-            offset = reader.readUInt16()
-            flag = reader.readUInt16()
+            offset, flag = struct.unpack('HH', self.paldict.data[i])
             self.palparams.append(PalParam(offset << 3, flag))
+        # Read data.
+        reader.seek(start+self.texinfo._dataofs)
+        self.texdata = reader.read(self.texinfo._datasize)
+        reader.seek(start+self.palinfo._dataofs)
+        self.paldata = reader.read(self.palinfo._datasize)
         # TODO 4x4
         if size:
             reader.seek(start+size)
