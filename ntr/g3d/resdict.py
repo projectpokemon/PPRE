@@ -24,6 +24,7 @@ class G3DResDict(object):
         self.version = reader.readUInt8()
         num = reader.readUInt8()
         size = reader.readUInt16()
+        reader.readUInt16()
         refofs = reader.readUInt16()
         self.nodes = []
         for i in xrange(num):
@@ -46,6 +47,7 @@ class G3DResDict(object):
         writer.writeUInt8(num)
         sizeofs = writer.tell()
         writer.writeUInt16(0)
+        writer.writeUInt16(8)
         writer.writeUInt16(0)  # refofs
         for i in xrange(num):
             # TODO: Build PTree. Although it isn't actually used
@@ -74,5 +76,6 @@ class G3DResDict(object):
         size = writer.tell()-start
         with writer.seek(sizeofs):
             writer.writeUInt16(size)
+            writer.writeUInt16(8)
             writer.writeUInt16(refofs)
         return writer

@@ -74,7 +74,6 @@ class TEX(Archive):
             self.load(reader)
 
     def load(self, reader):
-        reader = BinaryIO()
         start = reader.tell()
         self.magic = reader.read(4)
         size = reader.readUInt32()
