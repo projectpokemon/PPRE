@@ -79,6 +79,8 @@ class TEX(Archive):
         self.paldict = G3DResDict()
         self.texparams = []
         self.palparams = []
+        self.texdata = ''
+        self.paldata = ''
         if reader is not None:
             self.load(reader)
 
@@ -129,12 +131,24 @@ class TEX(Archive):
         ofs = writer.tell()-start
         with writer.seek(self.texinfo._lookupofs_ofs):
             writer.writeUInt16(ofs)
+        for i in xrange(self.texdict.num):
+            texparam = self.texparams[i]
+            self.texdict.data[i] = \
+                struct.pack('II',
+                            (texparam.ofs >> 3) |
+                            ((log2(texparam.width) >> 3) << 20) |
+                            ((log2(texparam.height) >> 3) << 23) |
+                            (texparam.format << 26) |
+                            (texparam.color0 << 29), 0)
         writer = self.texdict.save(writer)
 
         writer.writeAlign(4)
         ofs = writer.tell()-start
         with writer.seek(self.palinfo._lookupofs_ofs):
             writer.writeUInt16(ofs)
+        for i in xrange(self.texdict.num):
+            param = self.palparams[i]
+            self.paldict.data[i] = struct.pack('HH', param.ofs, param.count4)
         writer = self.paldict.save(writer)
 
         writer.writeAlign(8)
@@ -142,14 +156,7 @@ class TEX(Archive):
         with writer.seek(self.texinfo._dataofs_ofs):
             writer.writeUInt32(ofs)  # texinfo dataofs
         datastart = writer.tell()
-        for i in xrange(self.texdict.num):
-            texparam = self.texparams[i]
-            writer.writeUInt32((texparam.ofs >> 3) |
-                               ((log2(texparam.width) >> 3) << 20) |
-                               ((log2(texparam.height) >> 3) << 23) |
-                               (texparam.format << 26) |
-                               (texparam.color0 << 29))
-            writer.writeUInt32(0)
+        writer.write(self.texdata)
         writer.writeAlign(8)
         size = writer.tell()-datastart
         with writer.seek(self.texinfo._datasize_ofs):
@@ -160,10 +167,7 @@ class TEX(Archive):
         with writer.seek(self.palinfo._dataofs_ofs):
             writer.writeUInt32(ofs)  # palinfo dataofs
         datastart = writer.tell()
-        for i in xrange(self.texdict.num):
-            param = self.palparams[i]
-            writer.writeUInt16(param.ofs)
-            writer.writeUInt16(param.count4)
+        writer.write(self.paldata)
         writer.writeAlign(8)
         size = writer.tell()-datastart
         with writer.seek(self.palinfo._datasize_ofs):
