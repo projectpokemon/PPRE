@@ -19,6 +19,14 @@ class G3DResDict(object):
     def num(self):
         return len(self.data)
 
+    @num.setter
+    def num(self, value):
+        old = self.num
+        if value < old:
+            self.data = self.data[:value]
+        else:
+            self.data.extend(['']*(value-old))
+
     def load(self, reader):
         start = reader.tell()
         self.version = reader.readUInt8()

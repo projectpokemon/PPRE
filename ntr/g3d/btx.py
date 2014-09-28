@@ -292,8 +292,8 @@ class TEX(ArchiveList):
         self.paldata = ''.join(pal0)
         for i in xrange(num):
             self.palparams.append(PalParam(0, 0))
-        self.paldict.data = ['']*num
-        self.texdict.data = ['']*num
+        self.paldict.num = num
+        self.texdict.num = num
         self.paldict.names = ['palette_all_%03d\x00' % i
                               for i in xrange(num)]
         self.texdict.names = ['image_%03d\x00\x00\x00\x00\x00\x00\x00' % i
