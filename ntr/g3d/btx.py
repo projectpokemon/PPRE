@@ -281,9 +281,9 @@ class TEX(ArchiveList):
                         raise OverflowError('Cannot have more than 16 colors'
                                             ' for all images')
                 tex.append(index)
-            ofs = len(self.texdata) >> 3
+            ofs = len(self.texdata)
             size = images[texidx].size
-            self.texparams.append(TexParam(ofs, size[0], size[1], format, 0))
+            self.texparams.append(TexParam(ofs, size[0], size[1], format, 1))
             self.texdata += ''.join([chr(tex[n] | (tex[n+1] << 4))
                                      for n in xrange(0, len(tex), 2)])
             ofs = len(self.texdata)
