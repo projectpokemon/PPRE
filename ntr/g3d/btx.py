@@ -6,6 +6,8 @@ from rawdb.generic.archive import Archive
 from rawdb.ntr.g3d.resdict import G3DResDict
 from rawdb.util.io import BinaryIO
 
+from PIL import Image
+
 
 def log2(x):
     """Integer log2"""
@@ -84,6 +86,141 @@ class TEX(Archive):
         if reader is not None:
             self.load(reader)
 
+    def _get_bitmaps(self):
+        """List of 2d bitmaps
+
+        Each pixel is a tuple of (index, alpha)
+        """
+        bitmaps = []
+        for param in self.texparams:
+            pixels = []  # 1d
+            if param.format == 1:  # A3I5
+                block = self.texdata[param.ofs:param.ofs +
+                                     param.width*param.height]
+                for value in block:
+                    value = ord(value)
+                    index = value & 0x1F
+                    alpha = ((value >> 5) & 0x7)*36
+                    if not index and param.color0:
+                        alpha = 0
+                    pixels += [(index, alpha)]
+            elif param.format == 2:  # I2 4 colors
+                block = self.texdata[param.ofs:param.ofs +
+                                     (param.width*param.height >> 2)]
+                for value in block:
+                    value = ord(value)
+                    for shift in xrange(0, 8, 2):
+                        index = value >> shift & 0x3
+                        alpha = None
+                        if not index and param.color0:
+                            alpha = 0
+                        pixels += [(index, alpha)]
+            elif param.format == 3:  # I4 16 colors
+                block = self.texdata[param.ofs:param.ofs +
+                                     (param.width*param.height >> 1)]
+                for value in block:
+                    value = ord(value)
+                    for shift in xrange(0, 8, 4):
+                        index = value >> shift & 0xF
+                        alpha = None
+                        if not index and param.color0:
+                            alpha = 0
+                        pixels += [(index, alpha)]
+            elif param.format == 4:  # I8 256 colors
+                block = self.texdata[param.ofs:param.ofs +
+                                     param.width*param.height]
+                for value in block:
+                    index = ord(value)
+                    alpha = None
+                    if not index and param.color0:
+                        alpha = 0
+                    pixels += [(index, alpha)]
+            elif param.format == 6:  # A5I3
+                block = self.texdata[param.ofs:param.ofs +
+                                     param.width*param.height]
+                for value in block:
+                    value = ord(value)
+                    index = value & 0x7
+                    alpha = ((value >> 3) & 0x1F)*8
+                    if not index and param.color0:
+                        alpha = 0
+                    pixels += [(index, alpha)]
+            pixels2d = [pixels[i:i+param.width]
+                        for i in xrange(0, len(pixels), param.width)]
+            # img = Image.frombytes('RGBA', (param.width, param.height),
+            #                       data)
+            bitmaps.append(pixels2d)
+        return bitmaps
+
+    def _get_palettes(self):
+        palettes = []
+        for param in self.palparams:
+            palette = []
+            data = self.paldata[param.ofs:param.ofs+512]
+            values = [struct.unpack('H', data[i:i+2])[0]
+                      for i in xrange(0, len(data), 2)]
+            for value in values:
+                palette.append(struct.pack('4B',
+                                           (value >> 0 & 0x1F) << 3,
+                                           (value >> 5 & 0x1F) << 3,
+                                           (value >> 10 & 0x1F) << 3,
+                                           255))
+            palettes.append(palette)
+        return palettes
+
+    def _get_imagemap(self):
+        imagemap = []
+        if self.paldict.num == self.texdict.num:
+            imagemap = zip(xrange(self.texdict.num),
+                           xrange(self.paldict.num))
+        elif self.paldict.num == 1:
+            imagemap = zip(xrange(self.texdict.num),
+                           [0]*self.texdict.num)
+        else:  # Mtx Merger
+            for texidx, texname in enumerate(self.texdict.names):
+                match = 0
+                best = 0
+                for palidx, palname in enumerate(self.paldict.names):
+                    for c in xrange(16):
+                        try:
+                            if palname[c] != texname[c]:
+                                break
+                        except:
+                            break
+                    if c > match:
+                        match = c
+                        best = palidx
+                imagemap.append((texidx, best))
+        return imagemap
+
+    def _get_images(self):
+        self._images = []
+        bitmaps = self._get_bitmaps()
+        palettes = self._get_palettes()
+        for texidx, palidx in self._get_imagemap():
+            palette = palettes[palidx]
+            bitmap = bitmaps[texidx]
+            data = ''
+            for row in bitmap:
+                for pix in row:
+                    if pix[1] is None:
+                        data += palette[pix[0]]
+                    else:
+                        data += palette[pix[0]][:3] + chr(pix[1])
+            self._images.append(Image.frombytes('RGBA',
+                                                (len(row), len(bitmap)),
+                                                data))
+        return self._images
+
+    @property
+    def images(self):
+        """List of PIL Images
+        """
+        try:
+            return self._images
+        except AttributeError:
+            return self._get_images()
+
     def load(self, reader):
         start = reader.tell()
         self.magic = reader.read(4)
@@ -116,6 +253,10 @@ class TEX(Archive):
         # TODO 4x4
         if size:
             reader.seek(start+size)
+        try:
+            del self._images
+        except:
+            pass
 
     def save(self, writer=None):
         writer = writer if writer is not None else BinaryIO()
