@@ -73,7 +73,8 @@ class G3DResDict(object):
         writer.writeUInt16(0)
         for i in xrange(num):
             writer.write(self.data[i])
-            writer.writeAlign(self.sizeunit)
+            if len(self.data[i]) < self.sizeunit:
+                writer.write('\x00'*(self.sizeunit-len(self.data[i])))
         nameofs = writer.tell()-namerel
         with writer.seek(nameofsofs):
             writer.writeUInt16(nameofs)
