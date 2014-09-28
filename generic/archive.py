@@ -21,6 +21,9 @@ class Archive(object):
     def delete(self, ref):
         self.files.pop(ref)
 
+    def flush(self):
+        pass
+
     def __iter__(self):
         return self.files
 
@@ -65,6 +68,7 @@ class Archive(object):
                 else:
                     internalname = name
                 self.add(internalname, archive.read(name))
+        self.flush()
 
 
 class ArchiveList(Archive):
@@ -73,5 +77,5 @@ class ArchiveList(Archive):
     def get(self, ref):
         return self.files[ref]
 
-    def add(self, data):
+    def add(self, ref=None, data=''):
         self.files.append(data)

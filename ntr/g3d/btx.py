@@ -236,6 +236,69 @@ class TEX(ArchiveList):
             buffer.close()
         return files
 
+    def add(self, ref=None, data=''):
+        """Add a PIL image file's contents to archive
+
+        Be sure to call flush() after"""
+        if self._images is None:
+            self._images = []
+        image = Image.open(StringIO(data))
+        image = image.convert('RGBA')
+        self._images.append(image)
+
+    def flush(self):
+        """Builds added images into binary archive
+
+        This uses format 3 for building.
+        """
+        images = self.images
+        num = len(images)
+        imagemap = zip(xrange(num), [0]*num)  # 1:1
+        pal0 = ['\x00\x00']*16
+        pal2idx = 1  # max 15
+        self.texdata = ''  # Delete old images
+        self.texparams = []
+        self.palparams = []
+        for texidx, palidx in imagemap:
+            tex = []
+            format = 3  # 16-color
+            for pix in images[texidx].getdata():
+                alpha = pix[3]
+                if not alpha:  # color0=1
+                    tex.append(0)
+                    continue
+                color = (pix[0] >> 3) << 0 |\
+                    (pix[1] >> 3) << 5 |\
+                    (pix[2] >> 3) << 10
+                color = struct.pack('H', color)
+                try:
+                    index = pal0.index(color, 1)
+                except ValueError:
+                    pal0[pal2idx] = color
+                    index = pal2idx
+                    pal2idx += 1
+                    if pal2idx > 16:
+                        raise OverflowError('Cannot have more than 16 colors'
+                                            ' for all images')
+                tex.append(index)
+            ofs = len(self.texdata) >> 3
+            size = images[texidx].size
+            self.texparams.append(TexParam(ofs, size[0], size[1], format, 0))
+            self.texdata += ''.join([chr(tex[n] | (tex[n+1] << 4))
+                                     for n in xrange(0, len(tex), 2)])
+            ofs = len(self.texdata)
+            if ofs % 8:
+                self.texdata += '\x00'*(8 - (ofs % 8))  # Align
+        self.paldata = ''.join(pal0)
+        for i in xrange(num):
+            self.palparams.append(PalParam(0, 0))
+        self.paldict.data = ['']*num
+        self.texdict.data = ['']*num
+        self.paldict.names = ['palette_all_%03d\x00' % i
+                              for i in xrange(num)]
+        self.texdict.names = ['image_%03d\x00\x00\x00\x00\x00\x00\x00' % i
+                              for i in xrange(num)]
+
     def load(self, reader):
         start = reader.tell()
         self.magic = reader.read(4)
