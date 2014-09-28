@@ -15,6 +15,7 @@ class Archive(object):
         self.files[ref] = data
 
     def reset(self):
+        """Resets archive"""
         self.__init__()
 
     def delete(self, ref):
@@ -64,3 +65,13 @@ class Archive(object):
                 else:
                     internalname = name
                 self.add(internalname, archive.read(name))
+
+
+class ArchiveList(Archive):
+    files = []
+
+    def get(self, ref):
+        return self.files[ref]
+
+    def add(self, data):
+        self.files.append(data)

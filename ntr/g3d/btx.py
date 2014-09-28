@@ -3,7 +3,7 @@ from collections import namedtuple
 import struct
 from cStringIO import StringIO
 
-from rawdb.generic.archive import Archive
+from rawdb.generic.archive import ArchiveList
 from rawdb.ntr.g3d.resdict import G3DResDict
 from rawdb.util.io import BinaryIO
 
@@ -70,7 +70,7 @@ TexParam = namedtuple('TexParam', 'ofs width height format color0')
 PalParam = namedtuple('PalParam', 'ofs count4')
 
 
-class TEX(Archive):
+class TEX(ArchiveList):
     extension = '.png'
 
     def __init__(self, reader=None):

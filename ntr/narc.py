@@ -1,11 +1,11 @@
 
 from collections import namedtuple
 
-from rawdb.generic.archive import Archive
+from rawdb.generic.archive import ArchiveList
 from rawdb.util.io import BinaryIO
 
 
-class NARC(Archive):
+class NARC(ArchiveList):
     def __init__(self, reader=None):
         self.magic = 'NARC'
         self.endian = 0xFFFE
