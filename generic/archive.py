@@ -40,7 +40,7 @@ class Archive(object):
             except AttributeError:
                 names = xrange(len(self.files))
             for name in names:
-                archive.writestr(name+self.extension, self.files[name])
+                archive.writestr(str(name)+self.extension, self.files[name])
         return handle
 
     def import_(self, handle, mode='r'):

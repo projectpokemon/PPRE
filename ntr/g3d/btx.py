@@ -1,6 +1,7 @@
 
 from collections import namedtuple
 import struct
+from cStringIO import StringIO
 
 from rawdb.generic.archive import Archive
 from rawdb.ntr.g3d.resdict import G3DResDict
@@ -70,6 +71,8 @@ PalParam = namedtuple('PalParam', 'ofs count4')
 
 
 class TEX(Archive):
+    extension = '.png'
+
     def __init__(self, reader=None):
         self.magic = 'TEX0'
         self.endian = 0xFFFE
@@ -220,6 +223,17 @@ class TEX(Archive):
             return self._images
         except AttributeError:
             return self._get_images()
+
+    @property
+    def files(self):
+        """PNG files of images"""
+        files = []
+        for image in self.images:
+            buffer = StringIO()
+            image.save(buffer, format='PNG')
+            files.append(buffer.getvalue())
+            buffer.close()
+        return files
 
     def load(self, reader):
         start = reader.tell()
