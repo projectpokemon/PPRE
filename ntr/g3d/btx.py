@@ -149,6 +149,8 @@ class TEX(ArchiveList):
                     if not index and param.color0:
                         alpha = 0
                     pixels += [(index, alpha)]
+            else:
+                raise ValueError('Unhandled format: %d' % param.format)
             pixels2d = [pixels[i:i+param.width]
                         for i in xrange(0, len(pixels), param.width)]
             # img = Image.frombytes('RGBA', (param.width, param.height),
