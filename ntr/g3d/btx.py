@@ -390,3 +390,52 @@ class TEX(ArchiveList):
             writer.writeUInt16(size >> 3)  # palinfo datasize
 
         return writer
+
+
+class BTX(object):
+    def __init__(self, reader=None):
+        self.magic = 'BTX0'
+        self.endian = 0xFFFE
+        self.version = 0x102
+        self.numblocks = 1
+        self.tex = TEX()
+        if reader is not None:
+            self.load(reader)
+
+    def load(self, reader):
+        start = reader.tell()
+        self.magic = reader.read(4)
+        self.endian = reader.readUInt16()
+        self.version = reader.readUInt16()
+        size = reader.readUInt32()
+        headersize = reader.readUInt16()
+        numblocks = reader.readUInt16()
+        if headersize:
+            reader.seek(start+headersize)
+        texofs = reader.readUInt32()
+        reader.seek(start+texofs)
+        self.tex.load(reader)
+        if size:
+            reader.seek(start+size)
+
+    def save(self, writer=None):
+        if writer is None:
+            writer = BinaryIO()
+        start = writer.tell()
+        writer.write(self.magic)
+        writer.writeUInt16(self.endian)
+        writer.writeUInt16(self.version)
+        sizeofs = writer.tell()
+        writer.writeUInt32(0)
+        headersizeofs = writer.tell()
+        writer.writeUInt16(0)
+        writer.writeUInt16(self.numblocks)
+        size = writer.tell()-start
+        with writer.seek(headersizeofs):
+            writer.writeUInt16(size)
+        writer.writeUInt32(writer.tell()+4-start)  # block[0] ofs
+        writer = self.tex.save(writer)
+        size = writer.tell()-start
+        with writer.seek(sizeofs):
+            writer.writeUInt32(size)
+        return writer
