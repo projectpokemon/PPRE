@@ -1,7 +1,7 @@
 
 import unittest
 
-from rawdb.ntr.g3d.btx import TEX, TexInfo
+from rawdb.ntr.g3d.btx import TEX, TexInfo, TexParam
 from rawdb.util.io import BinaryIO
 
 
@@ -19,3 +19,13 @@ class TestTEX(unittest.TestCase):
         new = TexInfo(None)
         new.load(BinaryIO(out))
         self.assertEqual(out, new.save().getvalue())
+
+    def test_texparams(self):
+        default = TEX()
+        default.texdict.num = 1
+        default.texparams = [TexParam(0, 16, 16, 3, 0)]
+        default.texdict.names.append('test1')
+        out = default.save().getvalue()
+        new = TEX()
+        new.load(BinaryIO(out))
+        self.assertEqual(default.texparams, new.texparams)

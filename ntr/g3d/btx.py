@@ -362,7 +362,7 @@ class TEX(ArchiveList):
         ofs = writer.tell()-start
         with writer.seek(self.palinfo._lookupofs_ofs):
             writer.writeUInt16(ofs)
-        for i in xrange(self.texdict.num):
+        for i in xrange(self.paldict.num):
             param = self.palparams[i]
             self.paldict.data[i] = struct.pack('HH', param.ofs, param.count4)
         writer = self.paldict.save(writer)
