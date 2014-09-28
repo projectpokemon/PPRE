@@ -352,8 +352,8 @@ class TEX(ArchiveList):
             self.texdict.data[i] = \
                 struct.pack('II',
                             (texparam.ofs >> 3) |
-                            ((log2(texparam.width) >> 3) << 20) |
-                            ((log2(texparam.height) >> 3) << 23) |
+                            ((log2(texparam.width >> 3)) << 20) |
+                            ((log2(texparam.height >> 3)) << 23) |
                             (texparam.format << 26) |
                             (texparam.color0 << 29), 0)
         writer = self.texdict.save(writer)
