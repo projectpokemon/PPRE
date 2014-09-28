@@ -86,6 +86,7 @@ class TEX(Archive):
         self.palparams = []
         self.texdata = ''
         self.paldata = ''
+        self._images = None
         if reader is not None:
             self.load(reader)
 
@@ -219,9 +220,9 @@ class TEX(Archive):
     def images(self):
         """List of PIL Images
         """
-        try:
+        if self._images is not None:
             return self._images
-        except AttributeError:
+        else:
             return self._get_images()
 
     @property
@@ -267,10 +268,7 @@ class TEX(Archive):
         # TODO 4x4
         if size:
             reader.seek(start+size)
-        try:
-            del self._images
-        except:
-            pass
+        self._images = None
 
     def save(self, writer=None):
         writer = writer if writer is not None else BinaryIO()

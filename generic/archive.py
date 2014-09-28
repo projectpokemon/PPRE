@@ -14,6 +14,9 @@ class Archive(object):
     def add(self, ref, data):
         self.files[ref] = data
 
+    def reset(self):
+        self.__init__()
+
     def delete(self, ref):
         self.files.pop(ref)
 
@@ -53,6 +56,7 @@ class Archive(object):
         mode : string
             Mode to read from handle
         """
+        self.reset()
         with zipfile.ZipFile(handle, mode) as archive:
             for name in archive.namelist():
                 if name.endswith(self.extension):
