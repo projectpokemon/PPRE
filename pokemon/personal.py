@@ -34,7 +34,7 @@ class Personal(object):
         self.baseexp = reader.readUInt8()
         evs = reader.readUInt16()
         self.evs = Stats._make([(evs >> i) & 3 for i in xrange(0, 12, 2)])
-        self.items = [reader.readUInt8(), reader.readUInt8()]
+        self.items = [reader.readUInt16(), reader.readUInt16()]
         self.gender = reader.readUInt8()
         self.hatchsteps = reader.readUInt8() << 8
         self.happiness = reader.readUInt8()
@@ -48,5 +48,5 @@ class Personal(object):
         for i in xrange(13):
             tmx = reader.readUInt8()
             for j in xrange(8):
-                if tmx >> j:
-                    self.tms.append(i*8+j)
+                if (tmx >> j) & 0x1:
+                    self.tms.append(i*8+j+1)
