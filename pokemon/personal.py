@@ -28,7 +28,6 @@ class Personal(object):
             self.load(reader)
 
     def load(self, reader):
-        reader = BinaryIO()
         self.base_stat = Stats._make([reader.readUInt8() for i in xrange(6)])
         self.types = [reader.readUInt8(), reader.readUInt8()]
         self.catchrate = reader.readUInt8()

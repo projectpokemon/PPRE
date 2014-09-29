@@ -2,6 +2,8 @@
 import abc
 import zipfile
 
+from rawdb.util.io import BinaryIO
+
 
 class Archive(object):
     __metaclass__ = abc.ABCMeta
@@ -32,6 +34,11 @@ class Archive(object):
 
     def save(self, writer=None):
         return writer
+
+    def get_value(self):
+        """String of this Archive"""
+        writer = BinaryIO()
+        return self.save(writer).getvalue()
 
     def export(self, handle, mode='w'):
         """Build a zip archive from files
