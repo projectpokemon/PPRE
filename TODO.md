@@ -50,6 +50,12 @@ Nitro Formats
     * BNK - Sound Bank
     * SWAR - Wave Archive
 
+Citro Formats
+---
+* GARC - Archive Format
+* DARC - Archive Format
+* BCLIM - Z Image
+
 Meta Formats
 ---
 * Compression/Encryption
