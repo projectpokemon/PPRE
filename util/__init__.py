@@ -1,12 +1,12 @@
 
 from attr import temporary_attr
 from cache import cached_property
-from io import BinaryIO
+from rawdb.util.io import BinaryIO
 
 
 def lget(lst, idx, default=None):
     """Gets an item from a list if the list supports it. Otherwise it returns
-    the defautl value.
+    the default value.
 
     Parameters
     ----------
