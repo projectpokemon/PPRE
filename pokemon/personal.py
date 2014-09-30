@@ -66,7 +66,7 @@ class Personal(object):
             evs |= (self.evs[i/2] & 0x3) << i
         writer.writeUInt16(evs)
         for i in xrange(2):
-            writer.writeUInt8(lget(self.items, i, 0))
+            writer.writeUInt16(lget(self.items, i, 0))
         writer.writeUInt8(self.gender)
         writer.writeUInt8(self.hatchsteps >> 8)
         writer.writeUInt8(self.happiness)
@@ -87,3 +87,4 @@ class Personal(object):
                     tmx |= 1 << j
             writer.writeUInt8(tmx)
         writer.writeAlign(4)
+        return writer
