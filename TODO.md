@@ -7,7 +7,7 @@ Crossed-out entries have been finished completely for all games.
 Pokémon Formats
 ---
 * Pokémon Data
-    * Base Stats
+    * <s>Personal</s>
     * Evolutions
     * Baby Pokémon
     * Level-Up Moves
