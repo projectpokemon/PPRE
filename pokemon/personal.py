@@ -19,6 +19,9 @@ class Personal(object):
     BLACK2 = 4
     WHITE2 = 4
     GEN_V = 0b100
+    X = 8
+    Y = 8
+    GEN_VI = 0b1000
 
     def __init__(self, reader=None, version=DIAMOND):
         self.version = version
@@ -44,6 +47,8 @@ class Personal(object):
             self.formid = 0
             self.form = 0
             self.numforms = 1
+        elif self.version & self.GEN_VI:
+            raise NotImplementedError('Gen VI not supported yet')
         else:
             self.stage = None
             self.height = None
