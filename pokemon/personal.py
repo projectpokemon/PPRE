@@ -1,7 +1,7 @@
 
 from collections import namedtuple
 
-from rawdb.util import BinaryIO, lget
+from util import BinaryIO, lget
 
 
 Stats = namedtuple('Stats', 'hp attack defense speed spatk spdef')
@@ -60,6 +60,7 @@ class Personal(object):
             self.load(reader)
 
     def load(self, reader):
+        reader = BinaryIO.reader(reader)
         self.base_stat = Stats._make([reader.readUInt8() for i in xrange(6)])
         self.types = [reader.readUInt8(), reader.readUInt8()]
         self.catchrate = reader.readUInt8()
