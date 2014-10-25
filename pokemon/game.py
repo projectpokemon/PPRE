@@ -1,7 +1,8 @@
 
 import os
 
-from ntr.header_bin import HeaderBin
+from ntr.header_bin import HeaderBin as NTRHeaderBin
+from ctr.header_bin import HeaderBin as CTRHeaderBin
 
 GAME_CODES = {
     'ADA': 'Diamond',
@@ -39,8 +40,17 @@ class Game(object):
 
     @staticmethod
     def from_workspace(workspace):
-        with open(os.path.join(workspace, 'header.bin')) as handle:
-            header = HeaderBin(handle)
+        try:
+            # NTR
+            handle = open(os.path.join(workspace, 'header.bin'))
+        except:
+            # CTR
+            with open(os.path.join(workspace, 'ncch_header.bin')) as handle2:
+                header = CTRHeaderBin(handle2)
+        else:
+            header = NTRHeaderBin(handle)
+        finally:
+            handle.close()
         game_code = header.base_code[:3]
         region_code = header.base_code[3]
         try:
