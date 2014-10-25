@@ -2,7 +2,7 @@
 import abc
 import zipfile
 
-from rawdb.util.io import BinaryIO
+from util.io import BinaryIO
 
 
 class Archive(object):

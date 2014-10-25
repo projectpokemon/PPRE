@@ -1,8 +1,8 @@
 
 from collections import namedtuple
 
-from rawdb.generic.archive import ArchiveList
-from rawdb.util.io import BinaryIO
+from generic.archive import ArchiveList
+from util.io import BinaryIO
 
 
 class NARC(ArchiveList):
@@ -19,6 +19,7 @@ class NARC(ArchiveList):
             self.load(reader)
 
     def load(self, reader):
+        reader = BinaryIO.reader(reader)
         start = reader.tell()
         self.magic = reader.read(4)
         self.endian = reader.readUInt16()
