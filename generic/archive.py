@@ -27,13 +27,14 @@ class Archive(object):
         pass
 
     def __iter__(self):
-        return self.files
+        return iter(self.files)
 
     def __len__(self):
         return len(self.files)
 
+    @abc.abstract_method
     def save(self, writer=None):
-        return writer
+        pass
 
     def get_value(self):
         """String of this Archive"""
