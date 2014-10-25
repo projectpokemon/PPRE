@@ -107,11 +107,23 @@ class Game(object):
         self.personal_archive.files[natid] = data
         self.save_archive(self.personal_archive, self.personal_archive_file)
 
+    @cached_property
+    def evo_archive(self):
+        return self.archive(self.personal_archive_file)
+
+    def get_evo(self, natid):
+        return self.evo_archive.files[natid]
+
+    def set_evo(self, natid, data):
+        self.evo_archive.files[natid] = data
+        self.save_archive(self.evo_archive, self.evo_archive_file)
+
     def save(self):
         pass
 
 
 class DPGame(Game):
+    evo_archive_file = 'poketool/personal/evo.narc'
     personal_archive_file = 'poketool/personal/personal.narc'
 
     def __init__(self):
