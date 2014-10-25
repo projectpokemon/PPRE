@@ -1,3 +1,7 @@
 *.pyc
 __pycache__
 *.nds
+static
+local
+ndstool
+custom*
