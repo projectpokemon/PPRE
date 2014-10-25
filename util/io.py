@@ -143,6 +143,28 @@ class BinaryIO(StringIO):
         """Create a BinaryIOAdapter around a file handle"""
         return BinaryIOAdapter(handle)
 
+    @staticmethod
+    def reader(target):
+        """Creates a new reader for appropriate type
+
+        Parameters
+        ----------
+        target : unknown
+            Reader available
+
+        Returns
+        -------
+        reader : BinaryIO
+        """
+        if isinstance(target, BinaryIO):
+            return target
+        elif hasattr(target, 'read'):
+            return BinaryIO.adapter(target)
+        elif not target:
+            return BinaryIO()
+        else:
+            return BinaryIO(target)
+
 
 class BinaryIOAdapter(BinaryIO):
     """Adapter for file handles

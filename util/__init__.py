@@ -1,7 +1,7 @@
 
 from attr import temporary_attr
 from cache import cached_property
-from rawdb.util.io import BinaryIO
+from util.io import BinaryIO
 
 
 def lget(lst, idx, default=None):
