@@ -32,6 +32,10 @@ REGION_CODES = {
     'K': 'KO'
 }
 
+GEN_IV = ('Diamond', 'Pearl', 'Platinum', 'HeartGold', 'SoulSilver')
+GEN_V = ('Black', 'White', 'Black2', 'White2')
+GEN_VI = ('X', 'Y', 'OmegaRuby', 'AlphaSapphire')
+
 
 class Game(object):
     __metaclass__ = abc.ABCMeta
@@ -84,7 +88,7 @@ class Game(object):
         return game
 
     def archive(self, filename):
-        return NARC(os.path.join(self.workspace, 'fs', filename))
+        return NARC(open(os.path.join(self.workspace, 'fs', filename)))
 
     @cached_property
     def personal_archive(self):

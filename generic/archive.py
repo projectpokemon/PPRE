@@ -32,7 +32,7 @@ class Archive(object):
     def __len__(self):
         return len(self.files)
 
-    @abc.abstract_method
+    @abc.abstractmethod
     def save(self, writer=None):
         pass
 

@@ -1,6 +1,7 @@
 
 from collections import namedtuple
 
+import pokemon.game as game
 from util import BinaryIO, lget
 
 
@@ -8,22 +9,8 @@ Stats = namedtuple('Stats', 'hp attack defense speed spatk spdef')
 
 
 class Personal(object):
-    DIAMOND = 1
-    PEARL = 1
-    PLATINUM = 1
-    HEARTGOLD = 2
-    SOULSILVER = 2
-    GEN_IV = 0b11
-    BLACK = 4
-    WHITE = 4
-    BLACK2 = 4
-    WHITE2 = 4
-    GEN_V = 0b100
-    X = 8
-    Y = 8
-    GEN_VI = 0b1000
 
-    def __init__(self, reader=None, version=DIAMOND):
+    def __init__(self, reader=None, version='Diamond'):
         self.version = version
         self.base_stat = Stats(0, 0, 0, 0, 0, 0)
         self.types = [0]
@@ -40,14 +27,14 @@ class Personal(object):
         self.flee = 0
         self.color = 0
         self.tms = []  # List of known TMs
-        if self.version & self.GEN_V:
+        if self.version in game.GEN_V:
             self.stage = 1
             self.height = 0
             self.weight = 0
             self.formid = 0
             self.form = 0
             self.numforms = 1
-        elif self.version & self.GEN_VI:
+        elif self.version in game.GEN_VI:
             raise NotImplementedError('Gen VI not supported yet')
         else:
             self.stage = None
@@ -64,14 +51,14 @@ class Personal(object):
         self.base_stat = Stats._make([reader.readUInt8() for i in xrange(6)])
         self.types = [reader.readUInt8(), reader.readUInt8()]
         self.catchrate = reader.readUInt8()
-        if self.version & self.GEN_V:
+        if self.version in game.GEN_V:
             self.stage = reader.readUInt8()
         else:
             self.baseexp = reader.readUInt8()
         evs = reader.readUInt16()
         self.evs = Stats._make([(evs >> i) & 3 for i in xrange(0, 12, 2)])
         self.items = [reader.readUInt16(), reader.readUInt16()]
-        if self.version & self.GEN_V:
+        if self.version in game.GEN_V:
             self.items.append(reader.readUInt16())
         self.gender = reader.readUInt8()
         self.hatchsteps = reader.readUInt8() << 8
@@ -79,7 +66,7 @@ class Personal(object):
         self.growth = reader.readUInt8()
         self.egggroups = [reader.readUInt8(), reader.readUInt8()]
         self.abilities = [reader.readUInt8(), reader.readUInt8()]
-        if self.version & self.GEN_V:
+        if self.version in game.GEN_V:
             self.abilities.append(reader.readUInt8())
             self.flee = reader.readUInt8()
             self.formid = reader.readUInt16()
@@ -114,7 +101,7 @@ class Personal(object):
         for i in xrange(0, 12, 2):
             evs |= (self.evs[i/2] & 0x3) << i
         writer.writeUInt16(evs)
-        for i in xrange(3 if self.version & self.GEN_V else 2):
+        for i in xrange(3 if self.version in game.GEN_V else 2):
             writer.writeUInt16(lget(self.items, i, 0))
         writer.writeUInt8(self.gender)
         writer.writeUInt8(self.hatchsteps >> 8)
@@ -124,9 +111,9 @@ class Personal(object):
             raise ValueError('Pokemon must have at least one egg group')
         for i in xrange(2):
             writer.writeUInt8(lget(self.egggroups, i, self.egggroups[0]))
-        for i in xrange(3 if self.version & self.GEN_V else 2):
+        for i in xrange(3 if self.version in game.GEN_V else 2):
             writer.writeUInt8(lget(self.abilities, i, 0))
-        if self.version & self.GEN_V:
+        if self.version in game.GEN_V:
             writer.writeUInt8(self.flee)
             writer.writeUInt16(self.formid)
             writer.writeUInt16(self.form)

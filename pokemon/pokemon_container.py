@@ -6,10 +6,10 @@ class Pokemon(object):
     def __init__(self, game):
         self.game = game
         self.natid = None
-        self.personal = Personal(version=game.version)
+        self.personal = Personal(version=game.game_name)
 
     def load_id(self, natid):
-        self.personal.load(self.game.get_presonal(natid))
+        self.personal.load(self.game.get_personal(natid))
 
     @staticmethod
     def from_id(game, natid):
