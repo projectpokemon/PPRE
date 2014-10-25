@@ -1,4 +1,5 @@
 
+import abc
 import os
 
 from ctr.header_bin import HeaderBin as CTRHeaderBin
@@ -33,8 +34,13 @@ REGION_CODES = {
 
 
 class Game(object):
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self):
         self.workspace = None
+        self.game_name = None
+        self.game_code = None
+        self.region_code = None
         self.header = None
         self.config = {}
 
@@ -49,7 +55,6 @@ class Game(object):
                 header = CTRHeaderBin(handle2)
         else:
             header = NTRHeaderBin(handle)
-        finally:
             handle.close()
         game_code = header.base_code[:3]
         region_code = header.base_code[3]
@@ -75,6 +80,7 @@ class Game(object):
         game.game_name = game_name
         game.game_code = game_code
         game.region_code = region_code
+        game.header = header
         return game
 
     def archive(self, filename):
