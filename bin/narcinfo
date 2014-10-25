@@ -1,0 +1,23 @@
+#!/usr/bin/python
+
+import binascii
+import os
+import subprocess
+import sys
+
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+
+from rawdb.ntr.narc import NARC
+from rawdb.util.io import BinaryIO
+
+try:
+    with open(sys.argv[1]) as handle:
+        archive = NARC(BinaryIO.adapter(handle))
+        for idx, entry in enumerate(archive):
+            print 'File:', idx
+            print 'Size:', len(entry)
+            print 'CRC32:', binascii.crc32(entry)
+except IOError:
+    # Default `cat` this file
+    with open(sys.argv[1]) as handle:
+        print(handle.read())
