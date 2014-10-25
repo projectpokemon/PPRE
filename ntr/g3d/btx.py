@@ -3,9 +3,9 @@ from collections import namedtuple
 import struct
 from cStringIO import StringIO
 
-from rawdb.generic.archive import ArchiveList
-from rawdb.ntr.g3d.resdict import G3DResDict
-from rawdb.util.io import BinaryIO
+from generic.archive import ArchiveList
+from ntr.g3d.resdict import G3DResDict
+from util.io import BinaryIO
 
 from PIL import Image
 
@@ -302,6 +302,7 @@ class TEX(ArchiveList):
                               for i in xrange(num)]
 
     def load(self, reader):
+        reader = BinaryIO.reader(reader)
         start = reader.tell()
         self.magic = reader.read(4)
         size = reader.readUInt32()
@@ -405,6 +406,7 @@ class BTX(object):
             self.load(reader)
 
     def load(self, reader):
+        reader = BinaryIO.reader(reader)
         start = reader.tell()
         self.magic = reader.read(4)
         self.endian = reader.readUInt16()

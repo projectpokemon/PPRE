@@ -1,7 +1,7 @@
 
 from collections import namedtuple
 
-from rawdb.util.io import BinaryIO
+from util.io import BinaryIO
 
 
 Node = namedtuple('Node', 'ref left right index')
@@ -28,6 +28,7 @@ class G3DResDict(object):
             self.data.extend(['']*(value-old))
 
     def load(self, reader):
+        reader = BinaryIO.reader(reader)
         start = reader.tell()
         self.version = reader.readUInt8()
         num = reader.readUInt8()
