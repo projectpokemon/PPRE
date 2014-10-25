@@ -1,8 +1,10 @@
 
 import os
 
-from ntr.header_bin import HeaderBin as NTRHeaderBin
 from ctr.header_bin import HeaderBin as CTRHeaderBin
+from ntr.header_bin import HeaderBin as NTRHeaderBin
+from ntr.narc import NARC
+from util import cached_property
 
 GAME_CODES = {
     'ADA': 'Diamond',
@@ -31,12 +33,10 @@ REGION_CODES = {
 
 
 class Game(object):
-
     def __init__(self):
         self.workspace = None
         self.header = None
         self.config = {}
-        self.archives = {}
 
     @staticmethod
     def from_workspace(workspace):
@@ -77,22 +77,33 @@ class Game(object):
         game.region_code = region_code
         return game
 
+    def archive(self, filename):
+        return NARC(os.path.join(self.workspace, 'fs', filename))
+
+    @cached_property
+    def personal_archive(self):
+        return self.archive(self.personal_archive_file)
+
     def get_personal(self, natid):
-        return self.archives['personal'].files[natid]
+        return self.personal_archive.files[natid]
 
     def set_personal(self, natid, data):
-        self.archives['personal'].files[natid] = data
+        self.personal_archive.files[natid] = data
 
     def save(self):
         pass
 
 
 class DPGame(Game):
+    personal_archive_file = 'poketool/personal/personal.narc'
+
     def __init__(self):
         super(DPGame, self).__init__()
 
 
 class PtGame(DPGame):
+    personal_archive_file = 'poketool/personal/pl_personal.narc'
+
     def __init__(self):
         super(PtGame, self).__init__()
 
