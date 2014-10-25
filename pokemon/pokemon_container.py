@@ -10,6 +10,7 @@ class Pokemon(object):
 
     def load_id(self, natid):
         self.personal.load(self.game.get_personal(natid))
+        self.natid = natid
 
     @staticmethod
     def from_id(game, natid):
@@ -20,4 +21,4 @@ class Pokemon(object):
     def save(self):
         if self.natid is None:
             raise ValueError('This Pokemon has no natid set')
-        self.game.set_personal(self.natid, self.personal.save())
+        self.game.set_personal(self.natid, self.personal.save().getvalue())

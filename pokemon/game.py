@@ -6,6 +6,7 @@ from ctr.header_bin import HeaderBin as CTRHeaderBin
 from ntr.header_bin import HeaderBin as NTRHeaderBin
 from ntr.narc import NARC
 from util import cached_property
+from util import BinaryIO
 
 GAME_CODES = {
     'ADA': 'Diamond',
@@ -90,6 +91,11 @@ class Game(object):
     def archive(self, filename):
         return NARC(open(os.path.join(self.workspace, 'fs', filename)))
 
+    def save_archive(self, archive, filename):
+        with open(os.path.join(self.workspace, 'fs', filename), 'wb')\
+                as handle:
+            archive.save(BinaryIO.adapter(handle))
+
     @cached_property
     def personal_archive(self):
         return self.archive(self.personal_archive_file)
@@ -99,6 +105,7 @@ class Game(object):
 
     def set_personal(self, natid, data):
         self.personal_archive.files[natid] = data
+        self.save_archive(self.personal_archive, self.personal_archive_file)
 
     def save(self):
         pass
