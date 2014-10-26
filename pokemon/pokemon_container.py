@@ -1,6 +1,7 @@
 
 from pokemon.poketool.evo import Evolutions
 from pokemon.poketool.personal import Personal
+from pokemon.poketool.wotbl import LevelMoves
 
 
 class Pokemon(object):
@@ -9,10 +10,12 @@ class Pokemon(object):
         self.natid = None
         self.personal = Personal(version=game.game_name)
         self.evolutions = Evolutions()
+        self.levelmoves = LevelMoves()
 
     def load_id(self, natid):
         self.personal.load(self.game.get_personal(natid))
         self.evolutions.load(self.game.get_evo(natid))
+        self.levelmoves.load(self.game.get_wotbl(natid))
         self.natid = natid
 
     @staticmethod
@@ -26,3 +29,4 @@ class Pokemon(object):
             raise ValueError('This Pokemon has no natid set')
         self.game.set_personal(self.natid, self.personal.save().getvalue())
         self.game.set_evo(self.natid, self.evolutions.save().getvalue())
+        self.game.set_wotbl(self.natid, self.evolutions.save().getvalue())

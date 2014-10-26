@@ -109,7 +109,7 @@ class Game(object):
 
     @cached_property
     def evo_archive(self):
-        return self.archive(self.personal_archive_file)
+        return self.archive(self.evo_archive_file)
 
     def get_evo(self, natid):
         return self.evo_archive.files[natid]
@@ -118,6 +118,17 @@ class Game(object):
         self.evo_archive.files[natid] = data
         self.save_archive(self.evo_archive, self.evo_archive_file)
 
+    @cached_property
+    def wotbl_archive(self):
+        return self.archive(self.wotbl_archive_file)
+
+    def get_wotbl(self, natid):
+        return self.wotbl_archive.files[natid]
+
+    def set_wotbl(self, natid, data):
+        self.wotbl_archive.files[natid] = data
+        self.save_archive(self.wotbl_archive, self.wotbl_archive_file)
+
     def save(self):
         pass
 
@@ -125,6 +136,7 @@ class Game(object):
 class DPGame(Game):
     evo_archive_file = 'poketool/personal/evo.narc'
     personal_archive_file = 'poketool/personal/personal.narc'
+    wotbl_archive_file = 'poketool/personal/wotbl.narc'
 
     def __init__(self):
         super(DPGame, self).__init__()
