@@ -70,6 +70,36 @@ class Editable(object):
         self.keys[name] = Restriction(name, min_value, max_value, min_length,
                                       max_length, validator)
 
+    def restrictInt8(self, name, **kwargs):
+        params = {'min_value': -0x80, 'max_value': 0x7F}
+        params.update(kwargs)
+        self.restrict(name, **params)
+
+    def restrictUInt8(self, name, **kwargs):
+        params = {'min_value': 0, 'max_value': 0xFF}
+        params.update(kwargs)
+        self.restrict(name, **params)
+
+    def restrictInt16(self, name, **kwargs):
+        params = {'min_value': -0x8000, 'max_value': 0x7FFF}
+        params.update(kwargs)
+        self.restrict(name, **params)
+
+    def restrictUInt16(self, name, **kwargs):
+        params = {'min_value': 0, 'max_value': 0xFFFF}
+        params.update(kwargs)
+        self.restrict(name, **params)
+
+    def restrictInt32(self, name, **kwargs):
+        params = {'min_value': -0x80000000, 'max_value': 0x7FFFFFFF}
+        params.update(kwargs)
+        self.restrict(name, **params)
+
+    def restrictUInt32(self, name, **kwargs):
+        params = {'min_value': 0, 'max_value': 0xFFFFFFFF}
+        params.update(kwargs)
+        self.restrict(name, **params)
+
     def __setattr__(self, name, value):
         try:
             restriction = self.keys[name]
