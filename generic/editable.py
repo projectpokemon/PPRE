@@ -150,9 +150,27 @@ class Editable(object):
                 pass
             value = getattr(self, key)
             try:
-                out[key] = value.to_dict()
-            except AttributeError:
-                out[key] = value
+                sub_out = {}
+                for sub_name, sub_value in value.items():
+                    try:
+                        sub_out[sub_name] = sub_value.to_dict()
+                    except AttributeError:
+                        sub_out[sub_name] = sub_value
+                out[key] = sub_out
+            except (AttributeError, TypeError):
+                try:
+                    sub_out = []
+                    for sub_value in value:
+                        try:
+                            sub_out.append(sub_value.to_dict())
+                        except AttributeError:
+                            sub_out.append(sub_value)
+                    out[key] = sub_out
+                except:
+                    try:
+                        out[key] = value.to_dict()
+                    except AttributeError:
+                        out[key] = value
         return out
 
     def to_json(self):
