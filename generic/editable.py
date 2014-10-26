@@ -125,7 +125,7 @@ class Editable(object):
                         '{name}: "{value}" is less than length "{restrict}"'
                         .format(name=name, value=value,
                                 restrict=restriction.min_length))
-            if restriction.max_value is not None:
+            if restriction.max_length is not None:
                 if len(value) > restriction.max_length:
                     raise ValueError(
                         '{name}: "{value}" is more than length "{restrict}"'

@@ -1,33 +1,65 @@
 
-from collections import namedtuple
-
+from generic.editable import Editable
 import pokemon.game as game
 from util import BinaryIO, lget
 
 
-Stats = namedtuple('Stats', 'hp attack defense speed spatk spdef')
+class Stats(Editable):
+    def __init__(self, hp, attack, defense, speed, spatk, spdef,
+                 **restrict_kwargs):
+        self.setall(hp, attack, defense, speed, spatk, spdef)
+        self.restrictUInt8('hp', **restrict_kwargs)
+        self.restrictUInt8('attack', **restrict_kwargs)
+        self.restrictUInt8('defense', **restrict_kwargs)
+        self.restrictUInt8('speed', **restrict_kwargs)
+        self.restrictUInt8('spatk', **restrict_kwargs)
+        self.restrictUInt8('spdef', **restrict_kwargs)
+
+    def setall(self, hp, attack, defense, speed, spatk, spdef):
+        self.hp = hp
+        self.attack = attack
+        self.defense = defense
+        self.speed = speed
+        self.spatk = spatk
+        self.spdef = spdef
 
 
-class Personal(object):
+class Personal(Editable):
 
     def __init__(self, reader=None, version='Diamond'):
         self.version = version
         self.base_stat = Stats(0, 0, 0, 0, 0, 0)
+        self.restrict('base_stat')
         self.types = [0]
+        self.restrict('types', max_length=2)
         self.catchrate = 255
+        self.restrictUInt8('catchrate')
         self.baseexp = 0
-        self.evs = Stats(0, 0, 0, 0, 0, 0)  # Each 0-3
+        self.restrictUInt8('baseexp')
+        self.evs = Stats(0, 0, 0, 0, 0, 0, max_value=3)
+        self.restrict('evs')
         self.items = []
+        self.restrict('items', max_length=3)
         self.gender = 0  # TODO: Better type like enum? or m/f/n rates?
+        self.restrictUInt8('gender')
         self.hatchsteps = 256
+        self.restrictUInt16('hatchsteps')
         self.happiness = 70
+        self.restrictUInt8('happiness')
         self.growth = 0  # Exp growth rate
+        self.restrictUInt8('growth')
         self.egggroups = [15]
+        self.restrict('egggroups', max_length=3)
         self.abilities = []
+        self.restrict('abilities', max_length=3)
         self.flee = 0
+        self.restrictUInt8('flee')
         self.color = 0
+        self.restrictUInt8('color')
         self.tms = []  # List of known TMs
+        self.restrict('tms', max_length=13*8)
         if self.version in game.GEN_V:
+            # TODO: Restrictions here
             self.stage = 1
             self.height = 0
             self.weight = 0
@@ -48,7 +80,7 @@ class Personal(object):
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
-        self.base_stat = Stats._make([reader.readUInt8() for i in xrange(6)])
+        self.base_stat.setall(*[reader.readUInt8() for i in xrange(6)])
         self.types = [reader.readUInt8(), reader.readUInt8()]
         self.catchrate = reader.readUInt8()
         if self.version in game.GEN_V:
@@ -56,7 +88,7 @@ class Personal(object):
         else:
             self.baseexp = reader.readUInt8()
         evs = reader.readUInt16()
-        self.evs = Stats._make([(evs >> i) & 3 for i in xrange(0, 12, 2)])
+        self.evs.setall(*[(evs >> i) & 3 for i in xrange(0, 12, 2)])
         self.items = [reader.readUInt16(), reader.readUInt16()]
         if self.version in game.GEN_V:
             self.items.append(reader.readUInt16())

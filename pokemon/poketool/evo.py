@@ -1,17 +1,22 @@
 
+from generic.editable import Editable
 from util import BinaryIO
 
 
-class Evolution(object):
+class Evolution(Editable):
     def __init__(self, method, parameter, target):
         self.method = method
+        self.restrictUInt16('method')
         self.parameter = parameter
+        self.restrictUInt16('parameter')
         self.target = target
+        self.restrictUInt16('target')
 
 
-class Evolutions(object):
+class Evolutions(Editable):
     def __init__(self, reader=None):
         self.evos = []
+        self.restrict('evos')
         if reader is not None:
             self.load(reader)
 

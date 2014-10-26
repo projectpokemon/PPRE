@@ -1,20 +1,25 @@
 
+from generic.editable import Editable
 from util import BinaryIO
 
 
-class LevelMove(object):
+class LevelMove(Editable):
     def __init__(self, moveid, level):
+        # TODO: Varying restrictions per game
         self.moveid = moveid
+        self.restrictUInt16('moveid')
         self.level = level
+        self.restrictUInt16('level', max_value=0x7F)
 
     @property
     def move(self):
         raise NotImplementedError('Cannot build move')
 
 
-class LevelMoves(object):
+class LevelMoves(Editable):
     def __init__(self, reader=None):
         self.moves = []
+        self.restrict('moves', max_length=20)
         if reader is not None:
             self.load(reader)
 

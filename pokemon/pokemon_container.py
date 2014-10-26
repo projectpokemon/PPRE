@@ -1,16 +1,21 @@
 
+from generic.editable import Editable
 from pokemon.poketool.evo import Evolutions
 from pokemon.poketool.personal import Personal
 from pokemon.poketool.wotbl import LevelMoves
 
 
-class Pokemon(object):
+class Pokemon(Editable):
     def __init__(self, game):
         self.game = game
         self.natid = None
+        self.restrict('natid', min_value=0)
         self.personal = Personal(version=game.game_name)
+        self.restrict('personal')
         self.evolutions = Evolutions()
+        self.restrict('evolutions')
         self.levelmoves = LevelMoves()
+        self.restrict('levelmoves')
 
     def load_id(self, natid):
         self.personal.load(self.game.get_personal(natid))
