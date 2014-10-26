@@ -1,6 +1,6 @@
 
-from evo import Evolutions
-from personal import Personal
+from pokemon.poketool.evo import Evolutions
+from pokemon.poketool.personal import Personal
 
 
 class Pokemon(object):
