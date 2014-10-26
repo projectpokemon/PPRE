@@ -173,11 +173,11 @@ class Editable(object):
                         out[key] = value
         return out
 
-    def to_json(self):
+    def to_json(self, **json_args):
         """Returns the JSON version of this instance
 
         Returns
         -------
         json_string : string
         """
-        return json.dumps(self.to_dict())
+        return json.dumps(self.to_dict(), **json_args)
