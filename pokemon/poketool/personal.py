@@ -35,11 +35,15 @@ class Personal(Editable):
         self.catchrate = 255
         self.restrictUInt8('catchrate')
         self.baseexp = 0
-        self.restrictUInt8('baseexp')
+        if self.version in game.GEN_IV:
+            self.restrictUInt8('baseexp')
+        else:
+            self.restrictUInt16('baseexp')
         self.evs = Stats(0, 0, 0, 0, 0, 0, max_value=3)
         self.restrict('evs')
         self.items = []
-        self.restrict('items', max_length=3)
+        self.restrict('items',
+                      max_length=2 if self.version in game.GEN_VI else 3)
         self.gender = 0  # TODO: Better type like enum? or m/f/n rates?
         self.restrictUInt8('gender')
         self.hatchsteps = 256
@@ -49,9 +53,10 @@ class Personal(Editable):
         self.growth = 0  # Exp growth rate
         self.restrictUInt8('growth')
         self.egggroups = [15]
-        self.restrict('egggroups', max_length=3)
+        self.restrict('egggroups', max_length=2)
         self.abilities = []
-        self.restrict('abilities', max_length=3)
+        self.restrict('abilities',
+                      max_length=2 if self.version in game.GEN_VI else 3)
         self.flee = 0
         self.restrictUInt8('flee')
         self.color = 0
