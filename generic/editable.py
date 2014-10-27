@@ -228,6 +228,29 @@ class Editable(object):
                         out[key] = value
         return out
 
+    def from_dict(self, source, merge=True):
+        """Loads a dict into this instance
+
+        Parameters
+        ----------
+        source : dict.
+            Dict to load in
+        merge : Bool
+            If true, this merges with the current data. Otherwise it
+            resets missing fields
+        """
+        for key in self.keys:
+            try:
+                value = source[key]
+            except:
+                # TODO: handle reset if merge=False
+                continue
+            old_value = getattr(self, key)
+            try:
+                old_value.from_dict(value, merge)
+            except AttributeError:
+                setattr(self, key, value)
+
     def to_json(self, **json_args):
         """Returns the JSON version of this instance
 
