@@ -281,3 +281,16 @@ class Editable(object):
                     prefix=prefix, restrict=restrict, value=value))
             for child in restriction.children:
                 child.print_restrictions(level+1)
+
+    def __repr__(self):
+        return '<{cls}({value}) at {id}>'.format(cls=self.__class__.__name__,
+                                                 value=self.to_dict(),
+                                                 id=hex(id(self)))
+
+    def _repr_pretty_(self, printer, cycle):
+        if cycle:
+            printer.text('{cls}(...)'.format(cls=self.__class__.__name__))
+            return
+        with printer.group(2, '{cls}('.format(cls=self.__class__.__name__),
+                           ')'):
+            printer.pretty(self.to_dict())
