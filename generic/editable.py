@@ -126,6 +126,35 @@ class Editable(object):
         params.update(kwargs)
         self.restrict(name, **params)
 
+    def restrictUnused(self, name, **kwargs):
+
+        def unused(editable, name, value):
+            raise ValueError('"{name}" is unused'.format(name=name))
+        params = {'validator': unused}
+        params.update(kwargs)
+        self.restrict(name, **params)
+
+    def get_unrestricted(self, whitelist=None):
+        """Get a list of all attributes that are not restricted
+
+        This is a utility to verify all are restricted
+        """
+        keys = self.keys
+        unrestricted = []
+        if whitelist is None:
+            whitelist = []
+        for name, attr in self.__dict__.items():
+            if hasattr(attr, '__call__'):
+                continue
+            if name in keys:
+                continue
+            if name[0] == '_':
+                continue
+            if name in whitelist:
+                continue
+            unrestricted.append(name)
+        return unrestricted
+
     def __setattr__(self, name, value):
         try:
             restriction = self.keys[name]
