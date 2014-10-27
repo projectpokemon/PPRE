@@ -14,7 +14,7 @@ class Pokemon(Editable):
         self.restrict('personal')
         self.evolutions = Evolutions()
         self.restrict('evolutions')
-        self.levelmoves = LevelMoves()
+        self.levelmoves = LevelMoves(version=game.game_name)
         self.restrict('levelmoves')
 
     def load_id(self, natid):

@@ -1,15 +1,20 @@
 
 from generic.editable import Editable
+import pokemon.game as game
 from util import BinaryIO
 
 
 class LevelMove(Editable):
-    def __init__(self, moveid, level):
+    def __init__(self, moveid, level, version='Diamond'):
         # TODO: Varying restrictions per game
         self.moveid = moveid
-        self.restrictUInt16('moveid')
         self.level = level
-        self.restrictUInt16('level', max_value=0x7F)
+        if version in game.GEN_V:
+            self.restrictUInt16('moveid')
+            self.restrictUInt16('level')
+        else:
+            self.restrictUInt16('moveid', max_value=0x1FF)
+            self.restrictUInt16('level', max_value=0x7F)
 
     @property
     def move(self):
@@ -17,7 +22,8 @@ class LevelMove(Editable):
 
 
 class LevelMoves(Editable):
-    def __init__(self, reader=None):
+    def __init__(self, reader=None, version='Diamond'):
+        self.version = version
         self.moves = []
         self.restrict('moves', max_length=20)
         if reader is not None:
@@ -30,13 +36,20 @@ class LevelMoves(Editable):
             moveid = reader.readUInt16()
             if moveid == 0xFFFF:
                 break
-            level = (moveid >> 9) & 0x7F
-            moveid = moveid & 0x1FF
-            self.moves.append(LevelMove(moveid, level))
+            if self.version in game.GEN_V:
+                level = reader.readUInt16()
+            else:
+                level = (moveid >> 9) & 0x7F
+                moveid = moveid & 0x1FF
+            self.moves.append(LevelMove(moveid, level, self.version))
 
     def save(self, writer=None):
         writer = writer if writer is not None else BinaryIO()
         for lvlmove in self.moves:
-            writer.writeUInt16(lvlmove.moveid | (lvlmove.level << 9))
+            if self.version in game.GEN_V:
+                writer.writeUInt16(lvlmove.moveid)
+                writer.writeUInt16(lvlmove.level)
+            else:
+                writer.writeUInt16(lvlmove.moveid | (lvlmove.level << 9))
         writer.writeUInt16(0xFFFF)
         return writer
