@@ -150,21 +150,33 @@ class PtGame(DPGame):
 
 
 class HGSSGame(Game):
+    evo_archive_file = 'a/0/3/4'
+    personal_archive_file = 'a/0/0/2'
+    wotbl_archive_file = 'a/0/3/3'
+
     def __init__(self):
         super(HGSSGame, self).__init__()
 
 
 class BWGame(Game):
+    evo_archive_file = 'a/0/1/9'
+    personal_archive_file = 'a/0/1/6'
+    wotbl_archive_file = 'a/0/1/8'
+
     def __init__(self):
         super(BWGame, self).__init__()
 
 
-class B2W2Game(Game):
+class B2W2Game(BWGame):
     def __init__(self):
         super(B2W2Game, self).__init__()
 
 
 class XYGame(Game):
+    evo_archive_file = 'a/2/1/5'
+    personal_archive_file = 'a/2/1/8'
+    wotbl_archive_file = 'a/2/1/4'
+
     def __init__(self):
         super(XYGame, self).__init__()
 
