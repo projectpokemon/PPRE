@@ -5,6 +5,8 @@ from util import BinaryIO, lget
 
 
 class Stats(Editable):
+    STATS = ['hp', 'attack', 'defense', 'speed', 'spatk', 'spdef']
+
     def __init__(self, hp, attack, defense, speed, spatk, spdef,
                  **restrict_kwargs):
         self.setall(hp, attack, defense, speed, spatk, spdef)
@@ -22,6 +24,17 @@ class Stats(Editable):
         self.speed = speed
         self.spatk = spatk
         self.spdef = spdef
+
+    def __iter__(self):
+        for i in xrange(6):
+            yield (self.STATS[i], self[i])
+
+    def __getitem__(self, key):
+        try:
+            key = self.STATS[key]
+        except KeyError:
+            pass
+        return getattr(self, key)
 
 
 class Personal(Editable):
@@ -126,8 +139,8 @@ class Personal(Editable):
 
     def save(self, writer=None):
         writer = writer if writer is not None else BinaryIO()
-        for stat in self.base_stat:
-            writer.writeUInt8(stat)
+        for stat, value in self.base_stat:
+            writer.writeUInt8(value)
         if not len(self.types):
             raise ValueError('Pokemon must have at least one type')
         for i in xrange(2):
