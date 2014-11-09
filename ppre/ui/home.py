@@ -4,7 +4,7 @@ from ppre.ui.base_ui import BaseUserInterface
 
 class HomeUserInterface(BaseUserInterface):
     def __init__(self, ui, session):
-        super(HomeUserInterface, self).__init__(ui, session)
+        super(HomeUserInterface, self).__init__(ui, 'home', session)
         with self.menu('file') as file_menu:
             file_menu.action('new', self.new)
             file_menu.action('open', self.open)

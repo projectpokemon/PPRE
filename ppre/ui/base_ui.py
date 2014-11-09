@@ -5,8 +5,9 @@ class BaseUserInterface(object):
 
     This defers all items to the ui
     """
-    def __init__(self, ui, session, parent=None):
+    def __init__(self, ui, name, session, parent=None):
         self.ui = ui
+        self.name = name
         self.session = session
         self.parent = parent
 
@@ -14,8 +15,15 @@ class BaseUserInterface(object):
         self.ui.show()
 
     def translate(self, text):
-        # TODO
-        return text
+        path = [text]
+        parent = self
+        while parent:
+            path.insert(0, parent.name)
+            parent = parent.parent
+        entry = self.session.lang.table
+        for p in path:
+            entry = entry[p]
+        return str(entry)
 
     def menu(self, name):
         """Add a menu
@@ -24,24 +32,24 @@ class BaseUserInterface(object):
         """
         text = self.translate(name)
         ui = self.ui.menu(text)
-        return BaseUserInterface(ui, self.session, self)
+        return BaseUserInterface(ui, name, self.session, self)
 
     def action(self, name, callback):
         """Add an action item to a menu"""
         text = self.translate(name)
         ui = self.ui.action(text, callback)
-        return BaseUserInterface(ui, self.session, self)
+        return BaseUserInterface(ui, name, self.session, self)
 
     def group(self, name):
         """Create a tool group for logically indivisible components"""
         text = self.translate(name)
         ui = self.ui.group(text)
-        return BaseUserInterface(ui, self.session, self)
+        return BaseUserInterface(ui, name, self.session, self)
 
     def edit(self, name, *args, **kwargs):
         text = self.translate(name)
         ui = self.ui.edit(text, *args, **kwargs)
-        return BaseUserInterface(ui, self.session, self)
+        return BaseUserInterface(ui, name, self.session, self)
 
     def __enter__(self):
         return self
