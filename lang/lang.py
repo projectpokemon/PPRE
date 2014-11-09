@@ -25,11 +25,10 @@ class Table(object):
 
     def __init__(self, path):
         self.path = path
+        self.module = None
 
     def load(self):
-        try:
-            self.module
-        except:
+        if self.module is None:
             self.module = importlib.import_module(self.base_path+self.path)
             self.table = self.module.table
 

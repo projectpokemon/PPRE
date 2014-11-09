@@ -7,3 +7,4 @@ langs = Language.langs
 
 # Load languages
 Language('en')
+Language('la')
