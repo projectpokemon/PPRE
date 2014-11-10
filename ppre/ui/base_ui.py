@@ -12,6 +12,12 @@ class BaseUserInterface(object):
         self.name = name
         self.session = session
         self.parent = parent
+        self.children = {}
+        if self.parent is not None:
+            if name in self.parent.children:
+                raise ValueError('{parent} already has a {name}'.format(
+                    parent=self.parent, name=self.name))
+            self.parent.children[name] = self
 
     def show(self):
         self.ui.show()
@@ -64,6 +70,9 @@ class BaseUserInterface(object):
                                     filename)
         print(filename)
         self.ui.icon(filename)
+
+    def __getitem__(self, name):
+        return self.children[name]
 
     def __enter__(self):
         return self
