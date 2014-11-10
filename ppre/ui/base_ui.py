@@ -1,4 +1,6 @@
 
+import os
+
 
 class BaseUserInterface(object):
     """Base Interface wrapper
@@ -55,8 +57,12 @@ class BaseUserInterface(object):
         """Set the title"""
         self.ui.title(name)
 
-    def icon(self, filename):
+    def icon(self, filename, relative=True):
         """Set the title"""
+        if relative:
+            filename = os.path.join(os.path.dirname(__file__), '../../',
+                                    filename)
+        print(filename)
         self.ui.icon(filename)
 
     def __enter__(self):
