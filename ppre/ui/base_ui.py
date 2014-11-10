@@ -1,6 +1,8 @@
 
 import os
 
+from ppre.ui.bind import Bind
+
 
 class BaseUserInterface(object):
     """Base Interface wrapper
@@ -13,6 +15,7 @@ class BaseUserInterface(object):
         self.session = session
         self.parent = parent
         self.children = {}
+        self.bindings = []
         if self.parent is not None:
             if name in self.parent.children:
                 raise ValueError('{parent} already has a {name}'.format(
@@ -32,6 +35,18 @@ class BaseUserInterface(object):
         for p in path:
             entry = entry[p]
         return str(entry)
+
+    def get_value(self):
+        # Provide thin getters for easy overriding
+        return self.ui.value
+
+    def set_value(self, new_value):
+        self.ui.value = new_value
+    value = property(lambda self: self.get_value(),
+                     lambda self, new_value: self.set_value(new_value))
+
+    def bind(self, container, key, model=None, attr=None):
+        self.bindings.append(Bind(container, key, model, attr))
 
     def menu(self, name):
         """Add a menu
@@ -72,6 +87,15 @@ class BaseUserInterface(object):
 
     def __getitem__(self, name):
         return self.children[name]
+
+    def __setitem__(self, key, value):
+        self.children[key] = value
+
+    def keys(self):
+        return self.children.keys()
+
+    def __contains__(self, item):
+        return item in self.children
 
     def __enter__(self):
         return self

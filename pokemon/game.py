@@ -38,6 +38,13 @@ GEN_V = ('Black', 'White', 'Black2', 'White2')
 GEN_VI = ('X', 'Y', 'OmegaRuby', 'AlphaSapphire')
 
 
+class Project(object):
+    def __init__(self):
+        self.name = 'test'
+        self.description = 'description'
+        self.version = 3.5
+
+
 class Game(object):
     __metaclass__ = abc.ABCMeta
 
@@ -47,6 +54,7 @@ class Game(object):
         self.game_code = None
         self.region_code = None
         self.header = None
+        self.project = Project()
         self.config = {}
 
     @staticmethod

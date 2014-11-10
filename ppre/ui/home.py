@@ -1,5 +1,6 @@
 
 from ppre.ui.base_ui import BaseUserInterface
+from pokemon.game import DPGame as Game
 
 
 class HomeUserInterface(BaseUserInterface):
@@ -25,9 +26,16 @@ class HomeUserInterface(BaseUserInterface):
                 project_group.edit('description', soft_rows=4)
                 project_group.edit('version')
                 project_group.edit('output')
+        self.clear()
+
+    def clear(self):
+        self.session.game = None
+        self.bind(self, 'rom', self.session, 'game')
+        self.session.game = Game()
 
     def new(self):
-        pass
+        self.session.game.project.name = 'hello world'
+        self.session.game.project = self.session.game.project
 
     def open(self):
         pass

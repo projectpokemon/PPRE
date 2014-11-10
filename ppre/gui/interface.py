@@ -136,6 +136,17 @@ class Interface(BaseInterface):
         parts.append(char)
         return '+'.join(parts)
 
+    @property
+    def value(self):
+        return None
+
+    @value.setter
+    def value(self, new_value):
+        try:
+            self.widget.setText(new_value)
+        except:
+            pass
+
     @attach_interface
     def menu(self, text):
         menu = QtWidgets.QMenu(self.menubar)
