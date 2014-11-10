@@ -68,7 +68,6 @@ class BaseUserInterface(object):
         if relative:
             filename = os.path.join(os.path.dirname(__file__), '../../',
                                     filename)
-        print(filename)
         self.ui.icon(filename)
 
     def __getitem__(self, name):

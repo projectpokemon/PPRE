@@ -199,10 +199,6 @@ class Interface(BaseInterface):
             w, h = self.layout.optimize()
             self.widget.setGeometry(self.widget.x(), self.widget.y(), w, h)
         try:
-            print(self._menubar.geometry())
-        except:
-            pass
-        try:
             self.widget.show()
         except:
             pass
