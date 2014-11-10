@@ -179,6 +179,14 @@ class Interface(BaseInterface):
         label.setGeometry(QtCore.QRect(0, 0, 150, 20))
         return widget
 
+    def title(self, text):
+        self.widget.setWindowTitle(text)
+
+    def icon(self, filename):
+        icon = QtWidgets.QIcon()
+        icon.addPixmap(QtWidgets.QPixmap(filename), icon.Normal, icon.Off)
+        self.widget.setWindowIcon(icon)
+
     def show(self):
         try:
             self._layout

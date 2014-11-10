@@ -5,6 +5,8 @@ from ppre.ui.base_ui import BaseUserInterface
 class HomeUserInterface(BaseUserInterface):
     def __init__(self, ui, session):
         super(HomeUserInterface, self).__init__(ui, 'home', session)
+        self.title('PPRE 5.0')
+        self.icon('PPRE.ico')
         with self.menu('file') as file_menu:
             file_menu.action('new', self.new)
             file_menu.action('open', self.open)

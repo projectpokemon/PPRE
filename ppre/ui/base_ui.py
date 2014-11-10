@@ -51,6 +51,14 @@ class BaseUserInterface(object):
         ui = self.ui.edit(text, *args, **kwargs)
         return BaseUserInterface(ui, name, self.session, self)
 
+    def title(self, name):
+        """Set the title"""
+        self.ui.title(name)
+
+    def icon(self, filename):
+        """Set the title"""
+        self.ui.icon(filename)
+
     def __enter__(self):
         return self
 
