@@ -21,6 +21,8 @@ class BaseUserInterface(object):
                 raise ValueError('{parent} already has a {name}'.format(
                     parent=self.parent, name=self.name))
             self.parent.children[name] = self
+        self.get_value = self.ui.get_value
+        self.set_value = self.ui.set_value
 
     def show(self):
         self.ui.show()
@@ -35,15 +37,6 @@ class BaseUserInterface(object):
         for p in path:
             entry = entry[p]
         return str(entry)
-
-    def get_value(self):
-        # Provide thin getters for easy overriding
-        return self.ui.value
-
-    def set_value(self, new_value):
-        self.ui.value = new_value
-    value = property(lambda self: self.get_value(),
-                     lambda self, new_value: self.set_value(new_value))
 
     def bind(self, container, key, model=None, attr=None):
         self.bindings.append(Bind(container, key, model, attr))

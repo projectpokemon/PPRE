@@ -136,16 +136,19 @@ class Interface(BaseInterface):
         parts.append(char)
         return '+'.join(parts)
 
-    @property
-    def value(self):
-        return None
-
-    @value.setter
-    def value(self, new_value):
+    def get_value(self):
         try:
-            self.widget.setText(new_value)
+            return self.widget.text()
+        except:
+            return None
+
+    def set_value(self, value):
+        try:
+            self.widget.setText(value)
         except:
             pass
+    value = property(lambda self: self.get_value(),
+                     lambda self, new_value: self.set_value(new_value))
 
     @attach_interface
     def menu(self, text):

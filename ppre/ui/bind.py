@@ -32,7 +32,8 @@ class Bind(object):
             return res
         if interface == self.interface:
             return res
-        interface.set_value = hook.multi_call_patch(interface.set_value)
+        interface.ui.set_value = interface.set_value = \
+            hook.multi_call_patch(interface.ui.set_value)
         interface.set_value.add_call(self.on_interface_value_set)
         self.interface = interface
         self.bind_children()
