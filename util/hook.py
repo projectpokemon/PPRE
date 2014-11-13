@@ -9,11 +9,37 @@ class Result(object):
 
 
 def patch_magic(func):
+    """Fixes an issue with new-style classes not invoking the object's
+    magics, but rather calling the original class's magic.
+
+    This issue exists in Python > 2.2
+
+    >>> class MyObject(object):
+    >>>     def __setattr__(name, value):
+    >>>         print('SET 1')
+    >>>         object.__setattr__(self, name, value)
+    >>> def setattr2(name, value):
+    >>>     print('SET 2')
+    >>> obj = MyObject()
+    >>> obj.__setattr__ = blah_setattr  # Result printed is not relevant.
+    'SET 1'
+    >>> obj.a = 5  # Expecting 'SET 2'
+    'SET 1'
+
+    The reason is that type(obj).__setattr__ is used instead of
+    obj.__setattr__ (which is still the case in old style classes).
+    We can correct this by telling type(obj).__setattr__ to look up the
+    object's __setattr__ if there is one set and invoke that instead.
+    """
     try:
         if func.__name__[:2] != '__':
+            # Only applies to magics. This will raise in some cases. Skip
+            # those too.
             return
+        # Get the original function
         inv_func = getattr(func.__self__.__class__, func.__name__)
         if hasattr(inv_func, '_patched_magic'):
+            # If already patched, return. This patch is good for everything.
             return
 
         def passer(self, *args, **kwargs):
@@ -22,6 +48,7 @@ def patch_magic(func):
             except KeyError:
                 func_ = inv_func.__get__(self)
             return func_(*args, **kwargs)
+        # TODO: Add docstring, func name, etc. to passer?
         passer._patched_magic = True
         setattr(func.__self__.__class__, func.__name__, passer)
     except:
