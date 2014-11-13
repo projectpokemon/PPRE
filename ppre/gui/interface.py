@@ -98,6 +98,13 @@ class Interface(BaseInterface):
                                                 else None)
         else:
             self.widget = widget
+        self._value = None
+        try:
+            QtCore.QObject.connect(self.widget,
+                                   QtCore.SIGNAL('textEdited(const QString&)'),
+                                   lambda value: self.set_value(value))
+        except:
+            pass
 
     @property
     def menubar(self):
@@ -143,8 +150,12 @@ class Interface(BaseInterface):
             return None
 
     def set_value(self, value):
+        print('value', value)
+        if value == self._value:
+            return
+        self._value = value
         try:
-            self.widget.setText(value)
+            self.widget.setText(str(value))
         except:
             pass
     value = property(lambda self: self.get_value(),

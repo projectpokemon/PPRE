@@ -5,7 +5,7 @@ from util import hook
 
 class Bind(object):
     def __init__(self, container, key, parent=None, attr=None):
-        print('Bind', container.name)
+        print('Bind', container.name, key)
         self.container = container
         self.key = key
         self.parent = self.container if parent is None else parent
@@ -18,19 +18,21 @@ class Bind(object):
         self.interface = self.container[self.key]
         self.model = getattr(self.parent, self.attr)
         self.bind_children()
+        self.on_container_key_set(None, self.key, self.interface, True)
+        self.on_parent_attr_set(None, self.attr, self.model, True)
 
     def bind_children(self):
         # TODO: clear binding
         for child_key in self.interface.keys():
             print(child_key)
             if hasattr(self.model, child_key):
-                self.interface.bind(self.interface, child_key, self.model)
+                self.interface.bind(child_key, self.model)
 
-    def on_container_key_set(self, res, name, interface):
+    def on_container_key_set(self, res, name, interface, init=False):
         print('cks', name, interface.name)
         if name != self.key:
             return res
-        if interface == self.interface:
+        if interface == self.interface and not init:
             return res
         interface.ui.set_value = interface.set_value = \
             hook.multi_call_patch(interface.ui.set_value)
@@ -40,14 +42,16 @@ class Bind(object):
         return res
 
     def on_interface_value_set(self, res, value):
-        print('ivs', value)
+        print('ivs', self.key, self.attr, value, self.interface.get_value())
+        if getattr(self.parent, self.attr) != value:
+            setattr(self.parent, self.attr, value)
         return res
 
-    def on_parent_attr_set(self, res, name, value):
+    def on_parent_attr_set(self, res, name, value, init=False):
         print('pas', name, value)
         if name != self.attr:
             return res
-        if value == self.model:
+        if value == self.model and not init:
             return res
         try:
             value.__setattr__ = hook.multi_call_patch(value.__setattr__)
@@ -62,7 +66,8 @@ class Bind(object):
     def on_model_attr_set(self, res, name, value):
         print(name, value)
         if name in self.interface:
-            self.interface.set_value(value)
+            if self.interface[name].get_value() != value:
+                self.interface[name].set_value(value)
         return res
 
 

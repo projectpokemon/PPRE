@@ -15,7 +15,7 @@ class BaseUserInterface(object):
         self.session = session
         self.parent = parent
         self.children = {}
-        self.bindings = []
+        self.bindings = {}
         if self.parent is not None:
             if name in self.parent.children:
                 raise ValueError('{parent} already has a {name}'.format(
@@ -38,8 +38,13 @@ class BaseUserInterface(object):
             entry = entry[p]
         return str(entry)
 
-    def bind(self, container, key, model=None, attr=None):
-        self.bindings.append(Bind(container, key, model, attr))
+    def bind(self, key, model=None, attr=None):
+        if key in self.bindings:
+            if self.bindings[key].parent == model:
+                return
+            else:
+                pass  # unbind
+        self.bindings[key] = Bind(self, key, model, attr)
 
     def menu(self, name):
         """Add a menu

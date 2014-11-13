@@ -30,7 +30,7 @@ class HomeUserInterface(BaseUserInterface):
 
     def clear(self):
         self.session.game = None
-        self.bind(self, 'rom', self.session, 'game')
+        self.bind('rom', self.session, 'game')
         self.session.game = Game()
 
     def new(self):
@@ -38,7 +38,7 @@ class HomeUserInterface(BaseUserInterface):
         self.session.game.project = self.session.game.project
 
     def open(self):
-        pass
+        print(self.session.game.project.name)
 
     def save(self):
         pass
