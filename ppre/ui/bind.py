@@ -33,6 +33,12 @@ class Bind(object):
             self.interface.unbind(child_key)
         self.parent.__setattr__ = hook.restore(self.parent.__setattr__)
         self.container.__setitem__ = hook.restore(self.container.__setitem__)
+        self.interface.ui.set_value = self.interface.set_value = \
+            hook.restore(self.interface.ui.set_value)
+        try:
+            self.model.__setattr__ = hook.restore(self.model.__setattr__)
+        except:
+            pass
 
     def on_container_key_set(self, res, name, interface, init=False):
         print('cks', name, interface.name)
@@ -70,11 +76,14 @@ class Bind(object):
         return res
 
     def on_model_attr_set(self, res, name, value):
-        print(name, value)
+        print('mas', name, value)
         if name in self.interface:
             if self.interface[name].get_value() != value:
                 self.interface[name].set_value(value)
         return res
+
+    def __repr__(self):
+        return '<Bind {0}>'.format(self.container.name)
 
 
 def bind(interface, key, container=None, attr=None):

@@ -89,7 +89,7 @@ def multi_call_patch(func):
     def wrapped(res, *args, **kwargs):
         res.value = func(*args, **kwargs)
         return res
-    return multi_call(wrapped, original=func)
+    return multi_call(wrapped, original=None)
 
 
 def add_call(func, callback, priority=10):
