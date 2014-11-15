@@ -50,7 +50,7 @@ def patch_magic(func):
             return func_(*args, **kwargs)
         # TODO: Add docstring, func name, etc. to passer?
         passer._patched_magic = True
-        setattr(func.__self__.__class__, func.__name__, passer)
+        func.__self__.__class__.__dict__[func.__name__] = passer
     except:
         return
 

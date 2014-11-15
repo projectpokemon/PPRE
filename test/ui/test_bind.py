@@ -51,3 +51,8 @@ class TestBind(unittest.TestCase):
 
     def test_bind(self):
         Bind(self.container, 'a', self.parent, 'x')
+
+    def test_bind_twice(self):
+        Bind(self.container, 'a', self.parent, 'x')
+        self.setUp()
+        Bind(self.container, 'a', self.parent, 'x')

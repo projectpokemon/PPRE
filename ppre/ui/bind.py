@@ -28,6 +28,10 @@ class Bind(object):
             if hasattr(self.model, child_key):
                 self.interface.bind(child_key, self.model)
 
+    def unbind(self):
+        for child_key in self.interface.keys():
+            self.interface.unbind(child_key)
+
     def on_container_key_set(self, res, name, interface, init=False):
         print('cks', name, interface.name)
         if name != self.key:

@@ -43,8 +43,11 @@ class BaseUserInterface(object):
             if self.bindings[key].parent == model:
                 return
             else:
-                pass  # unbind
+                pass  # self.unbind(key)
         self.bindings[key] = Bind(self, key, model, attr)
+
+    def unbind(self, key):
+        self.bindings[key].unbind()
 
     def menu(self, name):
         """Add a menu
