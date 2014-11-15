@@ -31,6 +31,8 @@ class Bind(object):
     def unbind(self):
         for child_key in self.interface.keys():
             self.interface.unbind(child_key)
+        self.parent.__setattr__ = hook.restore(self.parent.__setattr__)
+        self.container.__setitem__ = hook.restore(self.container.__setitem__)
 
     def on_container_key_set(self, res, name, interface, init=False):
         print('cks', name, interface.name)

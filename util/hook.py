@@ -55,10 +55,13 @@ def patch_magic(func):
         return
 
 
-def multi_call(func):
-    _calls = [(func, 5)]
+def multi_call(original_func, original=None):
+    _calls = [(original_func, 5)]
 
-    @functools.wraps(func)
+    if original is None:
+        original = original_func
+
+    @functools.wraps(original_func)
     def func(*args, **kwargs):
         res = Result(None)
         print(args, kwargs)
@@ -68,6 +71,7 @@ def multi_call(func):
     func._calls = _calls
     func.add_call = lambda callback, priority=10: add_call(func, callback,
                                                            priority)
+    func._original = original
     return func
 
 
@@ -85,9 +89,14 @@ def multi_call_patch(func):
     def wrapped(res, *args, **kwargs):
         res.value = func(*args, **kwargs)
         return res
-    return multi_call(wrapped)
+    return multi_call(wrapped, original=func)
 
 
 def add_call(func, callback, priority=10):
     func._calls.append((callback, priority))
     func._calls.sort(key=operator.itemgetter(1))
+
+
+def restore(func):
+    func._calls = [(func._original, 5)]
+    return func

@@ -56,3 +56,13 @@ class TestBind(unittest.TestCase):
         Bind(self.container, 'a', self.parent, 'x')
         self.setUp()
         Bind(self.container, 'a', self.parent, 'x')
+
+    def test_rebind(self):
+        other_parent = Parent()
+        Bind(self.container, 'a', self.parent, 'x')
+        Bind(self.container, 'a', other_parent, 'x')
+        other_parent.x.b = 9
+        self.assertEqual(self.parent.x.b, 7)
+        self.parent.x.b = 8
+        self.assertEqual(self.parent.x.b, 8)
+        self.assertEqual(other_parent.x.b, 9)
