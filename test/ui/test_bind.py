@@ -54,6 +54,9 @@ class TestBind(unittest.TestCase):
         self.parent.x.b = 8
         self.assertEqual(self.parent.x.b, 8)
         self.assertEqual(self.parent.x.b, self.container['a']['b'].get_value())
+        self.container['a']['b'].set_value(11)
+        self.assertEqual(self.container['a']['b'].get_value(), 11)
+        self.assertEqual(self.parent.x.b, self.container['a']['b'].get_value())
 
     def test_bind_twice(self):
         Bind(self.container, 'a', self.parent, 'x')
@@ -69,3 +72,6 @@ class TestBind(unittest.TestCase):
         self.parent.x.b = 8
         self.assertEqual(self.parent.x.b, 8)
         self.assertEqual(other_parent.x.b, 9)
+        self.container['a']['b'].set_value(11)
+        self.assertEqual(self.parent.x.b, 8)
+        self.assertEqual(other_parent.x.b, 11)
