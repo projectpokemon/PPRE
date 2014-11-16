@@ -4,6 +4,9 @@ import os
 from ppre.ui.bind import Bind
 
 
+ALL_PARENTS = object()
+
+
 class BaseUserInterface(object):
     """Base Interface wrapper
 
@@ -15,7 +18,7 @@ class BaseUserInterface(object):
         self.session = session
         self.parent = parent
         self.children = {}
-        self.bindings = {}
+        self.bindings = []  # Multi-dict
         if self.parent is not None:
             if name in self.parent.children:
                 raise ValueError('{parent} already has a {name}'.format(
@@ -38,16 +41,32 @@ class BaseUserInterface(object):
             entry = entry[p]
         return str(entry)
 
-    def bind(self, key, model=None, attr=None, unbind=True):
-        if key in self.bindings:
-            if self.bindings[key].parent == model:
-                return
-            elif unbind:
-                self.unbind(key)
-        self.bindings[key] = Bind(self, key, model, attr, unbind=unbind)
+    def bind(self, key, parent=None, attr=None, unbind=True):
+        old_parents = []
+        already_bound = False
+        for bkey, binding in self.bindings:
+            if bkey == key:
+                if binding.parent == parent:
+                    already_bound = True
+                    continue
+                elif unbind:
+                    old_parents.append(binding.parent)
+        for old_parent in old_parents:
+            self.unbind(key, old_parent)
+        if already_bound:
+            return
+        self.bindings.append((key,
+                              Bind(self, key, parent, attr, unbind=unbind)))
 
-    def unbind(self, key):
-        self.bindings[key].unbind()
+    def unbind(self, key, parent=ALL_PARENTS):
+        bindings = []
+        for entry in self.bindings:
+            if entry[0] == key:
+                if parent is ALL_PARENTS or entry[1].parent == parent:
+                    entry[1].unbind()
+                    continue
+            bindings.append(entry)
+        self.bindings = bindings
 
     def menu(self, name):
         """Add a menu

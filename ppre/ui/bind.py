@@ -17,9 +17,9 @@ class Bind(object):
 
         self.interface = self.container[self.key]
         self.model = getattr(self.parent, self.attr)
-        self.bind_children(unbind)
         self.on_container_key_set(None, self.key, self.interface, True)
         self.on_parent_attr_set(None, self.attr, self.model, True)
+        self.bind_children(unbind)
 
     def bind_children(self, unbind=True):
         for child_key in self.interface.keys():
@@ -32,14 +32,6 @@ class Bind(object):
             self.interface.unbind(child_key)
         if not myself:
             return
-        hook.restore(self.parent.__setattr__)
-        hook.restore(self.container.__setitem__)
-        hook.restore(self.interface.set_value)
-        try:
-            hook.restore(self.model.__setattr__)
-        except:
-            pass
-        return
         self.parent.__setattr__.del_call(self.on_parent_attr_set)
         self.container.__setitem__.del_call(self.on_container_key_set)
         self.interface.set_value.del_call(self.on_interface_value_set)
@@ -58,8 +50,8 @@ class Bind(object):
             hook.multi_call_patch(interface.ui.set_value)
         interface.set_value.add_call(self.on_interface_value_set)
         self.interface = interface
-        # self.unbind(False)
-        self.bind_children()
+        self.unbind(False)
+        # self.bind_children()
         return res
 
     def on_interface_value_set(self, res, value):
@@ -82,8 +74,8 @@ class Bind(object):
             # "values" can't have their __setattr__ modified
         self.interface.set_value(value)
         self.model = value
-        # self.unbind(False)
-        self.bind_children()
+        self.unbind(False)
+        # self.bind_children()
         return res
 
     def on_model_attr_set(self, res, name, value):

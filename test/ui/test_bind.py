@@ -65,7 +65,6 @@ class TestBind(unittest.TestCase):
 
     def test_unbind(self):
         binding = Bind(self.container, 'a', self.parent, 'x')
-        print(self.container.bindings)
         binding.unbind()
         self.container['a']['d']['e'].set_value(22)
         self.parent.x.b = 7
@@ -91,3 +90,33 @@ class TestBind(unittest.TestCase):
         self.container['a']['b'].set_value(11)
         self.assertEqual(self.parent.x.b, 8)
         self.assertEqual(other_parent.x.b, 11)
+
+    def test_bind_another(self):
+        other_parent = Parent()
+        self.container.bind('a', self.parent, 'x')
+        self.container.bind('a', other_parent, 'x', False)
+        self.parent.x.b = 5
+        other_parent.x.b = 9
+        self.assertEqual(self.parent.x.b, 9)
+        self.assertEqual(other_parent.x.b, 9)
+        self.parent.x.b = 8
+        self.assertEqual(self.parent.x.b, 8)
+        self.assertEqual(other_parent.x.b, 8)
+        self.assertEqual(self.container['a']['b'].get_value(), 8)
+        self.container['a']['d']['e'].set_value(22)
+        self.assertEqual(self.parent.x.d.e, 22)
+        self.assertEqual(other_parent.x.d.e, 22)
+
+        return
+        # FIXME: parent.x seems to become same object
+        self.container.unbind('a')
+        other_parent.x.b = 8
+        self.parent.x.b = 4
+        self.assertEqual(self.parent.x.b, 4)
+        self.assertEqual(other_parent.x.b, 8)
+        self.assertEqual(self.container['a']['b'].get_value(), 8)
+        self.container['a']['b'].set_value(11)
+        self.assertEqual(self.parent.x.b, 4)
+        self.assertEqual(other_parent.x.b, 8)
+        self.assertEqual(self.container['a']['b'].get_value(), 11)
+
