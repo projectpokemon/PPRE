@@ -1,5 +1,5 @@
 
-import abc
+import json
 import os
 
 from ctr.header_bin import HeaderBin as CTRHeaderBin
@@ -7,6 +7,7 @@ from ntr.header_bin import HeaderBin as NTRHeaderBin
 from ntr.narc import NARC
 from util import cached_property
 from util import BinaryIO
+from generic.editable import Editable
 
 GAME_CODES = {
     'ADA': 'Diamond',
@@ -38,33 +39,48 @@ GEN_V = ('Black', 'White', 'Black2', 'White2')
 GEN_VI = ('X', 'Y', 'OmegaRuby', 'AlphaSapphire')
 
 
-class Project(object):
+class Project(Editable):
     def __init__(self):
-        self.name = 'test'
-        self.description = 'description'
-        self.version = 3.5
+        self.name = 'Project'
+        self.restrict('name')
+        self.description = 'Description'
+        self.restrict('description')
+        self.version = 0.1
+        self.restrict('version')
 
 
-class Game(object):
-    __metaclass__ = abc.ABCMeta
+class Files(Editable):
+    def __init__(self, directory):
+        self.base = ''
+        self.restrict('base')
+        self.directory = directory
+        self.restrict('directory')
 
+
+class Game(Editable):
+    """A Loaded Game Instance
+
+    """
     def __init__(self):
-        self.workspace = None
+        self.files = None
+        self.restrict('files')
+        self.project = Project()
+        self.restrict('project')
         self.game_name = None
         self.game_code = None
         self.region_code = None
         self.header = None
-        self.project = Project()
         self.config = {}
 
     @staticmethod
     def from_workspace(workspace):
+        files = Files(workspace)
         try:
             # NTR
-            handle = open(os.path.join(workspace, 'header.bin'))
+            handle = open(os.path.join(files.directory, 'header.bin'))
         except:
             # CTR
-            with open(os.path.join(workspace, 'ncch_header.bin')) as handle2:
+            with open(os.path.join(files.directory, 'ncch_header.bin')) as handle2:
                 header = CTRHeaderBin(handle2)
         else:
             header = NTRHeaderBin(handle)
@@ -89,18 +105,32 @@ class Game(object):
             game = XYGame()
         elif game_name in ('OmegaRuby', 'AlphaSapphire'):
             game = ORASGame()
-        game.workspace = workspace
+        game.files = files
         game.game_name = game_name
         game.game_code = game_code
         game.region_code = region_code
         game.header = header
+        game.load_config()
         return game
 
+    def load_config(self):
+        try:
+            with open(os.path.join(self.files.directory, 'config.json'))\
+                    as handle:
+                self.from_dict(json.load(handle))
+        except IOError:
+            pass
+
+    def write_config(self):
+        with open(os.path.join(self.files.directory, 'config.json'), 'w')\
+                as handle:
+            json.dump(self.to_dict(), handle)
+
     def archive(self, filename):
-        return NARC(open(os.path.join(self.workspace, 'fs', filename)))
+        return NARC(open(os.path.join(self.files.directory, 'fs', filename)))
 
     def save_archive(self, archive, filename):
-        with open(os.path.join(self.workspace, 'fs', filename), 'wb')\
+        with open(os.path.join(self.files.directory, 'fs', filename), 'wb')\
                 as handle:
             archive.save(BinaryIO.adapter(handle))
 
