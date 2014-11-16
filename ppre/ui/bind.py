@@ -69,8 +69,9 @@ class Bind(object):
             value.__setattr__ = hook.multi_call_patch(value.__setattr__)
             value.__setattr__.add_call(self.on_model_attr_set)
         except AttributeError:
+            pass
             # "values" can't have their __setattr__ modified
-            self.interface.set_value(value)
+        self.interface.set_value(value)
         self.model = value
         self.bind_children()
         return res
