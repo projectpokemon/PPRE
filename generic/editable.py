@@ -3,6 +3,8 @@ import abc
 import json
 from collections import namedtuple
 
+from util.iter import auto_iterate
+
 
 #: See Editable.restrict
 Restriction = namedtuple('Restriction', 'name min_value max_value min_length'
@@ -200,32 +202,18 @@ class Editable(object):
         out = {}
         for key in self.keys:
             try:
-                key = key.name
+                name = self.keys[key].name
             except:
-                pass
-            value = getattr(self, key)
-            try:
-                sub_out = {}
-                for sub_name, sub_value in value.items():
-                    try:
-                        sub_out[sub_name] = sub_value.to_dict()
-                    except AttributeError:
-                        sub_out[sub_name] = sub_value
-                out[key] = sub_out
-            except (AttributeError, TypeError):
+                name = key
+            value = getattr(self, name)
+            container, adder, iterator = auto_iterate(value)
+            for sub_key, sub_value in iterator:
                 try:
-                    sub_out = []
-                    for sub_value in value:
-                        try:
-                            sub_out.append(sub_value.to_dict())
-                        except AttributeError:
-                            sub_out.append(sub_value)
-                    out[key] = sub_out
-                except:
-                    try:
-                        out[key] = value.to_dict()
-                    except AttributeError:
-                        out[key] = value
+                    sub_value = sub_value.to_dict()
+                except AttributeError as err:
+                    pass
+                container = adder(container, sub_key, sub_value)
+            out[key] = container
         return out
 
     def from_dict(self, source, merge=True):
