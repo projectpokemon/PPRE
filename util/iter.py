@@ -42,27 +42,37 @@ def auto_iterate(obj):
     -------
     container
         Destination object
-    adder : method(key, value)
-        Method of container that adds each item
+    adder : method(container, key, value)
+        Method of container that adds each item. Returns the updated container
     iterator : iterator
         Has the (key, value) pairs that should be passed to adder
     """
     if is_dict(obj):
         container = {}
-        adder = container.__setitem__
+
+        def adder(container, key, value):
+            container[key] = value
+            return container
         iterator = obj.iteritems()
     elif is_string(obj):
         # Return same object if string
         container = obj
-        adder = lambda k, v: None
+
+        def adder(container, key, value):
+            return value
         iterator = dict(s=obj).iteritems()
     elif is_iterable(obj):
         container = []
-        adder = lambda k, v: container.append(v)
+
+        def adder(container, key, value):
+            container.append(value)
+            return container
         iterator = itertools.izip_longest([], obj)
     else:
         # Return same object
         container = obj
-        adder = lambda k, v: None
+
+        def adder(container, key, value):
+            return value
         iterator = dict(s=obj).iteritems()
     return container, adder, iterator
