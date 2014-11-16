@@ -4,7 +4,7 @@ from util import hook
 
 
 class Bind(object):
-    def __init__(self, container, key, parent=None, attr=None):
+    def __init__(self, container, key, parent=None, attr=None, unbind=True):
         print('Bind', container.name, key)
         self.container = container
         self.key = key
@@ -17,26 +17,34 @@ class Bind(object):
 
         self.interface = self.container[self.key]
         self.model = getattr(self.parent, self.attr)
-        self.bind_children()
+        self.bind_children(unbind)
         self.on_container_key_set(None, self.key, self.interface, True)
         self.on_parent_attr_set(None, self.attr, self.model, True)
 
-    def bind_children(self):
-        # TODO: clear binding
+    def bind_children(self, unbind=True):
         for child_key in self.interface.keys():
             print(child_key)
             if hasattr(self.model, child_key):
-                self.interface.bind(child_key, self.model)
+                self.interface.bind(child_key, self.model, unbind=unbind)
 
-    def unbind(self):
+    def unbind(self, myself=True):
         for child_key in self.interface.keys():
             self.interface.unbind(child_key)
-        self.parent.__setattr__ = hook.restore(self.parent.__setattr__)
-        self.container.__setitem__ = hook.restore(self.container.__setitem__)
-        self.interface.ui.set_value = self.interface.set_value = \
-            hook.restore(self.interface.ui.set_value)
+        if not myself:
+            return
+        hook.restore(self.parent.__setattr__)
+        hook.restore(self.container.__setitem__)
+        hook.restore(self.interface.set_value)
         try:
-            self.model.__setattr__ = hook.restore(self.model.__setattr__)
+            hook.restore(self.model.__setattr__)
+        except:
+            pass
+        return
+        self.parent.__setattr__.del_call(self.on_parent_attr_set)
+        self.container.__setitem__.del_call(self.on_container_key_set)
+        self.interface.set_value.del_call(self.on_interface_value_set)
+        try:
+            self.model.__setattr__.del_call(self.on_model_attr_set)
         except:
             pass
 
@@ -50,6 +58,7 @@ class Bind(object):
             hook.multi_call_patch(interface.ui.set_value)
         interface.set_value.add_call(self.on_interface_value_set)
         self.interface = interface
+        # self.unbind(False)
         self.bind_children()
         return res
 
@@ -73,6 +82,7 @@ class Bind(object):
             # "values" can't have their __setattr__ modified
         self.interface.set_value(value)
         self.model = value
+        # self.unbind(False)
         self.bind_children()
         return res
 

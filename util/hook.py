@@ -78,6 +78,7 @@ def multi_call(original_func, original=None):
     func._calls = _calls
     func.add_call = lambda callback, priority=10: add_call(func, callback,
                                                            priority)
+    func.del_call = lambda callback: del_call(func, callback)
     func._original = original
     return func
 
@@ -106,6 +107,12 @@ def multi_call_patch(func):
 def add_call(func, callback, priority=10):
     func._calls.append((callback, priority))
     func._calls.sort(key=operator.itemgetter(1))
+
+
+def del_call(func, callback):
+    print('del', func._calls)
+    func._calls = [entry for entry in func._calls if entry[0] != callback]
+    print('ete', func._calls)
 
 
 def restore(func):

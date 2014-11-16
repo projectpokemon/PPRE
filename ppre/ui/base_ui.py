@@ -38,13 +38,13 @@ class BaseUserInterface(object):
             entry = entry[p]
         return str(entry)
 
-    def bind(self, key, model=None, attr=None):
+    def bind(self, key, model=None, attr=None, unbind=True):
         if key in self.bindings:
             if self.bindings[key].parent == model:
                 return
-            else:
+            elif unbind:
                 self.unbind(key)
-        self.bindings[key] = Bind(self, key, model, attr)
+        self.bindings[key] = Bind(self, key, model, attr, unbind=unbind)
 
     def unbind(self, key):
         self.bindings[key].unbind()
