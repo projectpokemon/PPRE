@@ -63,11 +63,27 @@ class TestBind(unittest.TestCase):
         self.setUp()
         Bind(self.container, 'a', self.parent, 'x')
 
+    def test_unbind(self):
+        binding = Bind(self.container, 'a', self.parent, 'x')
+        print(self.container.bindings)
+        binding.unbind()
+        self.container['a']['d']['e'].set_value(22)
+        self.parent.x.b = 7
+        self.parent.x.d.e = 4
+        self.container['a']['b'].set_value(11)
+        self.assertEqual(len(self.parent.x.__setattr__._calls), 1)
+        self.assertEqual(len(self.container['a']['b'].set_value._calls), 1)
+        self.assertEqual(self.parent.x.b, 7)
+        self.assertEqual(self.parent.x.d.e, 4)
+        self.assertEqual(self.container['a']['b'].get_value(), 11)
+        self.assertEqual(self.container['a']['d']['e'].get_value(), 22)
+
     def test_rebind(self):
         other_parent = Parent()
         Bind(self.container, 'a', self.parent, 'x')
         Bind(self.container, 'a', other_parent, 'x')
         other_parent.x.b = 9
+        print(self.parent.x.__setattr__._calls)
         self.assertEqual(self.parent.x.b, 7)
         self.parent.x.b = 8
         self.assertEqual(self.parent.x.b, 8)
