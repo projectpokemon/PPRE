@@ -21,7 +21,7 @@ def patch_magic(func):
     >>> def setattr2(name, value):
     >>>     print('SET 2')
     >>> obj = MyObject()
-    >>> obj.__setattr__ = blah_setattr  # Result printed is not relevant.
+    >>> obj.__setattr__ = setattr2  # Result printed is not relevant.
     'SET 1'
     >>> obj.a = 5  # Expecting 'SET 2'
     'SET 1'
@@ -35,28 +35,31 @@ def patch_magic(func):
         if func.__name__[:2] != '__':
             # Only applies to magics. This will raise in some cases. Skip
             # those too.
-            return
+            return func
+        if hasattr(func, '_patched_magic'):
+            return func._wrapping
         # Get the original function
         inv_func = getattr(func.__self__.__class__, func.__name__)
         if hasattr(inv_func, '_patched_magic'):
             # If already patched, return. This patch is good for everything.
-            return
+            return inv_func._wrapping
 
         def passer(self, *args, **kwargs):
             try:
-                func_ = self.__dict__[func.__name__]
+                bound_func = self.__dict__[func.__name__]
             except KeyError:
-                func_ = inv_func.__get__(self)
-            #print(func_)
-            return func_(*args, **kwargs)
-        # TODO: Add docstring, func name, etc. to passer?
+                bound_func = inv_func.__get__(self)
+            return bound_func(*args, **kwargs)
         passer._patched_magic = True
+        passer._wrapping = inv_func
+        passer.__name__ = func.__name__
         try:
             object.__setattr__(func.__self__.__class__, func.__name__, passer)
         except:
             setattr(func.__self__.__class__, func.__name__, passer)
+        return func
     except:
-        return
+        return func
 
 
 def multi_call(original_func, original=None):
@@ -88,7 +91,11 @@ def multi_call_patch(func):
         return func
     except:
         pass
-    patch_magic(func)
+    patched = patch_magic(func)
+    if hasattr(patched, '__get__'):
+        func = patched.__get__(func.__self__)
+    else:
+        func = patched
 
     def wrapped(res, *args, **kwargs):
         res.value = func(*args, **kwargs)
