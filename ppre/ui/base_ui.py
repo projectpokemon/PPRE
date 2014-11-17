@@ -37,8 +37,11 @@ class BaseUserInterface(object):
             path.insert(0, parent.name)
             parent = parent.parent
         entry = self.session.lang.table
-        for p in path:
-            entry = entry[p]
+        try:
+            for p in path:
+                entry = entry[p]
+        except:
+            entry = text
         return str(entry)
 
     def bind(self, key, parent=None, attr=None, unbind=True):
@@ -97,6 +100,11 @@ class BaseUserInterface(object):
     def edit(self, name, *args, **kwargs):
         text = self.translate(name)
         ui = self.ui.edit(text, *args, **kwargs)
+        return BaseUserInterface(ui, name, self.session, self)
+
+    def browse(self, name, *args, **kwargs):
+        text = self.translate(name)
+        ui = self.ui.browse(text, *args, **kwargs)
         return BaseUserInterface(ui, name, self.session, self)
 
     def title(self, name):

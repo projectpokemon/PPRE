@@ -10,8 +10,10 @@ class NewProjectInterface(BaseUserInterface):
         super(NewProjectInterface, self).__init__(ui, 'new_project', session)
         self.title('New Project')
         self.game = None
-        with self.menu('file') as file_menu:
-            file_menu.action('new', self.new)
+        self.browse('base', types=['NDS Files (*.nds)', '3DS Files (*.3ds)',
+                                   'All Files (*.*)'])
+        self.browse('directory', directory=True)
+        self.show()
 
     def new(self):
         pass

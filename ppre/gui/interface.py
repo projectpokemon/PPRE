@@ -207,6 +207,24 @@ class Interface(BaseInterface):
         label.setGeometry(QtCore.QRect(0, 0, 150, 20))
         return widget
 
+    @attach_interface
+    def browse(self, text, types=None, directory=False):
+        widget = QtWidgets.QLineEdit(self.widget)
+        label = QtWidgets.QLabel(self.widget)
+        button = QtWidgets.QPushButton(self.widget)
+        self.layout.add_children(QtLayoutChild(widget), QtLayoutChild(label),
+                                 QtLayoutChild(button))
+        widget.setText(text)
+        widget.setContentsMargins(0, 0, 0, 0)
+        widget.setGeometry(QtCore.QRect(100, 0, 150, 20))
+        label.setText(text)
+        label.setContentsMargins(0, 0, 0, 0)
+        label.setGeometry(QtCore.QRect(0, 0, 130, 20))
+        button.setText('...')
+        button.setContentsMargins(0, 0, 0, 0)
+        button.setGeometry(QtCore.QRect(250, 0, 20, 20))
+        return widget
+
     def title(self, text):
         self.widget.setWindowTitle(text)
 
