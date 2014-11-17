@@ -68,6 +68,11 @@ class BaseUserInterface(object):
             bindings.append(entry)
         self.bindings = bindings
 
+    def new(self):
+        """Return a new interface"""
+        ui = self.ui.new()
+        return BaseUserInterface(ui, None, self.session, None)
+
     def menu(self, name):
         """Add a menu
 

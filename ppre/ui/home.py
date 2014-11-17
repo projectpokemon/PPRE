@@ -1,6 +1,31 @@
 
+import functools
+
 from ppre.ui.base_ui import BaseUserInterface
 from pokemon.game import Game
+
+
+class NewProjectInterface(BaseUserInterface):
+    def __init__(self, ui, session):
+        super(NewProjectInterface, self).__init__(ui, 'new_project', session)
+        self.title('New Project')
+        self.game = None
+        with self.menu('file') as file_menu:
+            file_menu.action('new', self.new)
+
+    def new(self):
+        pass
+
+
+def confirm(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        print(self.save_hash)
+        if self.save_hash and (self.save_hash != self.session.game.checksum()):
+            print('Save first')
+        else:
+            func(self, *args, **kwargs)
+    return wrapper
 
 
 class HomeUserInterface(BaseUserInterface):
@@ -27,29 +52,35 @@ class HomeUserInterface(BaseUserInterface):
                 project_group.edit('version')
                 project_group.edit('output')
         self.clear()
+        self.save_hash = self.session.game.checksum()
 
     def clear(self):
         self.session.game = Game()
         self.bind('rom', self.session, 'game')
 
+    @confirm
     def new(self):
+        NewProjectInterface(self.ui.new(), self.session)
         self.session.game.project.name = 'hello world'
         self.session.game.project = self.session.game.project
 
+    @confirm
     def open(self):
         print(self.session.game.project.name)
 
     def save(self):
+        self.save_hash = self.session.game.checksum()
         pass
 
     def save_as(self):
         pass
 
     def export(self):
-        pass
+        print(self.session.game.to_json())
 
     def export_as(self):
         pass
 
+    @confirm
     def quit(self):
         exit()

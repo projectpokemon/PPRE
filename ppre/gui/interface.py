@@ -129,6 +129,9 @@ class Interface(BaseInterface):
         widget.setParent(self.widget)
         self.layout.add_children(QtLayoutChild(widget))
 
+    def new(self):
+        return Interface(self.session)
+
     @staticmethod
     def shortcut(self, char, ctrl=False, shift=False, alt=False, meta=False):
         parts = []

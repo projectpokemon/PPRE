@@ -1,5 +1,6 @@
 
 import abc
+import binascii
 import json
 from collections import namedtuple
 
@@ -191,6 +192,23 @@ class Editable(object):
             if restriction.validator is not None:
                 restriction.validator(self, name, value)
         super(Editable, self).__setattr__(name, value)
+
+    def checksum(self):
+        """Returns a recursive weak_hash for this instance"""
+        weak_hash = 0
+        for key in self.keys:
+            try:
+                name = self.keys[key].name
+            except:
+                name = key
+            value = getattr(self, name)
+            for sub_key, sub_value in auto_iterate(value)[2]:
+                try:
+                    sub_value = sub_value.checksum()
+                except AttributeError as err:
+                    pass
+                weak_hash += hash(sub_value)
+        return weak_hash
 
     def to_dict(self):
         """Generates a dict recursively out of this instance
