@@ -5,20 +5,6 @@ from ppre.ui.base_ui import BaseUserInterface
 from pokemon.game import Game
 
 
-class NewProjectInterface(BaseUserInterface):
-    def __init__(self, ui, session):
-        super(NewProjectInterface, self).__init__(ui, 'new_project', session)
-        self.title('New Project')
-        self.game = None
-        self.browse('base', types=['NDS Files (*.nds)', '3DS Files (*.3ds)',
-                                   'All Files (*.*)'])
-        self.browse('directory', directory=True)
-        self.show()
-
-    def new(self):
-        pass
-
-
 def confirm(func):
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
@@ -62,9 +48,23 @@ class HomeUserInterface(BaseUserInterface):
 
     @confirm
     def new(self):
-        NewProjectInterface(self.ui.new(), self.session)
-        self.session.game.project.name = 'hello world'
-        self.session.game.project = self.session.game.project
+        with self.prompt('open') as prompt:
+            prompt.file('file', types=['NDS Files (*.nds)',
+                                       '3DS Files (*.3ds)',
+                                       'All Files (*.*)'])
+
+        @prompt.okay
+        def okay():
+            print('Okay')
+            target = prompt['file'].get_value()
+            if not target:
+                return
+            self.session.game = Game.from_file(target)
+
+        @prompt.cancel
+        def cancel():
+            print('Cancelled')
+            return
 
     @confirm
     def open(self):

@@ -7,6 +7,17 @@ from ppre.ui.bind import Bind
 ALL_PARENTS = object()
 
 
+def ui_wrap(method, doc=''):
+
+    def func(self, name, *args, **kwargs):
+        text = self.translate(name)
+        ui = getattr(self.ui, method)(text, *args, **kwargs)
+        return BaseUserInterface(ui, name, self.session, self)
+    func.__name__ = method
+    func.__doc__ = doc
+    return func
+
+
 class BaseUserInterface(object):
     """Base Interface wrapper
 
@@ -106,6 +117,16 @@ class BaseUserInterface(object):
         text = self.translate(name)
         ui = self.ui.browse(text, *args, **kwargs)
         return BaseUserInterface(ui, name, self.session, self)
+
+    file = ui_wrap('file')
+
+    def prompt(self, name, *args, **kwargs):
+        text = self.translate(name)
+        ui = self.ui.prompt(text, *args, **kwargs)
+        bui = BaseUserInterface(ui, name, self.session, self)
+        bui.okay = ui.on_okay
+        bui.cancel = ui.on_cancel
+        return bui
 
     def title(self, name):
         """Set the title"""

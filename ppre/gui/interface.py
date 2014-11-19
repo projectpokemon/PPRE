@@ -208,7 +208,7 @@ class Interface(BaseInterface):
         return widget
 
     @attach_interface
-    def browse(self, text, types=None, directory=False):
+    def file(self, text, types=None, directory=False):
         widget = QtWidgets.QLineEdit(self.widget)
         label = QtWidgets.QLabel(self.widget)
         button = QtWidgets.QPushButton(self.widget)
@@ -224,6 +224,27 @@ class Interface(BaseInterface):
         button.setContentsMargins(0, 0, 0, 0)
         button.setGeometry(QtCore.QRect(250, 0, 20, 20))
         return widget
+
+    def prompt(self, text):
+        widget = QtWidgets.QDialog(self.widget)
+        widget.setModal(True)
+        self.addWidget(widget)
+        # widget.setTitle(text)
+        widget.setContentsMargins(0, 0, 0, 0)
+        widget.setGeometry(QtCore.QRect(0, 0, 0, 0))
+        group_if = Interface(self.session, self, widget)
+        group_if.layout.padding_vertical = 50
+        group_if.layout.padding_horizontal = 20
+
+        def on_okay(callback):
+            QtCore.QObject.connect(widget, QtCore.SIGNAL('accepted()'), callback)
+        group_if.on_okay = on_okay
+
+        def on_cancel(callback):
+            QtCore.QObject.connect(widget, QtCore.SIGNAL('rejected()'), callback)
+        group_if.on_cancel = on_cancel
+
+        return group_if
 
     def title(self, text):
         self.widget.setWindowTitle(text)
