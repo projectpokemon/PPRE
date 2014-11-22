@@ -10,6 +10,8 @@ from pressure.layout import Layout, LayoutChild
 
 from ppre.interface import BaseInterface
 
+# Widget interfaces deferred until bottom of file
+
 
 def attach_interface(func):
     """Make a method that returns a widget return an Interface"""
@@ -164,6 +166,12 @@ class Interface(BaseInterface):
     value = property(lambda self: self.get_value(),
                      lambda self, new_value: self.set_value(new_value))
 
+    def focus(self, interface):
+        interface.on_focus()
+
+    def on_focus(self):
+        self.widget.setFocus()
+
     @attach_interface
     def menu(self, text):
         menu = QtWidgets.QMenu(self.menubar)
@@ -207,7 +215,6 @@ class Interface(BaseInterface):
         label.setGeometry(QtCore.QRect(0, 0, 150, 20))
         return widget
 
-    @attach_interface
     def file(self, text, types=None, directory=False):
         widget = QtWidgets.QLineEdit(self.widget)
         label = QtWidgets.QLabel(self.widget)
@@ -217,17 +224,19 @@ class Interface(BaseInterface):
         widget.setText(text)
         widget.setContentsMargins(0, 0, 0, 0)
         widget.setGeometry(QtCore.QRect(100, 0, 150, 20))
+        widget.label = label
+        widget.button = button
         label.setText(text)
         label.setContentsMargins(0, 0, 0, 0)
         label.setGeometry(QtCore.QRect(0, 0, 130, 20))
-        button.setText('...')
+        button.setText('Browse')
         button.setContentsMargins(0, 0, 0, 0)
-        button.setGeometry(QtCore.QRect(250, 0, 20, 20))
-        return widget
+        button.setGeometry(QtCore.QRect(250, 0, 60, 20))
+        return FileInterface(types, directory, self.session, self, widget)
 
     def prompt(self, text):
         widget = QtWidgets.QDialog(self.widget)
-        widget.setModal(True)
+        # widget.setModal(True)
         self.addWidget(widget)
         # widget.setTitle(text)
         widget.setContentsMargins(0, 0, 0, 0)
@@ -235,6 +244,16 @@ class Interface(BaseInterface):
         group_if = Interface(self.session, self, widget)
         group_if.layout.padding_vertical = 50
         group_if.layout.padding_horizontal = 20
+        ok_button = QtWidgets.QPushButton(widget)
+        ok_button.setText('Okay')
+        QtCore.QObject.connect(ok_button, QtCore.SIGNAL('clicked()'),
+                               widget.accept)
+        cancel_button = QtWidgets.QPushButton(widget)
+        cancel_button.setText('Cancel')
+        QtCore.QObject.connect(cancel_button, QtCore.SIGNAL('clicked()'),
+                               widget.reject)
+        self.layout.add_children(QtLayoutChild(ok_button),
+                                 QtLayoutChild(cancel_button))
 
         def on_okay(callback):
             QtCore.QObject.connect(widget, QtCore.SIGNAL('accepted()'), callback)
@@ -269,3 +288,9 @@ class Interface(BaseInterface):
             self.widget.show()
         except:
             pass
+
+    def destroy(self):
+        # TODO
+        pass
+
+from ppre.gui.widgets import *

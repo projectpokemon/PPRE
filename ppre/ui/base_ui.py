@@ -82,10 +82,19 @@ class BaseUserInterface(object):
             bindings.append(entry)
         self.bindings = bindings
 
+    def destroy(self):
+        self.ui.destroy()
+        if self.parent is not None:
+            del self.parent[self.name]
+
     def new(self):
         """Return a new interface"""
         ui = self.ui.new()
         return BaseUserInterface(ui, None, self.session, None)
+
+    def focus(self, name):
+        """Focus on a particular component by name"""
+        self.ui.focus(self[name].ui)
 
     def menu(self, name):
         """Add a menu
@@ -144,6 +153,9 @@ class BaseUserInterface(object):
 
     def __setitem__(self, key, value):
         self.children[key] = value
+
+    def __delitem__(self, name):
+        del self.children[name]
 
     def keys(self):
         return self.children.keys()

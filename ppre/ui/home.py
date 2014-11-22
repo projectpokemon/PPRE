@@ -52,6 +52,7 @@ class HomeUserInterface(BaseUserInterface):
             prompt.file('file', types=['NDS Files (*.nds)',
                                        '3DS Files (*.3ds)',
                                        'All Files (*.*)'])
+            prompt.focus('file')
 
         @prompt.okay
         def okay():
@@ -60,11 +61,12 @@ class HomeUserInterface(BaseUserInterface):
             if not target:
                 return
             self.session.game = Game.from_file(target)
+            self['open'].destroy()
 
         @prompt.cancel
         def cancel():
             print('Cancelled')
-            return
+            self['open'].destroy()
 
     @confirm
     def open(self):
