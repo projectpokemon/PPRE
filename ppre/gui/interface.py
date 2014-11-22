@@ -244,16 +244,15 @@ class Interface(BaseInterface):
         group_if = Interface(self.session, self, widget)
         group_if.layout.padding_vertical = 50
         group_if.layout.padding_horizontal = 20
-        ok_button = QtWidgets.QPushButton(widget)
-        ok_button.setText('Okay')
-        QtCore.QObject.connect(ok_button, QtCore.SIGNAL('clicked()'),
+        action_buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
+            QtCore.Qt.Horizontal, widget)
+        action_buttons.setGeometry(0, 0, 300, 20)
+        QtCore.QObject.connect(action_buttons, QtCore.SIGNAL('accepted()'),
                                widget.accept)
-        cancel_button = QtWidgets.QPushButton(widget)
-        cancel_button.setText('Cancel')
-        QtCore.QObject.connect(cancel_button, QtCore.SIGNAL('clicked()'),
+        QtCore.QObject.connect(action_buttons, QtCore.SIGNAL('rejected()'),
                                widget.reject)
-        self.layout.add_children(QtLayoutChild(ok_button),
-                                 QtLayoutChild(cancel_button))
+        group_if.layout.add_children(QtLayoutChild(action_buttons))
 
         def on_okay(callback):
             QtCore.QObject.connect(widget, QtCore.SIGNAL('accepted()'), callback)
