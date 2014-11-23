@@ -11,6 +11,10 @@ table = {
         'export_as': 'Export As',
         'quit': 'Quit'
     },
+    'tools': {
+        '_': 'Tools',
+        'edit_pokemon': 'Edit Pokemon'
+    },
     'rom': {
         '_': 'ROM',
         'files': {

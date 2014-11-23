@@ -35,6 +35,9 @@ class HomeUserInterface(BaseUserInterface):
             file_menu.action('export_as', self.export_as)
             file_menu.action('quit', self.quit)
 
+        with self.menu('tools') as tools_menu:
+            tools_menu.action('edit_pokemon', self.edit_pokemon)
+
         with self.group('rom') as rom_group:
             with rom_group.group('files') as files_group:
                 files_group.edit('base')
@@ -161,3 +164,6 @@ class HomeUserInterface(BaseUserInterface):
     @confirm
     def quit(self):
         exit()
+
+    def edit_pokemon(self):
+        pass

@@ -292,9 +292,8 @@ class Interface(BaseInterface):
             color = 'rgb({0})'.format(','.join(bands))
             self.widget.setAutoFillBackground(False)
             self.widget.setStyleSheet("""
-        QMainWindow {{ background-color: {color}; }}
-        """.format(color=color))
-            print(self.widget.styleSheet())
+            QMainWindow {{ background-color: {color}; }}
+            """.format(color=color))
 
     def icon(self, filename):
         icon = QtWidgets.QIcon()
