@@ -54,6 +54,7 @@ class HomeUserInterface(BaseUserInterface):
 
     def set_game(self, game):
         self.session.game = game
+        self.title('PPRE 5.0 - {0}'.format(game.game_name), color=game.color)
 
     @confirm
     def new(self):

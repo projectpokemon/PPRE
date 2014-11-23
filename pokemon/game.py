@@ -39,6 +39,22 @@ GEN_IV = ('Diamond', 'Pearl', 'Platinum', 'HeartGold', 'SoulSilver')
 GEN_V = ('Black', 'White', 'Black2', 'White2')
 GEN_VI = ('X', 'Y', 'OmegaRuby', 'AlphaSapphire')
 
+GAME_COLORS = {
+    'Diamond': '#89d1e5',  # 'rgb(133, 218, 239)'
+    'Pearl': '#d1b3b9',
+    'Platinum': '#E5E4E2',
+    'HeartGold': '#FDD017',
+    'SoulSilver': '#C0C0C0',
+    'Black': '#000000',
+    'White': '#ffffff',
+    'Black2': '#000000',
+    'White2': '#ffffff',
+    'X': '#6176b5',
+    'Y': '#ff251d',
+    'OmegaRuby': '#9B111E',
+    'AlphaSapphire': '#0F52BA'
+}
+
 
 class Project(Editable):
     def __init__(self):
@@ -70,6 +86,7 @@ class Game(Editable):
         self.game_name = None
         self.game_code = None
         self.region_code = None
+        self.color = '#E5E4E2'
         self.header = None
         self.config = {}
 
@@ -110,6 +127,7 @@ class Game(Editable):
         game.game_name = game_name
         game.game_code = game_code
         game.region_code = region_code
+        game.color = GAME_COLORS[game_name]
         game.header = header
         game.load_config()
         return game

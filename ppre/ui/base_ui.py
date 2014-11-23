@@ -142,9 +142,9 @@ class BaseUserInterface(object):
         bui.cancel = ui.cancel
         return bui
 
-    def title(self, name):
+    def title(self, name, color=None):
         """Set the title"""
-        self.ui.title(name)
+        self.ui.title(name, color)
 
     def icon(self, filename, relative=True):
         """Set the title"""
