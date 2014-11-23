@@ -223,7 +223,7 @@ class Interface(BaseInterface):
         widget.setGeometry(QtCore.QRect(120, 0, 150, 20))
         return BooleanInterface(self.session, self, widget)
 
-    def file(self, text, types=None, directory=False):
+    def file(self, text, types=None, directory=False, new=False):
         widget = QtWidgets.QLineEdit(self.widget)
         label = QtWidgets.QLabel(self.widget)
         button = QtWidgets.QPushButton(self.widget)
@@ -240,7 +240,7 @@ class Interface(BaseInterface):
         button.setText('Browse')
         button.setContentsMargins(0, 0, 0, 0)
         button.setGeometry(QtCore.QRect(250, 0, 60, 20))
-        return FileInterface(types, directory, self.session, self, widget)
+        return FileInterface(types, directory, new, self.session, self, widget)
 
     def prompt(self, text):
         widget = QtWidgets.QDialog(self.widget)

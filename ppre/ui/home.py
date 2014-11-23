@@ -150,10 +150,37 @@ class HomeUserInterface(BaseUserInterface):
                 parser.set('files', 'workspace',
                            self.session.game.files.directory)
                 parser.write(handle)
-        self.save_hash = self.session.game.checksum()
+            self.save_hash = self.session.game.checksum()
+        else:
+            try:
+                self.save_as()
+            except:
+                pass
 
     def save_as(self):
-        pass
+        with self.prompt('open') as prompt:
+            prompt.file('file', types=['PPRE Projects (*.pprj)'], new=True)
+            # TODO: hook on event and fires
+            # TODO: Get rid of this patch
+            # TODO: Handle cancel action in dialog
+            prompt['file'].set_value = prompt['file'].ui.set_value = \
+                hook.multi_call_patch(prompt['file'].set_value)
+            prompt['file'].set_value.add_call(
+                lambda res, value: res.noop(prompt.okay()))
+            prompt.focus('file')
+
+        @prompt.on_okay
+        def okay():
+            target = prompt['file'].get_value()
+            self['open'].destroy()
+            if not target:
+                return
+            self.save_filename = target
+            self.save()
+
+        @prompt.on_cancel
+        def cancel():
+            self['open'].destroy()
 
     def export(self):
         print(self.session.game.to_json())
