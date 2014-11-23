@@ -1,5 +1,6 @@
 
 import functools
+import os
 
 from ppre.ui.base_ui import BaseUserInterface
 from pokemon.game import Game
@@ -52,15 +53,21 @@ class HomeUserInterface(BaseUserInterface):
             prompt.file('file', types=['NDS Files (*.nds)',
                                        '3DS Files (*.3ds)',
                                        'All Files (*.*)'])
+            prompt.file('parent_directory', directory=True)
+            # prompt.check('backup')
             prompt.focus('file')
 
         @prompt.okay
         def okay():
             print('Okay')
             target = prompt['file'].get_value()
+            directory = prompt['parent_directory'].get_value()
             if not target:
                 return
-            self.session.game = Game.from_file(target)
+            if not directory:
+                directory = os.path.dirname(target)
+            # TODO: Confirm directory overwrite?
+            self.session.game = Game.from_file(target, directory)
             self['open'].destroy()
 
         @prompt.cancel
