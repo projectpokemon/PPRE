@@ -147,8 +147,8 @@ class Game(Editable):
             with open(os.path.join(self.files.directory, 'config.json'))\
                     as handle:
                 self.from_dict(json.load(handle))
-        except IOError:
-            pass
+        except IOError as err:
+            print(err)
 
     def write_config(self):
         with open(os.path.join(self.files.directory, 'config.json'), 'w')\

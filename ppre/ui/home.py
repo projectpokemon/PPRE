@@ -46,6 +46,7 @@ class HomeUserInterface(BaseUserInterface):
                 project_group.edit('output')
         self.clear()
         self.save_hash = self.session.game.checksum()
+        self.save_filename = None
 
     def clear(self):
         self.session.game = Game()
@@ -122,15 +123,27 @@ class HomeUserInterface(BaseUserInterface):
                 game = Game.from_workspace(workspace)
                 game.files.from_dict(dict(parser.items('location')))
                 game.project.from_dict(dict(parser.items('project')))
+                game.write_config()
             self.session.game = game
+            self.save_hash = self.session.game.checksum()
+            self.save_filename = target
 
         @prompt.on_cancel
         def cancel():
             self['open'].destroy()
 
     def save(self):
+        if self.save_filename:
+            with open(self.save_filename, 'w') as handle:
+                parser = configparser.ConfigParser()
+                try:
+                    parser.add_section('files')
+                except configparser.DuplicateSectionError:
+                    pass
+                parser.set('files', 'workspace',
+                           self.session.game.files.directory)
+                parser.write(handle)
         self.save_hash = self.session.game.checksum()
-        pass
 
     def save_as(self):
         pass
