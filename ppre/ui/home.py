@@ -16,6 +16,12 @@ def confirm(func):
         print(self.save_hash)
         if self.save_hash and (self.save_hash != self.session.game.checksum()):
             print('Save first')
+            if self.confirm('project_changed'):
+                self.save()
+                # FIXME: save_as() case is async
+                func(self, *args, **kwargs)
+            else:
+                return
         else:
             func(self, *args, **kwargs)
     return wrapper
