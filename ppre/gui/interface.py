@@ -150,7 +150,7 @@ class Interface(BaseInterface):
 
     def get_value(self):
         try:
-            return self.widget.text()
+            return str(self.widget.text())
         except:
             return None
 

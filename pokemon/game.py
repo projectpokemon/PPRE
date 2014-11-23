@@ -2,6 +2,7 @@
 import json
 import os
 
+import ndstool
 from ctr.header_bin import HeaderBin as CTRHeaderBin
 from ntr.header_bin import HeaderBin as NTRHeaderBin
 from ntr.narc import NARC
@@ -111,6 +112,34 @@ class Game(Editable):
         game.region_code = region_code
         game.header = header
         game.load_config()
+        return game
+
+    @staticmethod
+    def from_file(filename, parent_directory):
+        """Creates a workspace from a ROM
+
+        Returns
+        -------
+        game : Game
+
+        Raises
+        ------
+        IOError
+            If the new workspace already exists
+        """
+        tail = os.path.split(filename)[1]
+        name, ext = os.path.splitext(tail)
+        ext = ext.lower()
+        workspace = os.path.join(parent_directory, name)
+        os.mkdir(workspace)  # Let raise IOError
+        if ext in ('.3ds', '.3dz'):
+            raise NotImplementedError('CTR dumping not implemented')
+        elif ext == '.nds':
+            ndstool.dump(filename, workspace)
+        else:
+            raise ValueError('Not able to detect file type')
+        game = Game.from_workspace(workspace)
+        game.write_config()
         return game
 
     def load_config(self):
