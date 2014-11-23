@@ -7,6 +7,9 @@ class Result(object):
     def __init__(self, value):
         self.value = value
 
+    def noop(self, *args):
+        return self
+
 
 def patch_magic(func):
     """Fixes an issue with new-style classes not invoking the object's

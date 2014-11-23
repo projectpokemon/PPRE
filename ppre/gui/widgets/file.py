@@ -23,6 +23,7 @@ class FileInterface(Interface):
         else:
             fname = QtWidgets.QFileDialog.getOpenFileName(
                 None, self.widget.label.text(), filter=self.filter)
+        print(fname, self.set_value)
         if not fname:
             return
-        self.widget.setText(fname)
+        self.set_value(fname)

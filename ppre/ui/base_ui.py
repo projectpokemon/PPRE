@@ -122,6 +122,8 @@ class BaseUserInterface(object):
         ui = self.ui.edit(text, *args, **kwargs)
         return BaseUserInterface(ui, name, self.session, self)
 
+    boolean = ui_wrap('boolean')
+
     def browse(self, name, *args, **kwargs):
         text = self.translate(name)
         ui = self.ui.browse(text, *args, **kwargs)
@@ -133,8 +135,11 @@ class BaseUserInterface(object):
         text = self.translate(name)
         ui = self.ui.prompt(text, *args, **kwargs)
         bui = BaseUserInterface(ui, name, self.session, self)
-        bui.okay = ui.on_okay
-        bui.cancel = ui.on_cancel
+        # TODO: hook and fire events
+        bui.on_okay = ui.on_okay
+        bui.on_cancel = ui.on_cancel
+        bui.okay = ui.okay
+        bui.cancel = ui.cancel
         return bui
 
     def title(self, name):

@@ -1,9 +1,13 @@
 
 import functools
 import os
+import shutil
+
+from six.moves import configparser
 
 from ppre.ui.base_ui import BaseUserInterface
 from pokemon.game import Game
+from util import hook
 
 
 def confirm(func):
@@ -54,10 +58,11 @@ class HomeUserInterface(BaseUserInterface):
                                        '3DS Files (*.3ds)',
                                        'All Files (*.*)'])
             prompt.file('parent_directory', directory=True)
-            # prompt.check('backup')
+            prompt['parent_directory'].set_value('')
+            prompt.boolean('backup')
             prompt.focus('file')
 
-        @prompt.okay
+        @prompt.on_okay
         def okay():
             print('Okay')
             target = prompt['file'].get_value()
@@ -68,16 +73,60 @@ class HomeUserInterface(BaseUserInterface):
                 directory = os.path.dirname(target)
             # TODO: Confirm directory overwrite?
             self.session.game = Game.from_file(target, directory)
+            base_file = target
+            if prompt['backup'].get_value():
+                base_file = os.path.split(target)[1]
+                base_file = os.path.join(self.session.game.files.directory,
+                                         base_file)
+                shutil.copy(target, base_file)
+            self.session.game.files.base = base_file
+            self.session.game.write_config()
             self['open'].destroy()
 
-        @prompt.cancel
+        @prompt.on_cancel
         def cancel():
             print('Cancelled')
             self['open'].destroy()
 
     @confirm
     def open(self):
-        print(self.session.game.project.name)
+        with self.prompt('open') as prompt:
+            prompt.file('file', types=['PPRE Projects (*.pprj)'])
+            # TODO: hook on event and fires
+            # TODO: Get rid of this patch
+            # TODO: Handle cancel action in dialog
+            prompt['file'].set_value = prompt['file'].ui.set_value = \
+                hook.multi_call_patch(prompt['file'].set_value)
+            prompt['file'].set_value.add_call(
+                lambda res, value: res.noop(prompt.okay()))
+            prompt.focus('file')
+
+        @prompt.on_okay
+        def okay():
+            target = prompt['file'].get_value()
+            self['open'].destroy()
+            if not target:
+                return
+            with open(target) as handle:
+                parser = configparser.ConfigParser()
+                parser.readfp(handle)
+            try:
+                # Compat with PPRE2
+                workspace = parser.get('files', 'workspace')
+                game = Game.from_workspace(workspace)
+            except configparser.NoSectionError as nse:
+                try:
+                    workspace = parser.get('location', 'directory')
+                except:
+                    raise nse
+                game = Game.from_workspace(workspace)
+                game.files.from_dict(dict(parser.items('location')))
+                game.project.from_dict(dict(parser.items('project')))
+            self.session.game = game
+
+        @prompt.on_cancel
+        def cancel():
+            self['open'].destroy()
 
     def save(self):
         self.save_hash = self.session.game.checksum()
