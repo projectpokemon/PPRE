@@ -110,9 +110,7 @@ def add_call(func, callback, priority=10):
 
 
 def del_call(func, callback):
-    print('del', func._calls)
     func._calls = [entry for entry in func._calls if entry[0] != callback]
-    print('ete', func._calls)
 
 
 def restore(func):

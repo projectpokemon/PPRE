@@ -75,7 +75,7 @@ class Bind(object):
         self.interface.set_value(value)
         self.model = value
         self.unbind(False)
-        # self.bind_children()
+        self.bind_children()
         return res
 
     def on_model_attr_set(self, res, name, value):

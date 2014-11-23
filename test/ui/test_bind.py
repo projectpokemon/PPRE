@@ -120,3 +120,10 @@ class TestBind(unittest.TestCase):
         self.assertEqual(other_parent.x.b, 8)
         self.assertEqual(self.container['a']['b'].get_value(), 11)
 
+    def test_attr_change(self):
+        Bind(self.container, 'a', self.parent, 'x')
+        other_parent = Parent()
+        other_parent.x.b = 2
+        self.parent.x = other_parent.x
+        self.assertEqual(self.parent.x.b, 2)
+        self.assertEqual(self.container['a']['b'].get_value(), 2)
