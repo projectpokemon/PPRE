@@ -11,6 +11,10 @@ table = {
         'export_as': 'Exportato',
         'quit': 'Exi'
     },
+    'tools': {
+        '_': 'Instrumenta',
+        'edit_pokemon': 'Muta Pokemonem'
+    },
     'rom': {
         '_': 'Memorarum Legibile Proprie',
         'files': {
