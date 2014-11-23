@@ -52,6 +52,9 @@ class HomeUserInterface(BaseUserInterface):
         self.session.game = Game()
         self.bind('rom', self.session, 'game')
 
+    def set_game(self, game):
+        self.session.game = game
+
     @confirm
     def new(self):
         with self.prompt('open') as prompt:
@@ -73,7 +76,7 @@ class HomeUserInterface(BaseUserInterface):
             if not directory:
                 directory = os.path.dirname(target)
             # TODO: Confirm directory overwrite?
-            self.session.game = Game.from_file(target, directory)
+            self.set_game(Game.from_file(target, directory))
             base_file = target
             if prompt['backup'].get_value():
                 base_file = os.path.split(target)[1]
@@ -124,7 +127,7 @@ class HomeUserInterface(BaseUserInterface):
                 game.files.from_dict(dict(parser.items('location')))
                 game.project.from_dict(dict(parser.items('project')))
                 game.write_config()
-            self.session.game = game
+            self.set_game(game)
             self.save_hash = self.session.game.checksum()
             self.save_filename = target
 
