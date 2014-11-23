@@ -3,9 +3,14 @@
 from util import hook
 
 
+def debug(*args):
+    return
+    print(args)
+
+
 class Bind(object):
     def __init__(self, container, key, parent=None, attr=None, unbind=True):
-        print('Bind', container.name, key)
+        debug('Bind', container.name, key)
         self.container = container
         self.key = key
         self.parent = self.container if parent is None else parent
@@ -23,7 +28,7 @@ class Bind(object):
 
     def bind_children(self, unbind=True):
         for child_key in self.interface.keys():
-            print(child_key)
+            debug(child_key)
             if hasattr(self.model, child_key):
                 self.interface.bind(child_key, self.model, unbind=unbind)
 
@@ -41,7 +46,7 @@ class Bind(object):
             pass
 
     def on_container_key_set(self, res, name, interface, init=False):
-        print('cks', name, interface.name)
+        debug('cks', name, interface.name)
         if name != self.key:
             return res
         if interface == self.interface and not init:
@@ -55,13 +60,13 @@ class Bind(object):
         return res
 
     def on_interface_value_set(self, res, value):
-        print('ivs', self.key, self.attr, value, self.interface.get_value())
+        debug('ivs', self.key, self.attr, value, self.interface.get_value())
         if getattr(self.parent, self.attr) != value:
             setattr(self.parent, self.attr, value)
         return res
 
     def on_parent_attr_set(self, res, name, value, init=False):
-        print('pas', name, value)
+        debug('pas', name, value)
         if name != self.attr:
             return res
         if value == self.model and not init:
@@ -79,7 +84,7 @@ class Bind(object):
         return res
 
     def on_model_attr_set(self, res, name, value):
-        print('mas', name, value)
+        debug('mas', name, value)
         if name in self.interface:
             if self.interface[name].get_value() != value:
                 self.interface[name].set_value(value)

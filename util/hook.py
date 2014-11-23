@@ -74,7 +74,7 @@ def multi_call(original_func, original=None):
     @functools.wraps(original_func)
     def func(*args, **kwargs):
         res = Result(None)
-        print(args, kwargs)
+        # print(args, kwargs)
         for callback, priority in func._calls:
             res = callback(res, *args, **kwargs)
         return res.value
