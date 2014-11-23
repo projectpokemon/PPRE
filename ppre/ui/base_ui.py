@@ -87,10 +87,12 @@ class BaseUserInterface(object):
         if self.parent is not None:
             del self.parent[self.name]
 
-    def new(self):
+    def new(self, cls=None):
         """Return a new interface"""
         ui = self.ui.new()
-        return BaseUserInterface(ui, None, self.session, None)
+        if cls is None:
+            cls = BaseUserInterface
+        return cls(ui, None, self.session, None)
 
     def focus(self, name):
         """Focus on a particular component by name"""

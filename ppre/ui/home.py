@@ -52,7 +52,7 @@ class HomeUserInterface(BaseUserInterface):
         self.save_filename = None
 
     def clear(self):
-        self.session.game = Game()
+        self.set_game(Game())
         self.bind('rom', self.session, 'game')
 
     def set_game(self, game):
@@ -193,4 +193,6 @@ class HomeUserInterface(BaseUserInterface):
         exit()
 
     def edit_pokemon(self):
-        pass
+        from ppre.ui.editpokemon import PokemonUserInterface
+
+        PokemonUserInterface(self.ui.new(), self.session).show()
