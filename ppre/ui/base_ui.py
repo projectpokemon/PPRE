@@ -175,3 +175,12 @@ class BaseUserInterface(object):
 
     def __exit__(self, type_, value, traceback):
         self.show()
+
+
+if __name__ == '__main__':
+    # Build documentation typing
+    from ppre.interface import BaseInterface
+    from ppre.session import Session
+
+    session = Session()
+    BaseUserInterface(BaseInterface(session), 'interface', session)
