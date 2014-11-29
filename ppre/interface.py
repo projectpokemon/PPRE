@@ -2,10 +2,30 @@
 import abc
 
 
-class BaseInterface(object):
+from dispatch.events import Emitter
+
+
+class BaseInterface(Emitter):
     """Generalized Interface
 
     This is in charge of creating the actual visual components of the UI
+
+    Events
+    ------
+    change : (value=mixed)
+        Emitted if the value of this interface changes
+    trigger : (None)
+        Emitted if this interface has been triggered
+    okay : (None)
+        Emitted if an interface is completed successfully
+    cancel : (None)
+        Emitted if an interface is completed unsuccessfully
+    done : (None)
+        Emitted if an interface is completed
+    child:add : (child=Interface)
+        Emitted when a child is added
+    child:remove : (child=Interface)
+        Emitted when a child is removed
     """
     __metaclass__ = abc.ABCMeta
 
