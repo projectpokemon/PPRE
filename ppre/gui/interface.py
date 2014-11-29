@@ -135,7 +135,7 @@ class Interface(BaseInterface):
         return Interface(self.session)
 
     @staticmethod
-    def shortcut(self, char, ctrl=False, shift=False, alt=False, meta=False):
+    def shortcut(char, ctrl=False, shift=False, alt=False, meta=False):
         parts = []
         if ctrl:
             parts.append('CTRL')

@@ -33,13 +33,20 @@ class HomeUserInterface(BaseUserInterface):
         self.title('PPRE 5.0')
         self.icon('PPRE.ico')
         with self.menu('file') as file_menu:
-            file_menu.action('new', self.new)
-            file_menu.action('open', self.open)
-            file_menu.action('save', self.save)
-            file_menu.action('save_as', self.save_as)
-            file_menu.action('export', self.export)
-            file_menu.action('export_as', self.export_as)
-            file_menu.action('quit', self.quit)
+            file_menu.action('new', self.new,
+                             file_menu.shortcut('n', ctrl=True))
+            file_menu.action('open', self.open,
+                             file_menu.shortcut('o', ctrl=True))
+            file_menu.action('save', self.save,
+                             file_menu.shortcut('s', ctrl=True))
+            file_menu.action('save_as', self.save_as,
+                             file_menu.shortcut('s', ctrl=True, shift=True))
+            file_menu.action('export', self.export,
+                             file_menu.shortcut('e', ctrl=True))
+            file_menu.action('export_as', self.export_as,
+                             file_menu.shortcut('e', ctrl=True, shift=True))
+            file_menu.action('quit', self.quit,
+                             file_menu.shortcut('q', ctrl=True))
 
         with self.menu('tools') as tools_menu:
             tools_menu.action('edit_pokemon', self.edit_pokemon)

@@ -98,6 +98,9 @@ class BaseUserInterface(object):
         """Focus on a particular component by name"""
         self.ui.focus(self[name].ui)
 
+    def shortcut(self, char, ctrl=False, shift=False, alt=False, meta=False):
+        return self.ui.shortcut(char, ctrl, shift, alt, meta)
+
     def menu(self, name):
         """Add a menu
 
@@ -107,10 +110,10 @@ class BaseUserInterface(object):
         ui = self.ui.menu(text)
         return BaseUserInterface(ui, name, self.session, self)
 
-    def action(self, name, callback):
+    def action(self, name, callback, shortcut=None):
         """Add an action item to a menu"""
         text = self.translate(name)
-        ui = self.ui.action(text, callback)
+        ui = self.ui.action(text, callback, shortcut)
         return BaseUserInterface(ui, name, self.session, self)
 
     def group(self, name):
