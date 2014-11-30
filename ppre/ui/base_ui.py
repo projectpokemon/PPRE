@@ -1,4 +1,5 @@
 
+import functools
 import os
 
 from ppre.ui.bind import Bind
@@ -16,6 +17,13 @@ def ui_wrap(method, doc=''):
     func.__name__ = method
     func.__doc__ = doc
     return func
+
+
+def ui_pass(method):
+    def wrapper(self, *args, **kwargs):
+        return getattr(self.ui, method)(*args, **kwargs)
+    wrapper.__name__ = method
+    return wrapper
 
 
 class BaseUserInterface(object):
@@ -140,11 +148,6 @@ class BaseUserInterface(object):
         text = self.translate(name)
         ui = self.ui.prompt(text, *args, **kwargs)
         bui = BaseUserInterface(ui, name, self.session, self)
-        # TODO: hook and fire events
-        bui.on_okay = ui.on_okay
-        bui.on_cancel = ui.on_cancel
-        bui.okay = ui.okay
-        bui.cancel = ui.cancel
         return bui
 
     def title(self, name, color=None):
@@ -157,6 +160,11 @@ class BaseUserInterface(object):
             filename = os.path.join(os.path.dirname(__file__), '../../',
                                     filename)
         self.ui.icon(filename)
+
+    on = ui_pass('on')
+    once = ui_pass('once')
+    off = ui_pass('off')
+    fire = ui_pass('fire')
 
     def __getitem__(self, name):
         return self.children[name]

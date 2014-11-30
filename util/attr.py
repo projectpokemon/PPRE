@@ -60,3 +60,8 @@ class AttrClone(object):
     def __setattr__(self, name, value):
         return getattr(getattr_override(self, '_base_copy'), name, value)
 
+
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self

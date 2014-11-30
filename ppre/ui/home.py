@@ -119,11 +119,11 @@ class HomeUserInterface(BaseUserInterface):
             prompt['file'].set_value = prompt['file'].ui.set_value = \
                 hook.multi_call_patch(prompt['file'].set_value)
             prompt['file'].set_value.add_call(
-                lambda res, value: res.noop(prompt.okay()))
+                lambda res, value: res.noop(prompt.fire('okay')))
             prompt.focus('file')
 
-        @prompt.on_okay
-        def okay():
+        @prompt.on('okay')
+        def okay(evt):
             target = prompt['file'].get_value()
             self['open'].destroy()
             if not target:
@@ -148,8 +148,8 @@ class HomeUserInterface(BaseUserInterface):
             self.save_hash = self.session.game.checksum()
             self.save_filename = target
 
-        @prompt.on_cancel
-        def cancel():
+        @prompt.on('cancel')
+        def cancel(evt):
             self['open'].destroy()
 
     def save(self):

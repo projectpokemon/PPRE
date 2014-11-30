@@ -10,7 +10,11 @@ class PokemonUserInterface(BaseUserInterface):
         self.title('Pokemon Editor', color=session.game.color)
         self.data = Pokemon(session.game)
         with self.group('pokemon') as pokemon_group:
-            self.edit('natid')
+            natid = self.edit('natid')
+
+            @natid.on('changed')
+            def natid_changed(evt):
+                print(evt.data.value, )
             with pokemon_group.group('personal') as personal_group:
                 with personal_group.group('base_stat') as base_stat_group:
                     for stat in Stats.STATS:

@@ -1,5 +1,5 @@
 
-from attr import temporary_attr
+from attr import temporary_attr, AttrDict
 from cache import cached_property
 from util.io import BinaryIO
 
@@ -28,4 +28,4 @@ def lget(lst, idx, default=None):
         return default
 
 
-__all__ = ['cached_property', 'temporary_attr', 'BinaryIO', 'lget']
+__all__ = ['cached_property', 'temporary_attr', 'AttrDict', 'BinaryIO', 'lget']

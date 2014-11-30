@@ -9,6 +9,7 @@ QtWidgets = QtGui
 from pressure.layout import Layout, LayoutChild
 
 from ppre.interface import BaseInterface
+from util import AttrDict
 
 # Widget interfaces deferred until bottom of file
 
@@ -27,6 +28,12 @@ def session_bind(session):
         session.app
     except AttributeError:
         session.app = QtGui.QApplication(session.argv)
+
+
+def q_simplify(value):
+    if isinstance(value, QtCore.QString):
+        return str(value)
+    return value
 
 
 class QtLayoutChild(LayoutChild):
@@ -92,8 +99,6 @@ class Interface(BaseInterface):
         super(Interface, self).__init__(session)
         session_bind(session)
         self.parent = parent
-        if self.parent is not None:
-            self.parent.children.append(self)
         self.children = []
         if widget is None:
             self.widget = QtWidgets.QMainWindow(parent.widget if parent
@@ -107,6 +112,9 @@ class Interface(BaseInterface):
                                    lambda value: self.set_value(value))
         except:
             pass
+        if self.parent is not None:
+            self.parent.children.append(self)
+            self.parent.fire('child:add', self)
 
     @property
     def menubar(self):
@@ -147,6 +155,32 @@ class Interface(BaseInterface):
             parts.append('META')
         parts.append(char)
         return '+'.join(parts)
+
+    @staticmethod
+    def connect(widget, signal_str, callback):
+        QtCore.QObject.connect(widget, QtCore.SIGNAL(signal_str), callback)
+
+    def connect_event(self, widget, signal_str, event, **event_map):
+        """Emits an event on a Qt signal_str.
+
+        Parameters
+        ----------
+        widget : QWidget
+            Widget to connect to
+        signal_str : str
+            QString to listen on. This must take type parameters
+        event : str
+            Event name to emit
+        event_map : **kwargs
+            Map of argument types to attribute names. value=0, child=1, etc.
+            To make data.value = arg[0] and data.child = arg[1]
+        """
+        def callback(*args):
+            data = AttrDict()
+            for key, value in event_map.items():
+                data[key] = q_simplify(args[value])
+            self.fire(event, data)
+        self.connect(widget, signal_str, callback)
 
     def get_value(self):
         try:
@@ -200,7 +234,6 @@ class Interface(BaseInterface):
         group_if.layout.padding_horizontal = 20
         return group_if
 
-    @attach_interface
     def edit(self, text, soft_rows=None):
         widget = QtWidgets.QLineEdit(self.widget)
         label = QtWidgets.QLabel(self.widget)
@@ -213,7 +246,10 @@ class Interface(BaseInterface):
         label.setText(text)
         label.setContentsMargins(0, 0, 0, 0)
         label.setGeometry(QtCore.QRect(0, 0, 150, 20))
-        return widget
+        inf = Interface(self.session, self, widget)
+        inf.connect_event(widget, 'textEdited(const QString&)',
+                          'changed', value=0)
+        return inf
 
     def boolean(self, text):
         widget = QtWidgets.QCheckBox(self.widget)
@@ -256,22 +292,33 @@ class Interface(BaseInterface):
             QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
             QtCore.Qt.Horizontal, widget)
         action_buttons.setGeometry(0, 0, 300, 20)
-        QtCore.QObject.connect(action_buttons, QtCore.SIGNAL('accepted()'),
-                               widget.accept)
-        QtCore.QObject.connect(action_buttons, QtCore.SIGNAL('rejected()'),
-                               widget.reject)
+        group_if.connect(action_buttons, 'accepted()', widget.accept)
+        group_if.connect(action_buttons, 'rejected()', widget.reject)
+        group_if.connect_event(widget, 'accepted()', '_okay')
+        group_if.connect_event(widget, 'rejected()', '_cancel')
+        group_if.connect_event(action_buttons, 'clicked(QAbstractButton*)',
+                               'done')
         group_if.layout.add_children(QtLayoutChild(action_buttons))
 
-        def on_okay(callback):
-            QtCore.QObject.connect(widget, QtCore.SIGNAL('accepted()'), callback)
-        group_if.on_okay = on_okay
+        @group_if.on('cancel')
+        def cancel(evt):
+            if not evt.data:
+                evt.cancel()
+                widget.reject()
 
-        def on_cancel(callback):
-            QtCore.QObject.connect(widget, QtCore.SIGNAL('rejected()'), callback)
-        group_if.on_cancel = on_cancel
+        @group_if.on('_cancel')
+        def cancel(evt):
+            group_if.fire('cancel', True)
 
-        group_if.okay = lambda: widget.accept()
-        group_if.cancel = lambda: widget.reject()
+        @group_if.on('okay')
+        def okay(evt):
+            if not evt.data:
+                evt.cancel()
+                widget.accept()
+
+        @group_if.on('_okay')
+        def okay(evt):
+            group_if.fire('okay', True)
 
         return group_if
 
