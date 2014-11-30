@@ -89,47 +89,47 @@ class HomeUserInterface(BaseUserInterface):
             prompt.file('parent_directory', directory=True)
             prompt['parent_directory'].set_value('')
             prompt.boolean('backup')
+
+            @prompt.on('okay')
+            def okay(evt):
+                print('Okay')
+                target = prompt['file'].get_value()
+                directory = prompt['parent_directory'].get_value()
+                backup = prompt['backup'].get_value()
+                self['open'].destroy()
+                if not target:
+                    return
+                if not directory:
+                    directory = os.path.dirname(target)
+                # TODO: Confirm directory overwrite?
+                self.set_game(Game.from_file(target, directory))
+                base_file = target
+                if backup:
+                    base_file = os.path.split(target)[1]
+                    base_file = os.path.join(self.session.game.files.directory,
+                                            base_file)
+                    shutil.copy(target, base_file)
+                self.session.game.files.base = base_file
+                self.session.game.write_config()
+
+            @prompt.on('cancel')
+            def cancel(evt):
+                print('Cancelled')
+                self['open'].destroy()
             prompt.focus('file')
-
-        @prompt.on('okay')
-        def okay(evt):
-            print('Okay')
-            target = prompt['file'].get_value()
-            directory = prompt['parent_directory'].get_value()
-            backup = prompt['backup'].get_value()
-            self['open'].destroy()
-            if not target:
-                return
-            if not directory:
-                directory = os.path.dirname(target)
-            # TODO: Confirm directory overwrite?
-            self.set_game(Game.from_file(target, directory))
-            base_file = target
-            if backup:
-                base_file = os.path.split(target)[1]
-                base_file = os.path.join(self.session.game.files.directory,
-                                         base_file)
-                shutil.copy(target, base_file)
-            self.session.game.files.base = base_file
-            self.session.game.write_config()
-
-        @prompt.on('cancel')
-        def cancel(evt):
-            print('Cancelled')
-            self['open'].destroy()
 
     @confirm
     def open(self):
-        with self.prompt('open') as prompt:
-            prompt.file('file', types=['PPRE Projects (*.pprj)'])
-            # TODO: hook on event and fires
-            # TODO: Get rid of this patch
-            # TODO: Handle cancel action in dialog
-            prompt['file'].set_value = prompt['file'].ui.set_value = \
-                hook.multi_call_patch(prompt['file'].set_value)
-            prompt['file'].set_value.add_call(
-                lambda res, value: res.noop(prompt.fire('okay')))
-            prompt.focus('file')
+        with self.prompt('open', hide=True) as prompt:
+            file = prompt.file('file', types=['PPRE Projects (*.pprj)'])
+
+            @file.on('okay')
+            def okay(evt):
+                prompt.fire('okay')
+
+            @file.on('cancel')
+            def cancel(evt):
+                prompt.fire('cancel')
 
             @prompt.on('okay')
             def okay(evt):
@@ -160,6 +160,7 @@ class HomeUserInterface(BaseUserInterface):
             @prompt.on('cancel')
             def cancel(evt):
                 self['open'].destroy()
+            prompt.focus('file')
 
     def save(self):
         if self.save_filename:
@@ -181,7 +182,7 @@ class HomeUserInterface(BaseUserInterface):
                 pass
 
     def save_as(self):
-        with self.prompt('open') as prompt:
+        with self.prompt('open', hide=True) as prompt:
             prompt.file('file', types=['PPRE Projects (*.pprj)'], new=True)
             # TODO: hook on event and fires
             # TODO: Get rid of this patch
@@ -190,7 +191,6 @@ class HomeUserInterface(BaseUserInterface):
                 hook.multi_call_patch(prompt['file'].set_value)
             prompt['file'].set_value.add_call(
                 lambda res, value: res.noop(prompt.fire('okay')))
-            prompt.focus('file')
 
             @prompt.on('okay')
             def okay(evt):
@@ -204,6 +204,7 @@ class HomeUserInterface(BaseUserInterface):
             @prompt.on('cancel')
             def cancel(evt):
                 self['open'].destroy()
+            prompt.focus('file')
 
     def export(self):
         print(self.session.game.to_json())

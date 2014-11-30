@@ -107,6 +107,7 @@ class Interface(BaseInterface):
             self.widget = widget
         self._value = None
         self.blocking = False
+        self.hiding = False
         try:
             QtCore.QObject.connect(self.widget,
                                    QtCore.SIGNAL('textEdited(const QString&)'),
@@ -287,7 +288,7 @@ class Interface(BaseInterface):
         button.setGeometry(QtCore.QRect(250, 0, 60, 20))
         return FileInterface(types, directory, new, self.session, self, widget)
 
-    def prompt(self, text, block=True):
+    def prompt(self, text, block=True, hide=False):
         widget = QtWidgets.QDialog(self.widget)
         # widget.setModal(True)
         self.addWidget(widget)
@@ -329,8 +330,8 @@ class Interface(BaseInterface):
         def okay(evt):
             group_if.fire('okay', True)
 
-        if block:
-            group_if.blocking = True
+        group_if.blocking = block
+        group_if.hiding = hide
 
         return group_if
 
@@ -359,7 +360,9 @@ class Interface(BaseInterface):
         icon.addPixmap(QtWidgets.QPixmap(filename), icon.Normal, icon.Off)
         self.widget.setWindowIcon(icon)
 
-    def show(self, invoke=True):
+    def show(self):
+        if self.hiding:
+            return
         try:
             self._layout
         except:

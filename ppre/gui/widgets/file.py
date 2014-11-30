@@ -6,7 +6,8 @@ from ppre.gui.interface import Interface
 
 
 class FileInterface(Interface):
-    def __init__(self, types, is_directory, new, session, parent=None, widget=None):
+    def __init__(self, types, is_directory, new, session, parent=None,
+                 widget=None):
         super(FileInterface, self).__init__(session, parent, widget)
         if types:
             self.filter = ';;'.join(types)
@@ -14,8 +15,9 @@ class FileInterface(Interface):
             self.filter = ''
         self.is_directory = is_directory
         self.new = new
-        QtCore.QObject.connect(self.widget.button, QtCore.SIGNAL('clicked()'),
-                               self.on_focus)
+        self.connect_event(widget, 'textEdited(const QString&)',
+                           'changed', value=0)
+        self.connect(self.widget.button, 'clicked()', self.on_focus)
 
     def on_focus(self):
         if self.is_directory:
@@ -29,5 +31,8 @@ class FileInterface(Interface):
                 fname = QtWidgets.QFileDialog.getOpenFileName(
                     None, self.widget.label.text(), filter=self.filter)
         if not fname:
-            return
-        self.set_value(fname)
+            self.fire('cancel')
+        else:
+            self.set_value(fname)
+            self.fire('okay')
+        self.fire('done')
