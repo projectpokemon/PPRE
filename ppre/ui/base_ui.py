@@ -136,6 +136,7 @@ class BaseUserInterface(object):
         return BaseUserInterface(ui, name, self.session, self)
 
     boolean = ui_wrap('boolean')
+    message = ui_wrap('message')
 
     def browse(self, name, *args, **kwargs):
         text = self.translate(name)

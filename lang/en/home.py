@@ -1,6 +1,10 @@
 
 table = {
     '_': 'Home',
+    'should_save': {
+        'project_changed_save': 'This Project has been modified.\n'
+                                'Would you like to save?',
+    },
     'file': {
         '_': 'File',
         'new': 'New',

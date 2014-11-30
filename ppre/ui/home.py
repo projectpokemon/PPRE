@@ -16,12 +16,20 @@ def confirm(func):
         print(self.save_hash)
         if self.save_hash and (self.save_hash != self.session.game.checksum()):
             print('Save first')
-            if self.confirm('project_changed'):
-                self.save()
-                # FIXME: save_as() case is async
-                func(self, *args, **kwargs)
-            else:
-                return
+            with self.prompt('should_save') as prompt:
+                # TODO: Yes/No
+                prompt.message('project_changed_save')
+
+                @prompt.on('okay')
+                def okay(evt):
+                    self.save()  # TODO: handle non-blocking case?
+                    self['should_save'].destroy()
+                    func(self, *args, **kwargs)
+
+                @prompt.on('cancel')
+                def done(evt):
+                    self['should_save'].destroy()
+                    func(self, *args, **kwargs)
         else:
             func(self, *args, **kwargs)
     return wrapper
@@ -163,6 +171,7 @@ class HomeUserInterface(BaseUserInterface):
                     pass
                 parser.set('files', 'workspace',
                            self.session.game.files.directory)
+                self.session.game.write_config()
                 parser.write(handle)
             self.save_hash = self.session.game.checksum()
         else:

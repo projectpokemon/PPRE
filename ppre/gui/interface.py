@@ -110,7 +110,7 @@ class Interface(BaseInterface):
         try:
             QtCore.QObject.connect(self.widget,
                                    QtCore.SIGNAL('textEdited(const QString&)'),
-                                   lambda value: self.set_value(value))
+                                   lambda value: self.set_value(str(value)))
         except:
             pass
         if self.parent is not None:
@@ -195,7 +195,7 @@ class Interface(BaseInterface):
             return
         self._value = value
         try:
-            self.widget.setText(str(value))
+            self.widget.setText(value)
         except:
             pass
     value = property(lambda self: self.get_value(),
@@ -251,6 +251,14 @@ class Interface(BaseInterface):
         inf.connect_event(widget, 'textEdited(const QString&)',
                           'changed', value=0)
         return inf
+
+    @attach_interface
+    def message(self, text):
+        # TODO: Better geometry guesses
+        widget = QtWidgets.QLabel(self.widget)
+        widget.setText(text)
+        widget.setGeometry(QtCore.QRect(0, 0, 300, 20+20*text.count('\n')))
+        return widget
 
     def boolean(self, text):
         widget = QtWidgets.QCheckBox(self.widget)
