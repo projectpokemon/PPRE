@@ -83,11 +83,13 @@ class HomeUserInterface(BaseUserInterface):
             prompt.boolean('backup')
             prompt.focus('file')
 
-        @prompt.on_okay
-        def okay():
+        @prompt.on('okay')
+        def okay(evt):
             print('Okay')
             target = prompt['file'].get_value()
             directory = prompt['parent_directory'].get_value()
+            backup = prompt['backup'].get_value()
+            self['open'].destroy()
             if not target:
                 return
             if not directory:
@@ -95,17 +97,16 @@ class HomeUserInterface(BaseUserInterface):
             # TODO: Confirm directory overwrite?
             self.set_game(Game.from_file(target, directory))
             base_file = target
-            if prompt['backup'].get_value():
+            if backup:
                 base_file = os.path.split(target)[1]
                 base_file = os.path.join(self.session.game.files.directory,
                                          base_file)
                 shutil.copy(target, base_file)
             self.session.game.files.base = base_file
             self.session.game.write_config()
-            self['open'].destroy()
 
-        @prompt.on_cancel
-        def cancel():
+        @prompt.on('cancel')
+        def cancel(evt):
             print('Cancelled')
             self['open'].destroy()
 
