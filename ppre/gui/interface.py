@@ -106,6 +106,7 @@ class Interface(BaseInterface):
         else:
             self.widget = widget
         self._value = None
+        self.blocking = False
         try:
             QtCore.QObject.connect(self.widget,
                                    QtCore.SIGNAL('textEdited(const QString&)'),
@@ -278,7 +279,7 @@ class Interface(BaseInterface):
         button.setGeometry(QtCore.QRect(250, 0, 60, 20))
         return FileInterface(types, directory, new, self.session, self, widget)
 
-    def prompt(self, text):
+    def prompt(self, text, block=True):
         widget = QtWidgets.QDialog(self.widget)
         # widget.setModal(True)
         self.addWidget(widget)
@@ -320,6 +321,9 @@ class Interface(BaseInterface):
         def okay(evt):
             group_if.fire('okay', True)
 
+        if block:
+            group_if.blocking = True
+
         return group_if
 
     def title(self, text, color=None):
@@ -347,7 +351,7 @@ class Interface(BaseInterface):
         icon.addPixmap(QtWidgets.QPixmap(filename), icon.Normal, icon.Off)
         self.widget.setWindowIcon(icon)
 
-    def show(self):
+    def show(self, invoke=True):
         try:
             self._layout
         except:
@@ -359,7 +363,10 @@ class Interface(BaseInterface):
             w, h = self.layout.optimize()
             self.widget.setGeometry(self.widget.x(), self.widget.y(), w, h)
         try:
-            self.widget.show()
+            if self.blocking:
+                self.widget.exec_()
+            else:
+                self.widget.show()
         except:
             pass
 

@@ -123,35 +123,35 @@ class HomeUserInterface(BaseUserInterface):
                 lambda res, value: res.noop(prompt.fire('okay')))
             prompt.focus('file')
 
-        @prompt.on('okay')
-        def okay(evt):
-            target = prompt['file'].get_value()
-            self['open'].destroy()
-            if not target:
-                return
-            with open(target) as handle:
-                parser = configparser.ConfigParser()
-                parser.readfp(handle)
-            try:
-                # Compat with PPRE2
-                workspace = parser.get('files', 'workspace')
-                game = Game.from_workspace(workspace)
-            except configparser.NoSectionError as nse:
+            @prompt.on('okay')
+            def okay(evt):
+                target = prompt['file'].get_value()
+                self['open'].destroy()
+                if not target:
+                    return
+                with open(target) as handle:
+                    parser = configparser.ConfigParser()
+                    parser.readfp(handle)
                 try:
-                    workspace = parser.get('location', 'directory')
-                except:
-                    raise nse
-                game = Game.from_workspace(workspace)
-                game.files.from_dict(dict(parser.items('location')))
-                game.project.from_dict(dict(parser.items('project')))
-                game.write_config()
-            self.set_game(game)
-            self.save_hash = self.session.game.checksum()
-            self.save_filename = target
+                    # Compat with PPRE2
+                    workspace = parser.get('files', 'workspace')
+                    game = Game.from_workspace(workspace)
+                except configparser.NoSectionError as nse:
+                    try:
+                        workspace = parser.get('location', 'directory')
+                    except:
+                        raise nse
+                    game = Game.from_workspace(workspace)
+                    game.files.from_dict(dict(parser.items('location')))
+                    game.project.from_dict(dict(parser.items('project')))
+                    game.write_config()
+                self.set_game(game)
+                self.save_hash = self.session.game.checksum()
+                self.save_filename = target
 
-        @prompt.on('cancel')
-        def cancel(evt):
-            self['open'].destroy()
+            @prompt.on('cancel')
+            def cancel(evt):
+                self['open'].destroy()
 
     def save(self):
         if self.save_filename:

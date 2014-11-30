@@ -161,6 +161,7 @@ class BaseUserInterface(object):
                                     filename)
         self.ui.icon(filename)
 
+    # Events
     on = ui_pass('on')
     once = ui_pass('once')
     off = ui_pass('off')
