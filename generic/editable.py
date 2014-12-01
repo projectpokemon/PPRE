@@ -65,6 +65,56 @@ class Restriction_(object):
             validator[0](editable, name, value, *validator[1:])
 
 
+class CollectionNotifier(list):
+    """List that notifies the magics of its parent about modifications
+
+    Parent must have the following methods:
+        __insert__(self, name, index, value)
+        __remove__(self, name, index, value)
+
+    This inherits the list class and has all of the same methods
+
+    Attributes
+    ----------
+    parent : object
+        Parent class to notify
+    name : string
+        Name of this class for the parent's notification.
+        This is so that notifications resemble __setattr__
+    """
+    def __init__(self, parent, name, items=None):
+        self.parent = parent
+        self.name = name
+        list.__init__(self)
+        if items:
+            self.extend(items)
+
+    def append(self, item):
+        idx = len(self)
+        self.parent.__insert__(self.name, idx, item)
+        list.append(self, item)
+
+    def extend(self, items):
+        items = list(items)
+        idx = len(self)
+        for item in items:
+            self.parent.__insert__(self.name, idx, item)
+            idx += 1
+        list.extend(self, items)
+
+    def remove(self, item):
+        idx = self.index(item)
+        self.parent.__remove__(self.name, idx, item)
+        list.remove(self, item)
+
+    def pop(self, idx=None):
+        if idx is None:
+            idx = len(self)-1
+        item = self[idx]
+        self.parent.__remove__(self.name, idx, item)
+        return list.pop(self, idx)
+
+
 class Editable(object):
     """Editable interface
 
@@ -212,6 +262,8 @@ class Editable(object):
         return unrestricted
 
     def __setattr__(self, name, value):
+        if isinstance(value, list):
+            value = CollectionNotifier(self, name, value)
         try:
             restriction = self.keys[name]
             restriction.name
@@ -245,6 +297,12 @@ class Editable(object):
             if restriction.validator is not None:
                 restriction.validator(self, name, value)
         super(Editable, self).__setattr__(name, value)
+
+    def __insert__(self, name, index, value):
+        print('inserted into', name)
+
+    def __remove__(self, name, index, value):
+        pass
 
     def checksum(self):
         """Returns a recursive weak_hash for this instance"""
