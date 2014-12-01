@@ -28,8 +28,14 @@ class Restriction_(object):
         if 'max_length' in kwargs:
             self.validators.append((self.validate_max_length,
                                     kwargs['max_length']))
+        if 'type' in kwargs:
+            self.restrict_type(kwargs['type'])
         if args:
             self.validators.append(args)
+        return self
+
+    def restrict_type(self, type_, *args):
+        self.validators.append(tuple([self.validate_type]+list(args)))
         return self
 
     @staticmethod
@@ -60,9 +66,21 @@ class Restriction_(object):
                 '{name}: "{value}" is longer than maximum "{restrict}"'
                 .format(name=name, value=value, restrict=max_length))
 
+    @staticmethod
+    def validate_type(editable, name, value, type_, *args):
+        obj = type_(value, *args)
+        del obj
+
     def validate(self, editable, name, value):
         for validator in self.validators:
             validator[0](editable, name, value, *validator[1:])
+
+    def find_types(self):
+        types = []
+        for validator in self.validators:
+            if validator[0] == self.validate_type:
+                types.append(validator[1])
+        return types
 
 
 class CollectionNotifier(list):
