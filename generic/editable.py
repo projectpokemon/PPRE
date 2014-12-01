@@ -12,6 +12,59 @@ Restriction = namedtuple('Restriction', 'name min_value max_value min_length'
                          ' max_length validator children')
 
 
+class Restriction_(object):
+    def __init__(self, *args, **kwargs):
+        self.validators = []
+        self.restrict(*args, **kwargs)
+
+    def restrict(self, *args, **kwargs):
+        if 'min_value' in kwargs:
+            self.validators.append((self.validate_min, kwargs['min_value']))
+        if 'max_value' in kwargs:
+            self.validators.append((self.validate_max, kwargs['max_value']))
+        if 'min_length' in kwargs:
+            self.validators.append((self.validate_min_length,
+                                    kwargs['min_length']))
+        if 'max_length' in kwargs:
+            self.validators.append((self.validate_max_length,
+                                    kwargs['max_length']))
+        if args:
+            self.validators.append(args)
+        return self
+
+    @staticmethod
+    def validate_min(editable, name, value, min_value):
+        if value < min_value:
+            raise ValueError(
+                '{name}: "{value}" is less than minimum "{restrict}"'
+                .format(name=name, value=value, restrict=min_value))
+
+    @staticmethod
+    def validate_max(editable, name, value, max_value):
+        if value > max_value:
+            raise ValueError(
+                '{name}: "{value}" is more than maximum "{restrict}"'
+                .format(name=name, value=value, restrict=max_value))
+
+    @staticmethod
+    def validate_min_length(editable, name, value, min_length):
+        if len(value) < min_length:
+            raise ValueError(
+                '{name}: "{value}" is shorter than mininum "{restrict}"'
+                .format(name=name, value=value, restrict=min_length))
+
+    @staticmethod
+    def validate_max_length(editable, name, value, max_length):
+        if len(value) > max_length:
+            raise ValueError(
+                '{name}: "{value}" is longer than maximum "{restrict}"'
+                .format(name=name, value=value, restrict=max_length))
+
+    def validate(self, editable, name, value):
+        for validator in self.validators:
+            validator[0](editable, name, value, *validator[1:])
+
+
 class Editable(object):
     """Editable interface
 
