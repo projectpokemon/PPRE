@@ -196,9 +196,12 @@ class Interface(BaseInterface):
             return
         self._value = value
         try:
-            self.widget.setText(value)
+            self.widget.setValue(value)
         except:
-            pass
+            try:
+                self.widget.setText(value)
+            except:
+                pass
     value = property(lambda self: self.get_value(),
                      lambda self, new_value: self.set_value(new_value))
 
@@ -244,12 +247,34 @@ class Interface(BaseInterface):
         self.layout.add_children(QtLayoutChild(widget), QtLayoutChild(label))
         widget.setText(text)
         widget.setContentsMargins(0, 0, 0, 0)
-        widget.setGeometry(QtCore.QRect(100, 0, 150, 20))
+        widget.setGeometry(QtCore.QRect(120, 0, 150, 20))
         label.setText(text)
         label.setContentsMargins(0, 0, 0, 0)
-        label.setGeometry(QtCore.QRect(0, 0, 150, 20))
+        label.setGeometry(QtCore.QRect(0, 0, 110, 20))
         inf = Interface(self.session, self, widget)
         inf.connect_event(widget, 'textEdited(const QString&)',
+                          'changed', value=0)
+        return inf
+    text = edit
+
+    def number(self, text, min=None, max=None):
+        widget = QtWidgets.QSpinBox(self.widget)
+        label = QtWidgets.QLabel(self.widget)
+        self.layout.add_children(QtLayoutChild(widget), QtLayoutChild(label))
+        if min is None:
+            widget.setValue(0)
+        else:
+            widget.setMinimum(min)
+            widget.setValue(min)
+        if max is not None:
+            widget.setMaximum(max)
+        widget.setContentsMargins(0, 0, 0, 0)
+        widget.setGeometry(QtCore.QRect(120, 0, 50, 20))
+        label.setText(text)
+        label.setContentsMargins(0, 0, 0, 0)
+        label.setGeometry(QtCore.QRect(0, 0, 110, 20))
+        inf = Interface(self.session, self, widget)
+        inf.connect_event(widget, 'valueChanged(int)',
                           'changed', value=0)
         return inf
 
@@ -382,7 +407,6 @@ class Interface(BaseInterface):
             pass
 
     def destroy(self):
-        # TODO
-        pass
+        self.widget.close()
 
 from ppre.gui.widgets import *

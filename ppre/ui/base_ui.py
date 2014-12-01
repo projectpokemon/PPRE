@@ -135,7 +135,11 @@ class BaseUserInterface(object):
         ui = self.ui.edit(text, *args, **kwargs)
         return BaseUserInterface(ui, name, self.session, self)
 
+    # Editor Types
+    text = ui_wrap('text')
+    number = ui_wrap('number')
     boolean = ui_wrap('boolean')
+
     message = ui_wrap('message')
 
     def browse(self, name, *args, **kwargs):
@@ -161,6 +165,24 @@ class BaseUserInterface(object):
             filename = os.path.join(os.path.dirname(__file__), '../../',
                                     filename)
         self.ui.icon(filename)
+
+    def update_from_data(self, data, group=None):
+        if group is None:
+            group = self
+        for name, restriction in data.keys.items():
+            if restriction.min_value is not None or\
+                    restriction.max_value is not None:
+                group.number(name, min=restriction.min_value,
+                             max=restriction.max_value)
+            else:
+                try:
+                    val = getattr(data, name)
+                    if val.keys:
+                        with group.group(name) as sub_group:
+                            self.update_from_data(val, sub_group)
+
+                except:
+                    pass
 
     # Events
     on = ui_pass('on')

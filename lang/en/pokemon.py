@@ -1,10 +1,13 @@
 
+from lang.lang import Table
+
 stats = {'hp': 'HP', 'attack': 'Attack', 'defense': 'Defense',
          'speed': 'Speed', 'spatk': 'Special Attack',
          'spdef': 'Special Defense'}
 
 table = {
     '_': 'Pokemon',
+    'file': Table('en.home')['file'],
     'pokemon': {
         '_': 'Pokemon',
         'natid': 'National ID',
