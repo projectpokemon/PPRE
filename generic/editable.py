@@ -5,6 +5,7 @@ import json
 from collections import namedtuple
 
 from util.iter import auto_iterate
+from util import lcm
 
 
 #: See Editable.restrict
@@ -179,6 +180,47 @@ class Restriction(object):
                 types.append(validator[1])
         return types
 
+    def get_range(self):
+        """Get a high and low value for this restriction.
+
+        This pulls the highest argument of a min restriction and the lowest
+        argument of a max restriction and the LCM of a mod restriction.
+
+        Returns
+        -------
+        range : tuple(min, max, step)
+        """
+        min_value = None
+        max_value = None
+        step = 1
+        types = []
+        for validator in self.validators:
+            func_name = validator[0].__name__
+            print(func_name, validator)
+            if 'min' in func_name:
+                if min_value is None:
+                    min_value = validator[1]
+                else:
+                    min_value = max(min_value, validator[1])
+            elif 'max' in func_name:
+                if max_value is None:
+                    max_value = validator[1]
+                else:
+                    max_value = min(max_value, validator[1])
+            elif 'mod' in func_name:
+                step = lcm(step, validator[1])
+        if min_value:
+            for i in xrange(step):
+                if not (min_value+i) % step:
+                    min_value = min_value+i
+                    break
+        if max_value:
+            for i in xrange(0, -step, -1):
+                if not (max_value+i) % step:
+                    max_value = max_value+i
+                    break
+        return (min_value, max_value, step)
+
 
 class CollectionNotifier(list):
     """List that notifies the magics of its parent about modifications
@@ -265,8 +307,7 @@ class Editable(object):
             self._keys = OrderedDict()
             return self._keys
 
-    def restrict(self, name, min_value=None, max_value=None, min_length=None,
-                 max_length=None, validator=None, children=None, **kwargs):
+    def restrict(self, name, validator=None, children=None, **kwargs):
         """Restrict an attribute. This adds the attribute to the key
         collection used to build textual representations.
 
@@ -314,9 +355,7 @@ class Editable(object):
                         continue
                     used.append(cls)
                     children.append(value)
-        restriction = Restriction(name, children, min_value=min_value,
-                                  max_value=max_value, min_length=min_length,
-                                  max_length=max_length, **kwargs)
+        restriction = Restriction(name, children, **kwargs)
         if validator is not None:
             restriction.restrict(validator)
         self.keys[name] = restriction
@@ -330,7 +369,7 @@ class Editable(object):
     def restrictUInt8(self, name, **kwargs):
         params = {'min_value': 0, 'max_value': 0xFF, 'type': int}
         params.update(kwargs)
-        self.restrict(name, **params)
+        return self.restrict(name, **params)
 
     def restrictInt16(self, name, **kwargs):
         params = {'min_value': -0x8000, 'max_value': 0x7FFF, 'type': int}

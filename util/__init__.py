@@ -28,4 +28,37 @@ def lget(lst, idx, default=None):
         return default
 
 
-__all__ = ['cached_property', 'temporary_attr', 'AttrDict', 'BinaryIO', 'lget']
+def gcf(a, b):
+    """Return the Greatest Common Factor of two numbers
+
+    Parameters
+    ----------
+    a : int
+    b : int
+
+    Returns
+    -------
+    gcf : int
+    """
+    while b:
+        a, b = b, a % b
+    return a
+
+
+def lcm(a, b):
+    """Return the Least Common Multiple of two numbers
+
+    Parameters
+    ----------
+    a : int
+    b : int
+
+    Returns
+    -------
+    lcm : int
+    """
+    return a*b / gcf(a, b)
+
+
+__all__ = ['cached_property', 'temporary_attr', 'AttrDict', 'BinaryIO',
+           'lget', 'gcf', 'lcm']
