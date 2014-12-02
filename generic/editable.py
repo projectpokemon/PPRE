@@ -164,7 +164,8 @@ class Editable(object):
         try:
             return self._keys
         except AttributeError:
-            self._keys = {}
+            from collections import OrderedDict
+            self._keys = OrderedDict()
             return self._keys
 
     def restrict(self, name, min_value=None, max_value=None, min_length=None,
