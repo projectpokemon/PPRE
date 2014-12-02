@@ -13,6 +13,17 @@ Restriction_ = namedtuple('Restriction', 'name min_value max_value min_length'
 
 
 class Restriction(object):
+    """Restriction defintion on an attribute's value
+
+    Methods
+    -------
+    restrict
+        Add restrictions
+    restrict_type
+        Restrict values to a type
+    validate
+        Check that a new value is valid
+    """
     def __init__(self, name, children=None, *args, **kwargs):
         self.name = name
         self.children = children or []
@@ -20,6 +31,46 @@ class Restriction(object):
         self.restrict(*args, **kwargs)
 
     def restrict(self, *args, **kwargs):
+        """Add value restrictions based on arguments
+
+        Parameters passed must be as kwargs. If args are passed, that will
+        represent a single validator with its arguments.
+
+        Parameters
+        ----------
+        min_value : optional
+            Require value to be greater or equal to this value
+        max_value : optional
+            Require value to be less or equal to this value
+        min_length : int, optional
+            Require length of value to be greater or equal to this value
+        max_length : int, optional
+            Require length of value to be less or equal to this value
+
+        Examples
+        --------
+        >>> restriction = Restriction('name')
+        >>> def value_is_even(editable, name, value):
+                if value % 2:
+                    raise ValueError('"{0}" is not even'.format(value))
+        >>> restriction.restrict(value_is_even)
+        >>> restriction.validate(object(), 'name', 2)
+        >>> restriction.validate(object(), 'name', 3)
+        Traceback (most recent call last):
+            ...
+        ValueError: "3" is not even!
+        >>> restriction.restrict(min_value=7)
+        >>> restriction.validate(object(), 'name', 8)
+        >>> restriction.validate(object(), 'name', 4)
+        Traceback (most recent call last):
+            ...
+        ValueError: "4" is less than mininum "7"
+        >>> restriction.validate(object(), 'name', 9)
+        Traceback (most recent call last):
+            ...
+        ValueError: "9" is not even!
+        >>>
+        """
         if 'min_value' in kwargs:
             self.validators.append((self.validate_min, kwargs['min_value']))
         if 'max_value' in kwargs:
@@ -36,8 +87,19 @@ class Restriction(object):
             self.validators.append(args)
         return self
 
-    def restrict_type(self, *args):
-        self.validators.append(tuple([self.validate_type]+list(args)))
+    def restrict_type(self, type_, castable=True, *args):
+        """Creates a type restriction
+
+        Paramaters
+        ----------
+        type_ : type
+            The type to restrict against
+        castable : bool, optional
+            If True (default), check to see if type_(value, *args) is valid.
+            If False, check to see if value is an instance of type_
+        """
+        self.validators.append(tuple([self.validate_type, type_, castable] +
+                                     list(args)))
         return self
 
     @staticmethod
@@ -69,15 +131,45 @@ class Restriction(object):
                 .format(name=name, value=value, restrict=max_length))
 
     @staticmethod
-    def validate_type(editable, name, value, type_, *args):
-        obj = type_(value, *args)
-        del obj
+    def validate_type(editable, name, value, type_, castable=True, *args):
+        if castable:
+            obj = type_(value, *args)
+            del obj
+        else:
+            if not isinstance(value, type_):
+                raise ValueError(
+                    '{name}: "{value}" is not a "{restrict}"'
+                    .format(name=name, value=value, restrict=type_))
 
     def validate(self, editable, name, value):
+        """Check the validity of a new value by running against all validators
+
+        Parameters
+        ----------
+        editable : object
+            Object to pass to the validator functions. Validators may use
+            this to get local information
+        name : object
+            Name of the attribute to pass to validator functions. Validators
+            may use this to get local information
+        value : mixed
+            The new value to check
+
+        Raises
+        ------
+        ValueError
+            If the new value is not valid
+        """
         for validator in self.validators:
             validator[0](editable, name, value, *validator[1:])
 
     def find_types(self):
+        """Get all types associated with this Restriction
+
+        Returns
+        -------
+        types : list
+        """
         types = []
         for validator in self.validators:
             if validator[0] == self.validate_type:
