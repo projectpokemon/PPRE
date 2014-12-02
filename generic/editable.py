@@ -164,7 +164,10 @@ class Restriction(object):
             validator[0](editable, name, value, *validator[1:])
 
     def find_types(self):
-        """Get all types associated with this Restriction
+        """Get all types associated with this Restriction.
+
+        This retrieves the first argument for all functions passed that
+        are named 'validate_type' (restrict_type does this automatically)
 
         Returns
         -------
@@ -172,7 +175,7 @@ class Restriction(object):
         """
         types = []
         for validator in self.validators:
-            if validator[0] == self.validate_type:
+            if validator[0].__name__ == 'validate_type':
                 types.append(validator[1])
         return types
 
