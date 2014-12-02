@@ -8,12 +8,14 @@ from util.iter import auto_iterate
 
 
 #: See Editable.restrict
-Restriction = namedtuple('Restriction', 'name min_value max_value min_length'
+Restriction_ = namedtuple('Restriction', 'name min_value max_value min_length'
                          ' max_length validator children')
 
 
-class Restriction_(object):
-    def __init__(self, *args, **kwargs):
+class Restriction(object):
+    def __init__(self, name, children=None, *args, **kwargs):
+        self.name = name
+        self.children = children or []
         self.validators = []
         self.restrict(*args, **kwargs)
 
@@ -34,7 +36,7 @@ class Restriction_(object):
             self.validators.append(args)
         return self
 
-    def restrict_type(self, type_, *args):
+    def restrict_type(self, *args):
         self.validators.append(tuple([self.validate_type]+list(args)))
         return self
 
@@ -169,7 +171,7 @@ class Editable(object):
             return self._keys
 
     def restrict(self, name, min_value=None, max_value=None, min_length=None,
-                 max_length=None, validator=None, children=None):
+                 max_length=None, validator=None, children=None, **kwargs):
         """Restrict an attribute. This adds the attribute to the key
         collection used to build textual representations.
 
@@ -217,37 +219,42 @@ class Editable(object):
                         continue
                     used.append(cls)
                     children.append(value)
-        restriction = Restriction(name, min_value, max_value, min_length,
-                                  max_length, validator, children)
+        restriction = Restriction(name, children, min_value=min_value,
+                                  max_value=max_value, min_length=min_length,
+                                  max_length=max_length, **kwargs)
+        if validator is not None:
+            restriction.restrict(validator)
         self.keys[name] = restriction
+        return restriction
 
     def restrictInt8(self, name, **kwargs):
-        params = {'min_value': -0x80, 'max_value': 0x7F}
+        params = {'min_value': -0x80, 'max_value': 0x7F, 'type': int}
         params.update(kwargs)
         self.restrict(name, **params)
 
     def restrictUInt8(self, name, **kwargs):
-        params = {'min_value': 0, 'max_value': 0xFF}
+        params = {'min_value': 0, 'max_value': 0xFF, 'type': int}
         params.update(kwargs)
         self.restrict(name, **params)
 
     def restrictInt16(self, name, **kwargs):
-        params = {'min_value': -0x8000, 'max_value': 0x7FFF}
+        params = {'min_value': -0x8000, 'max_value': 0x7FFF, 'type': int}
         params.update(kwargs)
         self.restrict(name, **params)
 
     def restrictUInt16(self, name, **kwargs):
-        params = {'min_value': 0, 'max_value': 0xFFFF}
+        params = {'min_value': 0, 'max_value': 0xFFFF, 'type': int}
         params.update(kwargs)
         self.restrict(name, **params)
 
     def restrictInt32(self, name, **kwargs):
-        params = {'min_value': -0x80000000, 'max_value': 0x7FFFFFFF}
+        params = {'min_value': -0x80000000, 'max_value': 0x7FFFFFFF,
+                  'type': int}
         params.update(kwargs)
         self.restrict(name, **params)
 
     def restrictUInt32(self, name, **kwargs):
-        params = {'min_value': 0, 'max_value': 0xFFFFFFFF}
+        params = {'min_value': 0, 'max_value': 0xFFFFFFFF, 'type': int}
         params.update(kwargs)
         self.restrict(name, **params)
 
@@ -289,7 +296,8 @@ class Editable(object):
         except:
             pass
         else:
-            if restriction.min_value is not None:
+            restriction.validate(self, name, value)
+            """if restriction.min_value is not None:
                 if value < restriction.min_value:
                     raise ValueError(
                         '{name}: "{value}" is less than minimum "{restrict}"'
@@ -314,7 +322,7 @@ class Editable(object):
                         .format(name=name, value=value,
                                 restrict=restriction.max_length))
             if restriction.validator is not None:
-                restriction.validator(self, name, value)
+                restriction.validator(self, name, value)"""
         super(Editable, self).__setattr__(name, value)
 
     def __insert__(self, name, index, value):

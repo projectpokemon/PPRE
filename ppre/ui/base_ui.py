@@ -170,10 +170,9 @@ class BaseUserInterface(object):
         if group is None:
             group = self
         for name, restriction in data.keys.items():
-            if restriction.min_value is not None or\
-                    restriction.max_value is not None:
-                group.number(name, min=restriction.min_value,
-                             max=restriction.max_value)
+            if int in restriction.find_types():
+                group.number(name)
+                # , min=restriction.min_value, max=restriction.max_value)
             else:
                 try:
                     val = getattr(data, name)
