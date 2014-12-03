@@ -3,6 +3,7 @@ import json
 import os
 
 import ndstool
+from ctr import ctrtool
 from ctr.header_bin import HeaderBin as CTRHeaderBin
 from ntr.header_bin import HeaderBin as NTRHeaderBin
 from ntr.narc import NARC
@@ -152,7 +153,7 @@ class Game(Editable):
         workspace = os.path.join(parent_directory, name)
         os.mkdir(workspace)  # Let raise IOError
         if ext in ('.3ds', '.3dz'):
-            raise NotImplementedError('CTR dumping not implemented')
+            ctrtool.dump(filename, workspace)
         elif ext == '.nds':
             ndstool.dump(filename, workspace)
         else:
