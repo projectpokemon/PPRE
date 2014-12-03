@@ -6,7 +6,7 @@ from pokemon.poketool.wotbl import LevelMoves
 
 
 class Pokemon(Editable):
-    available = xrange(493)
+    available = {1: 'Bulbasaur', 2: 'Ivysaur'}
 
     def __init__(self, game):
         self.game = game

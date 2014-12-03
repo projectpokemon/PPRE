@@ -280,6 +280,27 @@ class Interface(BaseInterface):
                           'changed', value=0)
         return inf
 
+    def select(self, text, values):
+        widget = QtWidgets.QComboBox(self.widget)
+        label = QtWidgets.QLabel(self.widget)
+        self.layout.add_children(QtLayoutChild(widget), QtLayoutChild(label))
+        try:
+            values.items
+        except:
+            widget.addItems([str(value) for value in values])
+        else:
+            for idx, value in values.items():
+                widget.insertItem(idx, value)
+        widget.setContentsMargins(0, 0, 0, 0)
+        widget.setGeometry(QtCore.QRect(120, 0, 120, 20))
+        label.setText(text)
+        label.setContentsMargins(0, 0, 0, 0)
+        label.setGeometry(QtCore.QRect(0, 0, 110, 20))
+        inf = Interface(self.session, self, widget)
+        inf.connect_event(widget, 'currentIndexChanged(int)',
+                          'changed', value=0)
+        return inf
+
     @attach_interface
     def message(self, text):
         # TODO: Better geometry guesses

@@ -138,6 +138,7 @@ class BaseUserInterface(object):
     # Editor Types
     text = ui_wrap('text')
     number = ui_wrap('number')
+    select = ui_wrap('select')
     boolean = ui_wrap('boolean')
 
     message = ui_wrap('message')
@@ -174,6 +175,10 @@ class BaseUserInterface(object):
                 min, max, step = restriction.get_range()
                 group.number(name, min=min, max=max, step=step)
             else:
+                values = restriction.get_values()
+                if values:
+                    group.select(name, values=values)
+                    continue
                 try:
                     val = getattr(data, name)
                     if val.keys:
