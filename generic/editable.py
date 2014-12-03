@@ -268,21 +268,29 @@ class Restriction(object):
         types = []
         for validator in self.validators:
             func_name = validator[0].__name__
+            if func_name == 'deferred_validate':
+                func_name = validator[1].__name__
+                if 0 in validator[2]:
+                    arg = validator[3]()
+                else:
+                    arg = validator[3]
+            else:
+                arg = validator[1]
             if 'min' in func_name:
                 if min_value is None:
-                    min_value = validator[1]
+                    min_value = arg
                 else:
-                    min_value = max(min_value, validator[1])
+                    min_value = max(min_value, arg)
             elif 'max' in func_name:
                 if max_value is None:
-                    max_value = validator[1]
+                    max_value = arg
                 else:
-                    max_value = min(max_value, validator[1])
+                    max_value = min(max_value, arg)
             elif 'mod' in func_name:
                 if step is None:
-                    step = validator[1]
+                    step = arg
                 else:
-                    step = lcm(step, validator[1])
+                    step = lcm(step, arg)
         if min_value and step:
             for i in xrange(step):
                 if not (min_value+i) % step:
