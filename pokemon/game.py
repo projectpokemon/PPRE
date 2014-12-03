@@ -6,6 +6,7 @@ import ndstool
 from ctr.header_bin import HeaderBin as CTRHeaderBin
 from ntr.header_bin import HeaderBin as NTRHeaderBin
 from ntr.narc import NARC
+from ctr.garc import GARC
 from util import cached_property
 from util import BinaryIO
 from generic.editable import Editable
@@ -264,6 +265,9 @@ class XYGame(Game):
 
     def __init__(self):
         super(XYGame, self).__init__()
+
+    def archive(self, filename):
+        return GARC(open(os.path.join(self.files.directory, 'fs', filename)))
 
 
 class ORASGame(XYGame):
