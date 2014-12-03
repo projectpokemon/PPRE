@@ -75,8 +75,9 @@ class FATO(object):
         start = reader.tell()
         self.magic = reader.read(4)
         size = reader.readUInt32()
-        num = reader.readUInt32()
-        res = reader.readUInt32()
+        num = reader.readUInt16()
+        res = reader.readUInt16()
+        print(self.magic, size, num, res)
 
         self.offsets_ = [reader.readUInt32() for x in range(num)]
         if size:
