@@ -276,7 +276,6 @@ class Restriction(object):
         min_value = None
         max_value = None
         step = None
-        types = []
         for validator in self.validators:
             func_name = validator[0].__name__
             if func_name == 'deferred_validate':
@@ -313,6 +312,33 @@ class Restriction(object):
                     max_value = max_value+i
                     break
         return (min_value, max_value, step)
+
+    def get_values(self):
+        """Get all valid values for this restriction.
+
+        Returns
+        -------
+        values
+        """
+        values = None
+        for validator in self.validators:
+            if 'values' in validator[0].__name__:
+                arg = validator[1]
+                if values is None:
+                    values = validator[1]
+                else:
+                    # TODO: handle complete merges of all types
+                    for value in values:
+                        if value not in arg:
+                            try:
+                                values.remove(value)  # List case
+                            except AttributeError:
+                                del values[value]  # Dict case
+        # TODO: optimize
+        if values:
+            for value in values:
+                self.validate(None, self.name, value)
+        return values
 
 
 class CollectionNotifier(list):
