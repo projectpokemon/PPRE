@@ -46,10 +46,6 @@ class Personal(Editable):
         self.types = [0]
         self.restrict('types', max_length=2)
         self.catchrate = 255
-
-        def validate_mod(editable, name, value, mod):
-            if not value % mod:
-                raise ValueError('{0} Not mod {1}'.format(value, mod))
         self.restrictUInt8('catchrate')
         self.baseexp = 0
         if self.version in game.GEN_IV:

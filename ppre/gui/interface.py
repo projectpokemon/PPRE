@@ -257,7 +257,7 @@ class Interface(BaseInterface):
         return inf
     text = edit
 
-    def number(self, text, min=None, max=None):
+    def number(self, text, min=None, max=None, step=None):
         widget = QtWidgets.QSpinBox(self.widget)
         label = QtWidgets.QLabel(self.widget)
         self.layout.add_children(QtLayoutChild(widget), QtLayoutChild(label))
@@ -268,6 +268,8 @@ class Interface(BaseInterface):
             widget.setValue(min)
         if max is not None:
             widget.setMaximum(max)
+        if step is not None:
+            widget.setSingleStep(step)
         widget.setContentsMargins(0, 0, 0, 0)
         widget.setGeometry(QtCore.QRect(120, 0, 50, 20))
         label.setText(text)

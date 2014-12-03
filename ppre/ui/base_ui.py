@@ -172,8 +172,7 @@ class BaseUserInterface(object):
         for name, restriction in data.keys.items():
             if int in restriction.find_types():
                 min, max, step = restriction.get_range()
-                print(name, min, max, step)
-                group.number(name, min=min, max=max)
+                group.number(name, min=min, max=max, step=step)
             else:
                 try:
                     val = getattr(data, name)

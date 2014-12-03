@@ -47,6 +47,8 @@ class Restriction(object):
             Require length of value to be greater or equal to this value
         max_length : int, optional
             Require length of value to be less or equal to this value
+        divisible : int, optional
+            Require all values to be divisible by this number
 
         Examples
         --------
@@ -82,6 +84,8 @@ class Restriction(object):
         if 'max_length' in kwargs:
             self.validators.append((self.validate_max_length,
                                     kwargs['max_length']))
+        if 'divisible' in kwargs:
+            self.validators.append((self.validate_mod, kwargs['divisible']))
         if 'type' in kwargs:
             self.restrict_type(kwargs['type'])
         if args:
@@ -130,6 +134,13 @@ class Restriction(object):
             raise ValueError(
                 '{name}: "{value}" is longer than maximum "{restrict}"'
                 .format(name=name, value=value, restrict=max_length))
+
+    @staticmethod
+    def validate_mod(editable, name, value, mod):
+        if not value % mod:
+            raise ValueError(
+                '{name}: "{value}" is not evenly divisible by {restrict}'
+                .format(name=name, value=value, restrict=mod))
 
     @staticmethod
     def validate_type(editable, name, value, type_, castable=True, *args):
@@ -192,11 +203,10 @@ class Restriction(object):
         """
         min_value = None
         max_value = None
-        step = 1
+        step = None
         types = []
         for validator in self.validators:
             func_name = validator[0].__name__
-            print(func_name, validator)
             if 'min' in func_name:
                 if min_value is None:
                     min_value = validator[1]
@@ -208,13 +218,16 @@ class Restriction(object):
                 else:
                     max_value = min(max_value, validator[1])
             elif 'mod' in func_name:
-                step = lcm(step, validator[1])
-        if min_value:
+                if step is None:
+                    step = validator[1]
+                else:
+                    step = lcm(step, validator[1])
+        if min_value and step:
             for i in xrange(step):
                 if not (min_value+i) % step:
                     min_value = min_value+i
                     break
-        if max_value:
+        if max_value and step:
             for i in xrange(0, -step, -1):
                 if not (max_value+i) % step:
                     max_value = max_value+i
@@ -364,7 +377,7 @@ class Editable(object):
     def restrictInt8(self, name, **kwargs):
         params = {'min_value': -0x80, 'max_value': 0x7F, 'type': int}
         params.update(kwargs)
-        self.restrict(name, **params)
+        return self.restrict(name, **params)
 
     def restrictUInt8(self, name, **kwargs):
         params = {'min_value': 0, 'max_value': 0xFF, 'type': int}
@@ -374,23 +387,23 @@ class Editable(object):
     def restrictInt16(self, name, **kwargs):
         params = {'min_value': -0x8000, 'max_value': 0x7FFF, 'type': int}
         params.update(kwargs)
-        self.restrict(name, **params)
+        return self.restrict(name, **params)
 
     def restrictUInt16(self, name, **kwargs):
         params = {'min_value': 0, 'max_value': 0xFFFF, 'type': int}
         params.update(kwargs)
-        self.restrict(name, **params)
+        return self.restrict(name, **params)
 
     def restrictInt32(self, name, **kwargs):
         params = {'min_value': -0x80000000, 'max_value': 0x7FFFFFFF,
                   'type': int}
         params.update(kwargs)
-        self.restrict(name, **params)
+        return self.restrict(name, **params)
 
     def restrictUInt32(self, name, **kwargs):
         params = {'min_value': 0, 'max_value': 0xFFFFFFFF, 'type': int}
         params.update(kwargs)
-        self.restrict(name, **params)
+        return self.restrict(name, **params)
 
     def restrictUnused(self, name, **kwargs):
 
@@ -398,7 +411,7 @@ class Editable(object):
             raise ValueError('"{name}" is unused'.format(name=name))
         params = {'validator': unused}
         params.update(kwargs)
-        self.restrict(name, **params)
+        return self.restrict(name, **params)
 
     def get_unrestricted(self, whitelist=None):
         """Get a list of all attributes that are not restricted
