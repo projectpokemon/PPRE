@@ -49,6 +49,8 @@ class Restriction(object):
             Require length of value to be less or equal to this value
         divisible : int, optional
             Require all values to be divisible by this number
+        child : dict, optional
+            Apply restrictions on a container's children
 
         Examples
         --------
@@ -88,6 +90,8 @@ class Restriction(object):
             self.validators.append((self.validate_mod, kwargs['divisible']))
         if 'type' in kwargs:
             self.restrict_type(kwargs['type'])
+        if 'child' in kwargs:
+            self.restrict_child(**kwargs['child'])
         if args:
             self.validators.append(args)
         return self
@@ -106,6 +110,34 @@ class Restriction(object):
         self.validators.append(tuple([self.validate_type, type_, castable] +
                                      list(args)))
         return self
+
+    @property
+    def child(self):
+        """Restriction placed on a child"""
+        try:
+            return self._sub_restriction
+        except:
+            self._sub_restriction = Restriction(self.name)
+            return self._sub_restriction
+
+    def restrict_child(self, **kwargs):
+        """Place restriction on a child, for use in containers
+
+        Container validation must be explicitly called! Use a
+        CollectionNotifier to get container updates
+
+        Examples
+        --------
+        >>> parent = Restriction('name')
+        >>> parent.restrict_child(type=int)
+        >>> # Or parent.restrict(child={'type': int})
+        >>> # Or parent.child.restrict_type(int)
+        >>> parent.validate(object(), 'name', [13, 's', 15])
+        ValueError: name: "s" is not a "int"!
+        """
+        self.child.restrict(**kwargs)
+        self.validators.append((self.validate_children, self.child))
+        return self.child
 
     @staticmethod
     def validate_min(editable, name, value, min_value):
@@ -152,6 +184,11 @@ class Restriction(object):
                 raise ValueError(
                     '{name}: "{value}" is not a "{restrict}"'
                     .format(name=name, value=value, restrict=type_))
+
+    @staticmethod
+    def validate_children(editable, name, value, restriction):
+        for child in auto_iterate(value)[2]:
+            restriction.validate(editable, name, child)
 
     def validate(self, editable, name, value):
         """Check the validity of a new value by running against all validators
@@ -474,6 +511,13 @@ class Editable(object):
 
     def __insert__(self, name, index, value):
         print('inserted into', name)
+        try:
+            restriction = self.keys[name]
+            restriction = restriction.child
+        except:
+            pass
+        else:
+            restriction.validate(self, name, value)
 
     def __remove__(self, name, index, value):
         pass
