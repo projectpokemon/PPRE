@@ -39,6 +39,9 @@ class Restriction(object):
 
         Parameters
         ----------
+        deferred : bool, optional
+            If True, all function arguments will be evaluated at validation
+            time returning the actual argument.
         min_value : optional
             Require value to be greater or equal to this value
         max_value : optional
@@ -76,6 +79,8 @@ class Restriction(object):
         ValueError: "9" is not even!
         >>>
         """
+        if kwargs.get('deferred'):
+            idx = len(self.validators)
         if 'min_value' in kwargs:
             self.validators.append((self.validate_min, kwargs['min_value']))
         if 'max_value' in kwargs:
@@ -94,6 +99,17 @@ class Restriction(object):
             self.restrict_child(**kwargs['child'])
         if args:
             self.validators.append(args)
+        if kwargs.get('deferred'):
+            for i, validator in enumerate(self.validators[idx:], idx):
+                func_args = []
+                for j, arg in enumerate(validator[1:]):
+                    if hasattr(arg, '__call__') and\
+                            not hasattr(arg, '__base__'):
+                        func_args.append(j)
+                if func_args:
+                    self.validators[i] = tuple([self.deferred_validate,
+                                                validator[0], func_args] +
+                                               list(validator[1:]))
         return self
 
     def restrict_type(self, type_, castable=True, *args):
@@ -138,6 +154,14 @@ class Restriction(object):
         self.child.restrict(**kwargs)
         self.validators.append((self.validate_children, self.child))
         return self.child
+
+    @staticmethod
+    def deferred_validate(editable, name, value, validate_func, func_args,
+                          *args):
+        args = list(args)
+        for i in func_args:
+            args[i] = args[i]()
+        validate_func(*args)
 
     @staticmethod
     def validate_min(editable, name, value, min_value):
