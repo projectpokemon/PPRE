@@ -42,6 +42,8 @@ class Restriction(object):
         deferred : bool, optional
             If True, all function arguments will be evaluated at validation
             time returning the actual argument.
+        values : iterable, optional
+            List of all valid values
         min_value : optional
             Require value to be greater or equal to this value
         max_value : optional
@@ -81,6 +83,8 @@ class Restriction(object):
         """
         if kwargs.get('deferred'):
             idx = len(self.validators)
+        if 'values' in kwargs:
+            self.validators.append((self.validate_values, kwargs['values']))
         if 'min_value' in kwargs:
             self.validators.append((self.validate_min, kwargs['min_value']))
         if 'max_value' in kwargs:
@@ -162,6 +166,13 @@ class Restriction(object):
         for i in func_args:
             args[i] = args[i]()
         validate_func(*args)
+
+    @staticmethod
+    def validate_values(editable, name, value, values):
+        if value not in values:
+            raise ValueError(
+                '{name}: "{value}" is not in "{restrict}"'
+                .format(name=name, value=value, restrict=values))
 
     @staticmethod
     def validate_min(editable, name, value, min_value):
