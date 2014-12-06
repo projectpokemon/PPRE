@@ -57,7 +57,8 @@ class HomeUserInterface(BaseUserInterface):
                              file_menu.shortcut('q', ctrl=True))
 
         with self.menu('tools') as tools_menu:
-            tools_menu.action('edit_pokemon', self.edit_pokemon)
+            tools_menu.action('edit_pokemon', self.edit_pokemon,
+                              tools_menu.shortcut('1', ctrl=True, alt=True))
 
         with self.group('rom') as rom_group:
             with rom_group.group('files') as files_group:
