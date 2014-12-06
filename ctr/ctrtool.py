@@ -16,8 +16,12 @@ def dump(fname, directory):
     input('Hit enter')
     subprocess.call([binary, '-p',
                      '--romfs', os.path.join(directory, 'romfs.bin'),
-                     os.path.join(fname)
+                     fname
                      ])
+    with open(os.path.join(directory, 'ncch_header.bin'), 'wb') as header:
+        with open(fname) as handle:
+            handle.seek(0x4000)  # TODO: seek NCSD specified offset
+            header.write(handle.read(512))
     xorstream(os.path.join(directory, 'romfs.bin'),
               os.path.join(directory, 'romfs.xorpad'),
               outname=os.path.join(directory, 'romfs.dec.bin'))

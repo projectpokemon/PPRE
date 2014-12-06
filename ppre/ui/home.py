@@ -84,7 +84,7 @@ class HomeUserInterface(BaseUserInterface):
     def new(self):
         with self.prompt('open') as prompt:
             prompt.file('file', types=['NDS Files (*.nds)',
-                                       '3DS Files (*.3ds)',
+                                       '3DS Files (*.3ds *.3dz)',
                                        'All Files (*.*)'])
             prompt.file('parent_directory', directory=True)
             prompt['parent_directory'].set_value('')
