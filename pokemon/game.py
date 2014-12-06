@@ -135,23 +135,18 @@ class Game(Editable):
         return game
 
     @staticmethod
-    def from_file(filename, workspace):
+    def from_file(filename, workspace, **kwargs):
         """Creates a workspace from a ROM
 
         Returns
         -------
         game : Game
-
-        Raises
-        ------
-        IOError
-            If the new workspace already exists
         """
         tail = os.path.split(filename)[1]
         name, ext = os.path.splitext(tail)
         ext = ext.lower()
         if ext in ('.3ds', '.3dz'):
-            ctrtool.dump(filename, workspace)
+            ctrtool.dump(filename, workspace, xorpad=kwargs.pop('xorpad'))
         elif ext == '.nds':
             ndstool.dump(filename, workspace)
         else:

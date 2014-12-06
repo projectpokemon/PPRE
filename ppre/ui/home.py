@@ -82,6 +82,7 @@ class HomeUserInterface(BaseUserInterface):
 
     @confirm
     def new(self):
+        game_kwargs = {}
         with self.prompt('open') as prompt:
             prompt.file('file', types=['NDS Files (*.nds)',
                                        '3DS Files (*.3ds *.3dz)',
@@ -124,7 +125,35 @@ class HomeUserInterface(BaseUserInterface):
                             self['replace_dir'].destroy()
                     if not replace_prompt.should_replace:
                         return
-                self.set_game(Game.from_file(target, directory))
+                if ext in ('.3ds', '.3dz'):
+                    with self.prompt('xorpad', hide=True) as xorpad_prompt:
+                        file = xorpad_prompt.file('romfs_xorpad_file', types=[
+                            '3DS XORpads (*.xorpad)', 'All Files (*.*)'])
+
+                        @file.on('okay')
+                        def okay(evt):
+                            xorpad_prompt.fire('okay')
+
+                        @file.on('cancel')
+                        def cancel(evt):
+                            xorpad_prompt.fire('cancel')
+
+                        @xorpad_prompt.on('okay')
+                        def okay(evt):
+                            target = \
+                                xorpad_prompt['romfs_xorpad_file'].get_value()
+                            self['xorpad'].destroy()
+                            if not target:
+                                return
+                            game_kwargs['xorpad'] = target
+
+                        @xorpad_prompt.on('cancel')
+                        def cancel(evt):
+                            self['xorpad'].destroy()
+                        xorpad_prompt.focus('romfs_xorpad_file')
+                    if 'xorpad' not in game_kwargs:
+                        return
+                self.set_game(Game.from_file(target, directory, **game_kwargs))
                 base_file = target
                 if backup:
                     base_file = os.path.join(self.session.game.files.directory,

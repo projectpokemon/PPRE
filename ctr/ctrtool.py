@@ -12,8 +12,7 @@ else:
     binary = "bin/ctrtool"
 
 
-def dump(fname, directory):
-    input('Hit enter')
+def dump(fname, directory, xorpad):
     subprocess.call([binary, '-p',
                      '--romfs', os.path.join(directory, 'romfs.bin'),
                      fname
@@ -22,8 +21,7 @@ def dump(fname, directory):
         with open(fname) as handle:
             handle.seek(0x4000)  # TODO: seek NCSD specified offset
             header.write(handle.read(512))
-    xorstream(os.path.join(directory, 'romfs.bin'),
-              os.path.join(directory, 'romfs.xorpad'),
+    xorstream(os.path.join(directory, 'romfs.bin'), xorpad,
               outname=os.path.join(directory, 'romfs.dec.bin'))
     subprocess.call([binary,
                      '--romfsdir', os.path.join(directory, 'fs'),
