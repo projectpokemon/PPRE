@@ -54,13 +54,19 @@ class PokemonUserInterface(BaseUserInterface):
                     group_0.edit('level')"""
         with self.group('pokemon') as pokemon_group:
             self.update_from_data(self.data, pokemon_group)
-        """natid = self['pokemon']['natid']
+
+        natid = self['pokemon']['natid']
 
         @natid.on('changed')
         def natid_changed(evt):
-            print(evt.data.value, )"""
+            self.load(evt.data.value)
 
+        print('prebind', self.data)
         self.bind('pokemon', self, 'data')
+        print(self.data)
+
+    def load(self, natid):
+        self.data.load_id(natid)
 
     def new(self):
         pass

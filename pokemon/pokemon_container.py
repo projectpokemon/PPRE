@@ -6,12 +6,12 @@ from pokemon.poketool.wotbl import LevelMoves
 
 
 class Pokemon(Editable):
-    available = {1: 'Bulbasaur', 2: 'Ivysaur'}
+    available = {0: '--', 1: 'Bulbasaur', 2: 'Ivysaur'}
 
     def __init__(self, game):
         self.game = game
         self.natid = None
-        self.restrict('natid', min_value=0, values=Pokemon.available)
+        self.restrict('natid', min_value=0, values=self.available)
         self.personal = Personal(version=game.game_name)
         self.restrict('personal')
         self.evolutions = Evolutions()
@@ -20,6 +20,7 @@ class Pokemon(Editable):
         self.restrict('levelmoves')
 
     def load_id(self, natid):
+        print(self.personal, natid)
         self.personal.load(self.game.get_personal(natid))
         self.evolutions.load(self.game.get_evo(natid))
         self.levelmoves.load(self.game.get_wotbl(natid))
