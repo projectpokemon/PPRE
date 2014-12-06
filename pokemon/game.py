@@ -135,7 +135,7 @@ class Game(Editable):
         return game
 
     @staticmethod
-    def from_file(filename, parent_directory):
+    def from_file(filename, workspace):
         """Creates a workspace from a ROM
 
         Returns
@@ -150,8 +150,6 @@ class Game(Editable):
         tail = os.path.split(filename)[1]
         name, ext = os.path.splitext(tail)
         ext = ext.lower()
-        workspace = os.path.join(parent_directory, name)
-        os.mkdir(workspace)  # Let raise IOError
         if ext in ('.3ds', '.3dz'):
             ctrtool.dump(filename, workspace)
         elif ext == '.nds':

@@ -101,13 +101,34 @@ class HomeUserInterface(BaseUserInterface):
                     return
                 if not directory:
                     directory = os.path.dirname(target)
-                # TODO: Confirm directory overwrite?
+                tail = os.path.split(target)[1]
+                name, ext = os.path.splitext(tail)
+                ext = ext.lower()
+                directory = os.path.join(directory, name)
+                try:
+                    os.mkdir(directory)
+                except OSError:
+                    with self.prompt('replace_dir') as replace_prompt:
+                        replace_prompt.should_replace = False
+                        replace_prompt.message('should_replace_dir')
+
+                        @replace_prompt.on('okay')
+                        def okay(evt):
+                            replace_prompt.should_replace = True
+                            shutil.rmtree(directory)
+                            os.mkdir(directory)
+                            self['replace_dir'].destroy()
+
+                        @replace_prompt.on('cancel')
+                        def cancel(evt):
+                            self['replace_dir'].destroy()
+                    if not replace_prompt.should_replace:
+                        return
                 self.set_game(Game.from_file(target, directory))
                 base_file = target
                 if backup:
-                    base_file = os.path.split(target)[1]
                     base_file = os.path.join(self.session.game.files.directory,
-                                            base_file)
+                                             tail)
                     shutil.copy(target, base_file)
                 self.session.game.files.base = base_file
                 self.session.game.write_config()
