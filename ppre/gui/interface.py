@@ -436,4 +436,4 @@ class Interface(BaseInterface):
     def destroy(self):
         self.widget.close()
 
-from ppre.gui.widgets import *
+from ppre.gui.components import *
