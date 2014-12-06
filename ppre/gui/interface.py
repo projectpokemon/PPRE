@@ -191,9 +191,9 @@ class Interface(BaseInterface):
             return None
 
     def set_value(self, value):
-        print('value', value)
         if value == self._value:
             return
+        print('value', value)
         self._value = value
         try:
             self.widget.setValue(value)
@@ -278,6 +278,8 @@ class Interface(BaseInterface):
         inf = Interface(self.session, self, widget)
         inf.connect_event(widget, 'valueChanged(int)',
                           'changed', value=0)
+        self.connect(widget, 'valueChanged(int)',
+                     lambda value: self.set_value(value))
         return inf
 
     def select(self, text, values):
