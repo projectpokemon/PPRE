@@ -14,7 +14,6 @@ int xorstream(FILE *handle1, FILE *handle2, FILE *out) {
     if(read1 < BLOCK_READ_SIZE || read2 < BLOCK_READ_SIZE) {
       moredata = 0;
     }
-    printf("%d %d %d\n", read1, read2, moredata);
     read_both = read1 < read2 ? read1 : read2;
     for(c = 0; c < read_both; ++c) {
       out_buffer[c] = buffer1[c] ^ buffer2[c];
