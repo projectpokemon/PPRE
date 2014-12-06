@@ -56,10 +56,6 @@ class HomeUserInterface(BaseUserInterface):
             file_menu.action('quit', self.quit,
                              file_menu.shortcut('q', ctrl=True))
 
-        with self.menu('tools') as tools_menu:
-            tools_menu.action('edit_pokemon', self.edit_pokemon,
-                              tools_menu.shortcut('1', ctrl=True, alt=True))
-
         with self.group('rom') as rom_group:
             with rom_group.group('files') as files_group:
                 files_group.edit('base')
@@ -79,7 +75,20 @@ class HomeUserInterface(BaseUserInterface):
 
     def set_game(self, game):
         self.session.game = game
+        try:
+            game.personal_archive_file
+        except:
+            self.title('PPRE 5.0')
+            return
         self.title('PPRE 5.0 - {0}'.format(game.game_name), color=game.color)
+
+        if 'tools' in self:
+            self.destroy('tools')
+        self.ui.widget.hide()
+        with self.menu('tools') as tools_menu:
+            tools_menu.action('edit_pokemon', self.edit_pokemon,
+                              tools_menu.shortcut('1', ctrl=True, alt=True))
+        self.show()
 
     @confirm
     def new(self):
@@ -261,7 +270,7 @@ class HomeUserInterface(BaseUserInterface):
         print(self.session.game.to_json())
 
     def export_as(self):
-        pass
+        self.set_game(Game())
 
     @confirm
     def quit(self):

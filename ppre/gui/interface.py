@@ -211,12 +211,12 @@ class Interface(BaseInterface):
     def on_focus(self):
         self.widget.setFocus()
 
-    @attach_interface
     def menu(self, text):
         menu = QtWidgets.QMenu(self.menubar)
         menu.setTitle(text)
         self.menubar.addAction(menu.menuAction())
-        return menu
+        menu_if = Interface(self.session, self, menu)
+        return menu_if
 
     @attach_interface
     def action(self, text, callback, shortcut=None):

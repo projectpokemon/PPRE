@@ -90,10 +90,14 @@ class BaseUserInterface(object):
             bindings.append(entry)
         self.bindings = bindings
 
-    def destroy(self):
-        self.ui.destroy()
-        if self.parent is not None:
-            del self.parent[self.name]
+    def destroy(self, target_name=None):
+        if target_name is not None:
+            target = self[target_name]
+        else:
+            target = self
+        target.ui.destroy()
+        if target.parent is not None:
+            del target.parent.children[target.name]
 
     def new(self, cls=None):
         """Return a new interface"""
@@ -201,7 +205,7 @@ class BaseUserInterface(object):
         self.children[key] = value
 
     def __delitem__(self, name):
-        del self.children[name]
+        self.destroy(name)
 
     def keys(self):
         return self.children.keys()
