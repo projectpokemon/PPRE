@@ -2,8 +2,10 @@
 from ppre.gui.interface import Interface
 
 from file import FileInterface
+from edit import EditInterface
 
-__all__ = ['FileInterface', 'PromptInterface', 'BooleanInterface']
+__all__ = ['FileInterface', 'PromptInterface', 'BooleanInterface',
+           'EditInterface']
 
 
 class PromptInterface(Interface):

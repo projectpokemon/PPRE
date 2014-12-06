@@ -240,21 +240,7 @@ class Interface(BaseInterface):
         return group_if
 
     def edit(self, text, soft_rows=None):
-        widget = QtWidgets.QLineEdit(self.widget)
-        label = QtWidgets.QLabel(self.widget)
-        # self.addWidget(widget)
-        # self.addWidget(label)
-        self.layout.add_children(QtLayoutChild(widget), QtLayoutChild(label))
-        widget.setText(text)
-        widget.setContentsMargins(0, 0, 0, 0)
-        widget.setGeometry(QtCore.QRect(120, 0, 150, 20))
-        label.setText(text)
-        label.setContentsMargins(0, 0, 0, 0)
-        label.setGeometry(QtCore.QRect(0, 0, 110, 20))
-        inf = Interface(self.session, self, widget)
-        inf.connect_event(widget, 'textEdited(const QString&)',
-                          'changed', value=0)
-        return inf
+        return EditInterface(self, text)
     text = edit
 
     def number(self, text, min=None, max=None, step=None):
