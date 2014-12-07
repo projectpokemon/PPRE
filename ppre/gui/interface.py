@@ -244,29 +244,7 @@ class Interface(BaseInterface):
     text = edit
 
     def number(self, text, min=None, max=None, step=None):
-        widget = QtWidgets.QSpinBox(self.widget)
-        label = QtWidgets.QLabel(self.widget)
-        self.layout.add_children(QtLayoutChild(widget), QtLayoutChild(label))
-        if min is None:
-            widget.setValue(0)
-        else:
-            widget.setMinimum(min)
-            widget.setValue(min)
-        if max is not None:
-            widget.setMaximum(max)
-        if step is not None:
-            widget.setSingleStep(step)
-        widget.setContentsMargins(0, 0, 0, 0)
-        widget.setGeometry(QtCore.QRect(120, 0, 50, 20))
-        label.setText(text)
-        label.setContentsMargins(0, 0, 0, 0)
-        label.setGeometry(QtCore.QRect(0, 0, 110, 20))
-        inf = Interface(self.session, self, widget)
-        inf.connect_event(widget, 'valueChanged(int)',
-                          'changed', value=0)
-        self.connect(widget, 'valueChanged(int)',
-                     lambda value: inf.set_value(value))
-        return inf
+        return NumberInterface(self, text, min=min, max=max, step=step)
 
     def select(self, text, values):
         widget = QtWidgets.QComboBox(self.widget)
