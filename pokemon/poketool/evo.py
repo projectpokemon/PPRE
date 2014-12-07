@@ -4,7 +4,7 @@ from util import BinaryIO
 
 
 class Evolution(Editable):
-    def __init__(self, method, parameter, target):
+    def __init__(self, method=0, parameter=0, target=0):
         self.method = method
         self.restrictUInt16('method')
         self.parameter = parameter
@@ -16,7 +16,7 @@ class Evolution(Editable):
 class Evolutions(Editable):
     def __init__(self, reader=None):
         self.evos = []
-        self.restrict('evos')
+        self.restrict('evos', max_length=7).child.restrict_type(Evolution, False)
         if reader is not None:
             self.load(reader)
 

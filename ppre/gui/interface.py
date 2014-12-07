@@ -46,8 +46,8 @@ class QtLayoutChild(LayoutChild):
             self.widget.setGeometry)
         self._x = geometry.x()
         self._y = geometry.y()
-        self.width = geometry.width()
-        self.height = geometry.height()
+        self._width = geometry.width()
+        self._height = geometry.height()
         super(QtLayoutChild, self).__init__(widget, width=self.width,
                                             height=self.height)
 
@@ -74,6 +74,9 @@ class QtLayoutChild(LayoutChild):
             setGeometry(x, y, width, height)
         return setGeometryUpdate
 
+    def updateGeometry(self):
+        self.widget.setGeometry(self.x, self.y, self.width, self.height)
+
     @property
     def x(self):
         return self._x
@@ -81,7 +84,7 @@ class QtLayoutChild(LayoutChild):
     @x.setter
     def x(self, value):
         self._x = value
-        self.widget.setGeometry(value, self.y, self.width, self.height)
+        self.updateGeometry()
 
     @property
     def y(self):
@@ -90,7 +93,25 @@ class QtLayoutChild(LayoutChild):
     @y.setter
     def y(self, value):
         self._y = value
-        self.widget.setGeometry(self.x, value, self.width, self.height)
+        self.updateGeometry()
+
+    @property
+    def width(self):
+        return self._width
+
+    @width.setter
+    def width(self, value):
+        self._width = value
+        self.updateGeometry()
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, value):
+        self._height = value
+        self.updateGeometry()
 
 
 class Interface(BaseInterface):
@@ -239,6 +260,9 @@ class Interface(BaseInterface):
         group_if.layout.padding_horizontal = 20
         return group_if
 
+    def multigroup(self, text, min=None, max=None):
+        return MultiGroupInterface(self, text, min=min, max=max)
+
     def edit(self, text, soft_rows=None):
         return EditInterface(self, text)
     text = edit
@@ -385,9 +409,11 @@ class Interface(BaseInterface):
             pass
         else:
             state = hash(tuple(self.layout.children))
+            print(self, self.layout.children)
             if state != self.layout.hash:
                 self.layout.hash = state
             w, h = self.layout.optimize()
+            print(self, w, h)
             self.widget.setGeometry(self.widget.x(), self.widget.y(), w, h)
         try:
             if self.blocking:
@@ -399,5 +425,10 @@ class Interface(BaseInterface):
 
     def destroy(self):
         self.widget.close()
+
+    def update(self):
+        if self.parent:
+            self.parent.update()
+        self.show()
 
 from ppre.gui.components import *

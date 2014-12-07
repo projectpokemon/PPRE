@@ -5,7 +5,7 @@ from util import BinaryIO
 
 
 class LevelMove(Editable):
-    def __init__(self, moveid, level, version='Diamond'):
+    def __init__(self, moveid=0, level=0, version='Diamond'):
         # TODO: Varying restrictions per game
         self.moveid = moveid
         self.level = level
@@ -25,7 +25,8 @@ class LevelMoves(Editable):
     def __init__(self, reader=None, version='Diamond'):
         self.version = version
         self.moves = []
-        self.restrict('moves', max_length=20)
+        self.restrict('moves', max_length=20).child.restrict_type(LevelMove,
+                                                                  False)
         if reader is not None:
             self.load(reader)
 

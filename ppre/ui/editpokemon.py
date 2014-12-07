@@ -53,13 +53,19 @@ class PokemonUserInterface(BaseUserInterface):
                     group_0.edit('moveid')
                     group_0.edit('level')"""
         with self.group('pokemon') as pokemon_group:
-            self.update_from_data(self.data, pokemon_group)
-
-        natid = self['pokemon']['natid']
+            natid = self.select('natid', values=self.data.available)
+            with pokemon_group.group('personal') as personal_group:
+                self.update_from_data(self.data.personal, personal_group)
+            with pokemon_group.group('evolutions') as evolutions_group:
+                self.update_from_data(self.data.evolutions, evolutions_group)
+            # with pokemon_group.group('levelmoves') as levelmoves_group:
+            #     self.update_from_data(self.data.levelmoves, levelmoves_group)
 
         @natid.on('changed')
         def natid_changed(evt):
             self.load(evt.data.value)
+            self['pokemon']['evolutions']['evos'].show()
+            self.show()
 
         print('prebind', self.data)
         self.bind('pokemon', self, 'data')

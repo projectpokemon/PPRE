@@ -3,9 +3,11 @@ from ppre.gui.interface import Interface
 
 from file import FileInterface
 from edit import EditInterface, NumberInterface
+from group import MultiGroupInterface
 
 __all__ = ['FileInterface', 'PromptInterface', 'BooleanInterface',
-           'EditInterface', 'NumberInterface']
+           'EditInterface', 'NumberInterface',
+           'MultiGroupInterface']
 
 
 class PromptInterface(Interface):

@@ -116,18 +116,18 @@ class Restriction(object):
                                                list(validator[1:]))
         return self
 
-    def restrict_type(self, type_, castable=True, *args):
+    def restrict_type(self, type, castable=True, *args):
         """Creates a type restriction
 
         Paramaters
         ----------
-        type_ : type
+        type : type
             The type to restrict against
         castable : bool, optional
             If True (default), check to see if type_(value, *args) is valid.
             If False, check to see if value is an instance of type_
         """
-        self.validators.append(tuple([self.validate_type, type_, castable] +
+        self.validators.append(tuple([self.validate_type, type, castable] +
                                      list(args)))
         return self
 
@@ -139,6 +139,13 @@ class Restriction(object):
         except:
             self._sub_restriction = Restriction(self.name)
             return self._sub_restriction
+
+    def has_children(self):
+        try:
+            self._sub_restriction
+            return True
+        except:
+            return False
 
     def restrict_child(self, **kwargs):
         """Place restriction on a child, for use in containers
@@ -367,28 +374,29 @@ class CollectionNotifier(list):
 
     def append(self, item):
         idx = len(self)
-        self.parent.__insert__(self.name, idx, item)
         list.append(self, item)
+        self.parent.__insert__(self.name, idx, item)
 
     def extend(self, items):
         items = list(items)
         idx = len(self)
+        list.extend(self, items)
         for item in items:
             self.parent.__insert__(self.name, idx, item)
             idx += 1
-        list.extend(self, items)
 
     def remove(self, item):
         idx = self.index(item)
-        self.parent.__remove__(self.name, idx, item)
         list.remove(self, item)
+        self.parent.__remove__(self.name, idx, item)
 
     def pop(self, idx=None):
         if idx is None:
             idx = len(self)-1
         item = self[idx]
+        value = list.pop(self, idx)
         self.parent.__remove__(self.name, idx, item)
-        return list.pop(self, idx)
+        return item
 
 
 class Editable(object):
@@ -541,7 +549,7 @@ class Editable(object):
         return unrestricted
 
     def __setattr__(self, name, value):
-        if isinstance(value, list):
+        if isinstance(value, list) and not isinstance(value, CollectionNotifier):
             value = CollectionNotifier(self, name, value)
         try:
             restriction = self.keys[name]
@@ -587,6 +595,7 @@ class Editable(object):
             pass
         else:
             restriction.validate(self, name, value)
+            setattr(self, name, getattr(self, name))
 
     def __remove__(self, name, index, value):
         pass

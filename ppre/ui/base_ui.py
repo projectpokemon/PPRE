@@ -134,6 +134,11 @@ class BaseUserInterface(object):
         ui = self.ui.group(text)
         return BaseUserInterface(ui, name, self.session, self)
 
+    def multigroup(self, name):
+        text = self.translate(name)
+        ui = self.ui.multigroup(text)
+        return MultiGroupUserInterface(ui, name, self.session, self)
+
     def edit(self, name, *args, **kwargs):
         text = self.translate(name)
         ui = self.ui.edit(text, *args, **kwargs)
@@ -175,22 +180,41 @@ class BaseUserInterface(object):
         if group is None:
             group = self
         for name, restriction in data.keys.items():
-            if int in restriction.find_types():
-                min, max, step = restriction.get_range()
-                group.number(name, min=min, max=max, step=step)
-            else:
-                values = restriction.get_values()
-                if values:
-                    group.select(name, values=values)
-                    continue
+            if not self.update_from_restriction(name, restriction, group):
                 try:
                     val = getattr(data, name)
                     if val.keys:
                         with group.group(name) as sub_group:
                             self.update_from_data(val, sub_group)
+                        continue
+                except AttributeError:
+                    pass
 
+    def update_from_restriction(self, name, restriction, group):
+        types = restriction.find_types()
+        if int in types:
+            min, max, step = restriction.get_range()
+            group.number(name, min=min, max=max, step=step)
+            return True
+        elif types:
+            for type_ in types:
+                try:
+                    data = type_()
+                    data.keys
+                    self.update_from_data(data, group)
                 except:
                     pass
+        elif restriction.has_children():
+            min, max, step = restriction.get_range()
+            with group.multigroup(name, min=min, max=max) as sub_group:
+                self.update_from_restriction(restriction.child.name,
+                                             restriction.child, sub_group)
+            return True
+        else:
+            values = restriction.get_values()
+            if values:
+                group.select(name, values=values)
+                return True
 
     # Events
     on = ui_pass('on')
@@ -218,6 +242,30 @@ class BaseUserInterface(object):
 
     def __exit__(self, type_, value, traceback):
         self.show()
+
+
+class MultiGroupUserInterface(BaseUserInterface):
+    def __init__(self, *args, **kwargs):
+        self.clone_builders = []
+        super(MultiGroupUserInterface, self).__init__(*args, **kwargs)
+
+    def __getattribute__(self, name):
+        attr = super(MultiGroupUserInterface, self).__getattribute__(name)
+        if not hasattr(attr, '__call__'):
+            return attr
+        if '_' in name:
+            # Currently holds true for all non-interface returners
+            return attr
+
+        @functools.wraps(attr)
+        def wrapper(*args, **kwargs):
+            ret = attr(*args, **kwargs)
+            if isinstance(ret, BaseUserInterface):
+                builder = (name, args, kwargs)
+                if builder not in self.clone_builders:
+                    self.clone_builders.append(builder)
+            return ret
+        return wrapper
 
 
 if __name__ == '__main__':
