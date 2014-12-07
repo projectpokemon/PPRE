@@ -612,7 +612,7 @@ class Editable(Emitter):
             except ValueError:
                 self.fire('invalid', ('insert', name, index, value))
                 raise
-            self.fire('insert' (name, index, value))
+            self.fire('insert', (name, index, value))
 
     def __remove__(self, name, index, value):
         # TODO: validate lengths?
