@@ -4,6 +4,8 @@ import binascii
 import json
 from collections import namedtuple
 
+from dispatch.events import Emitter
+
 from util.iter import auto_iterate
 from util import lcm
 
@@ -390,8 +392,10 @@ class CollectionNotifier(list):
         self.parent.__remove__(self.name, idx, item)
         return list.pop(self, idx)
 
+    # TODO: __setitem__
 
-class Editable(object):
+
+class Editable(Emitter):
     """Editable interface
 
     Attributes
@@ -407,6 +411,18 @@ class Editable(object):
         Generate a dict for this object
     to_json
         Generate a JSON string for this object
+
+    Events
+    ------
+    set : (name, value)
+        Fired before a restricted attribute is changed
+    insert : (name, index, value)
+        Fired before an item is inserted into a collection
+    remove : (name, index, value)
+        Fired before an item is removed from a collection
+    invalid : (method, *args)
+        Fired if an invalid value is passed. The rest of the event signature
+        looks matches the method's arguments
     """
     __metaclass__ = abc.ABCMeta
 
@@ -549,7 +565,12 @@ class Editable(object):
         except:
             pass
         else:
-            restriction.validate(self, name, value)
+            try:
+                restriction.validate(self, name, value)
+            except ValueError:
+                self.fire('invalid', ('set', name, value))
+                raise
+            self.fire('set', (name, value))
             """if restriction.min_value is not None:
                 if value < restriction.min_value:
                     raise ValueError(
@@ -586,10 +607,16 @@ class Editable(object):
         except:
             pass
         else:
-            restriction.validate(self, name, value)
+            try:
+                restriction.validate(self, name, value)
+            except ValueError:
+                self.fire('invalid', ('insert', name, index, value))
+                raise
+            self.fire('insert' (name, index, value))
 
     def __remove__(self, name, index, value):
-        pass
+        # TODO: validate lengths?
+        self.fire('remove', (name, index, value))
 
     def checksum(self):
         """Returns a recursive weak_hash for this instance"""
