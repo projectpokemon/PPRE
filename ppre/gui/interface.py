@@ -329,7 +329,7 @@ class Interface(BaseInterface):
         @group_if.on('cancel')
         def cancel(evt):
             if not evt.data:
-                evt.cancel()
+                evt.cancelled = True
                 widget.reject()
 
         @group_if.on('_cancel')
@@ -339,7 +339,7 @@ class Interface(BaseInterface):
         @group_if.on('okay')
         def okay(evt):
             if not evt.data:
-                evt.cancel()
+                evt.cancelled = True
                 widget.accept()
 
         @group_if.on('_okay')
