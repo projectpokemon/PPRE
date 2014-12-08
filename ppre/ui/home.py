@@ -71,10 +71,10 @@ class HomeUserInterface(BaseUserInterface):
 
     def clear(self):
         self.set_game(Game())
-        self.bind('rom', self.session, 'game')
 
     def set_game(self, game):
         self.session.game = game
+        self.bind('rom', self.session, 'game')
         try:
             game.personal_archive_file
         except:

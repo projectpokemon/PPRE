@@ -563,41 +563,21 @@ class Editable(Emitter):
             restriction = self.keys[name]
             restriction.name
         except:
-            pass
+            super(Editable, self).__setattr__(name, value)
         else:
             try:
                 restriction.validate(self, name, value)
             except ValueError:
                 self.fire('invalid', ('set', name, value))
                 raise
-            self.fire('set', (name, value))
-            """if restriction.min_value is not None:
-                if value < restriction.min_value:
-                    raise ValueError(
-                        '{name}: "{value}" is less than minimum "{restrict}"'
-                        .format(name=name, value=value,
-                                restrict=restriction.min_value))
-            if restriction.max_value is not None:
-                if value > restriction.max_value:
-                    raise ValueError(
-                        '{name}: "{value}" is more than maximum "{restrict}"'
-                        .format(name=name, value=value,
-                                restrict=restriction.max_value))
-            if restriction.min_length is not None:
-                if len(value) < restriction.min_length:
-                    raise ValueError(
-                        '{name}: "{value}" is less than length "{restrict}"'
-                        .format(name=name, value=value,
-                                restrict=restriction.min_length))
-            if restriction.max_length is not None:
-                if len(value) > restriction.max_length:
-                    raise ValueError(
-                        '{name}: "{value}" is more than length "{restrict}"'
-                        .format(name=name, value=value,
-                                restrict=restriction.max_length))
-            if restriction.validator is not None:
-                restriction.validator(self, name, value)"""
-        super(Editable, self).__setattr__(name, value)
+            try:
+                old_value = getattr(self, name)
+            except AttributeError:
+                pass
+            else:
+                super(Editable, self).__setattr__(name, value)
+                if old_value != value:
+                    self.fire('set', (name, value))
 
     def __insert__(self, name, index, value):
         print('inserted into', name)

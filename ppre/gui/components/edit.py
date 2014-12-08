@@ -25,6 +25,8 @@ class EditInterface(Interface):
         self.label.setBuddy(self.widget)
         parent.layout.add_children(QtLayoutChild(self.label),
                                    QtLayoutChild(self.widget))
+        self.connect(widget, 'textEdited(const QString&)',
+                     lambda value: self.set_value(str(value)))
         self.connect_event(widget, 'textEdited(const QString&)',
                            'changed', value=0)
 

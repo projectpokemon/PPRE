@@ -1,14 +1,16 @@
 """Data binder used to ensure two objects have the same values"""
 
+from dispatch.events.event import EventData
+
 from util import hook
 
 
 def debug(*args):
-    return
+    pass
     print(args)
 
 
-class Bind(object):
+class OldBind(object):
     def __init__(self, container, key, parent=None, attr=None, unbind=True):
         debug('Bind', container.name, key)
         self.container = container
@@ -94,7 +96,37 @@ class Bind(object):
         return '<Bind {0}>'.format(self.container.name)
 
 
-def bind(interface, key, container=None, attr=None):
+class Bind(object):
+    def __init__(self, interface, data, unbind=True):
+        debug('Bind', interface.name)
+        self.interface = interface
+        self.data = data
+
+        try:
+            data.keys
+        except:
+            self.interface.set_value(data)
+            return
+
+        @data.on('set')
+        def model_set(evt):
+            name, value = evt.data
+            print(name, value)
+            # self.interface[name].set_value(value)
+            self.interface.bind(name, value)
+        for attr in data.keys:
+            evt = EventData('', self, (attr, getattr(data, attr)))
+            model_set(evt)
+        self.interface.set_value(data)
+
+    def bind_children(self, unbind=True):
+        for child_key in self.interface.keys():
+            debug(child_key)
+            if hasattr(self.data, child_key):
+                self.interface.bind(child_key, getattr(self.data, child_key), unbind=unbind)
+
+
+def older_bind(interface, key, container=None, attr=None):
     """Ensures consistency between interface[key] and container.attr
     """
     if attr is None:

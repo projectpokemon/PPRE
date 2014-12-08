@@ -2,6 +2,8 @@
 import functools
 import os
 
+from dispatch.events.event import EventData
+
 from ppre.ui.bind import Bind
 
 
@@ -63,7 +65,7 @@ class BaseUserInterface(object):
             entry = text
         return str(entry)
 
-    def bind(self, key, parent=None, attr=None, unbind=True):
+    def old_bind(self, key, parent=None, attr=None, unbind=True):
         old_parents = []
         already_bound = False
         for bkey, binding in self.bindings:
@@ -89,6 +91,41 @@ class BaseUserInterface(object):
                     continue
             bindings.append(entry)
         self.bindings = bindings
+
+    def bind(self, key, parent, attr, unbind=True):
+        data = getattr(parent, attr)
+        interface = self[key]
+
+        @interface.on('changed')
+        def interface_set(evt):
+            value = evt.data.value
+            print('if', value)
+            if value != getattr(parent, attr):
+                setattr(parent, attr, value)
+        try:
+            data.keys
+            data.keys()
+            if data != interface.get_value():
+                interface.set_value(data)
+            return
+        except TypeError:
+            pass
+        except AttributeError:
+            if data != interface.get_value():
+                interface.set_value(data)
+            return
+
+        @data.on('set')
+        def model_set(evt):
+            name, value = evt.data
+            print(name, value)
+            # self.interface[name].set_value(value)
+            interface.bind(name, data, name)
+        for attr in data.keys:
+            evt = EventData('', self, (attr, getattr(data, attr)))
+            model_set(evt)
+        if data != interface.get_value():
+            interface.set_value(data)
 
     def destroy(self, target_name=None):
         if target_name is not None:
