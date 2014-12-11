@@ -473,6 +473,9 @@ class Editable(Emitter):
         except AttributeError:
             if default is not None:
                 setattr(self, name, default)
+                old_value = default
+            else:
+                raise ValueError('self.{name} is not set'.format(name=name))
         if children is None:
             # FIXME: This children thing might be stupid afterall
             children = []

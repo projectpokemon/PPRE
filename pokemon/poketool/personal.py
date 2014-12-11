@@ -47,7 +47,6 @@ class Personal(Editable):
         self.restrict('types', max_length=2)
         self.catchrate = 255
         self.restrictUInt8('catchrate')
-        self.baseexp = 0
         if self.version in game.GEN_IV:
             self.restrictUInt8('baseexp')
         else:
@@ -57,22 +56,19 @@ class Personal(Editable):
         self.items = []
         self.restrict('items',
                       max_length=2 if self.version in game.GEN_VI else 3)
-        self.gender = 0  # TODO: Better type like enum? or m/f/n rates?
+        # TODO: Better type like enum? or m/f/n rates?
         self.restrictUInt8('gender')
         self.hatchsteps = 256
         self.restrictUInt16('hatchsteps')
         self.happiness = 70
         self.restrictUInt8('happiness')
-        self.growth = 0  # Exp growth rate
-        self.restrictUInt8('growth')
+        self.restrictUInt8('growth')  # Exp growth rate
         self.egggroups = [15]
         self.restrict('egggroups', max_length=2)
         self.abilities = []
         self.restrict('abilities',
                       max_length=2 if self.version in game.GEN_VI else 3)
-        self.flee = 0
         self.restrictUInt8('flee')
-        self.color = 0
         self.restrictUInt8('color')
         self.tms = []  # List of known TMs
         self.restrict('tms', max_length=13*8)
