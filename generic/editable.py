@@ -442,7 +442,7 @@ class Editable(Emitter):
             self._keys = OrderedDict()
             return self._keys
 
-    def restrict(self, name, validator=None, children=None, **kwargs):
+    def restrict(self, name, validator=None, children=None, default=None, **kwargs):
         """Restrict an attribute. This adds the attribute to the key
         collection used to build textual representations.
 
@@ -471,7 +471,8 @@ class Editable(Emitter):
         try:
             old_value = getattr(self, name)
         except AttributeError:
-            raise ValueError('self.{name} is not set'.format(name=name))
+            if default is not None:
+                setattr(self, name, default)
         if children is None:
             # FIXME: This children thing might be stupid afterall
             children = []
@@ -497,33 +498,33 @@ class Editable(Emitter):
         return restriction
 
     def restrictInt8(self, name, **kwargs):
-        params = {'min_value': -0x80, 'max_value': 0x7F, 'type': int}
+        params = {'default': 0, 'min_value': -0x80, 'max_value': 0x7F, 'type': int}
         params.update(kwargs)
         return self.restrict(name, **params)
 
     def restrictUInt8(self, name, **kwargs):
-        params = {'min_value': 0, 'max_value': 0xFF, 'type': int}
+        params = {'default': 0, 'min_value': 0, 'max_value': 0xFF, 'type': int}
         params.update(kwargs)
         return self.restrict(name, **params)
 
     def restrictInt16(self, name, **kwargs):
-        params = {'min_value': -0x8000, 'max_value': 0x7FFF, 'type': int}
+        params = {'default': 0, 'min_value': -0x8000, 'max_value': 0x7FFF, 'type': int}
         params.update(kwargs)
         return self.restrict(name, **params)
 
     def restrictUInt16(self, name, **kwargs):
-        params = {'min_value': 0, 'max_value': 0xFFFF, 'type': int}
+        params = {'default': 0, 'min_value': 0, 'max_value': 0xFFFF, 'type': int}
         params.update(kwargs)
         return self.restrict(name, **params)
 
     def restrictInt32(self, name, **kwargs):
-        params = {'min_value': -0x80000000, 'max_value': 0x7FFFFFFF,
+        params = {'default': 0, 'min_value': -0x80000000, 'max_value': 0x7FFFFFFF,
                   'type': int}
         params.update(kwargs)
         return self.restrict(name, **params)
 
     def restrictUInt32(self, name, **kwargs):
-        params = {'min_value': 0, 'max_value': 0xFFFFFFFF, 'type': int}
+        params = {'default': 0, 'min_value': 0, 'max_value': 0xFFFFFFFF, 'type': int}
         params.update(kwargs)
         return self.restrict(name, **params)
 
