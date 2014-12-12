@@ -189,3 +189,23 @@ class BinaryIOAdapter(BinaryIO):
     def tell(self):
         return self.handle.tell()
 
+
+class BoundIO(object):
+    """Binds a binary_io to an object so that all of its functions use obj
+    directly"""
+    def __init__(self, obj, binary_io):
+        self.handle = binary_io
+        self.obj = obj
+
+    def __getattr__(self, name):
+        attr = super(BoundIO, self).__getattr__(name)
+        if name[:4] == 'read':
+            def bound_read_wrapper(target, *args, **kwargs):
+                setattr(self.obj, target, attr(*args, **kwargs))
+            return bound_read_wrapper
+        elif name[:5] == 'write':
+            def bound_write_wrapper(target, *args, **kwargs):
+                attr(getattr(self.obj, target), *args, **kwargs)
+            return bound_write_wrapper
+        else:
+            return attr
