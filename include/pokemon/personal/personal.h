@@ -3,21 +3,21 @@
 
 #include <ppre.h>
 
-#define STRUCT_STATS(t) struct {\
-    t hp;\
-    t attack;\
-    t defense;\
-    t speed;\
-    t spatk;\
-    t spdef;\
+#define STRUCT_STATS(width) struct {\
+    uint hp : width;\
+    uint attack : width;\
+    uint defense : width;\
+    uint speed : width;\
+    uint spatk : width;\
+    uint spdef : width;\
 }
 
 STRUCT_VERSION(personal, dp) {
-    STRUCT_STATS(uint8) base_stats;
+    STRUCT_STATS(8) base_stats;
     uint8 types[2];
     uint8 catchrate;
     uint8 baseexp;
-    uint16 evs;
+    STRUCT_STATS(2) evs;
     uint16 items[2];
     uint8 gender;
     uint8 hatchcycles;
