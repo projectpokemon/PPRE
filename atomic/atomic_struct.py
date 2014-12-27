@@ -17,11 +17,11 @@ class AtomicContext(object):
         self.key = key
 
     def __enter__(self, value=True):
-        self.old_value = self.atomic.ctx[self.key]
-        self.atomic.ctx[self.key] = value
+        self.old_value = self.atomic.context[self.key]
+        self.atomic.context[self.key] = value
 
     def __exit__(self, type_, value_, traceback):
-        self.atomic.ctx[self.key] = self.old_value
+        self.atomic.context[self.key] = self.old_value
 
 
 class AtomicStruct(object):
@@ -52,18 +52,20 @@ class AtomicStruct(object):
     def uint16(self, name):
         return self._add(name, ctypes.c_uint16)
 
+    def get_type(self, type_callable, base_obj=None):
+        with (base_obj or self).simulate():
+            return type_callable('_')[1]
+
     def embed(self, name, type_callable, base_obj=None):
         self._anonymous.append(name)
-        with (base_obj or self).simulate():
-            return self._add(name, type_callable())
+        return self._add(name, self.get_type(type_callable, base_obj))
 
     def array(self, name, type_callable, base_obj=None, length=1):
-        with (base_obj or self).simulate():
-            return self._add(name, type_callable() * length)
+        return self._add(name,
+                         self.get_type(type_callable, base_obj) * length)
 
     def struct(self, name, type_callable, base_obj=None):
-        with (base_obj or self).simulate():
-            return self._add(name, type_callable())
+        return self._add(name, self.get_type(type_callable, base_obj))
 
     def base_struct(self, name):
         return (name, self._type)
@@ -72,7 +74,7 @@ class AtomicStruct(object):
         return self._type
 
     def freeze(self):
-        self._type = type(self.name, (ctypes.Structure),
+        self._type = type(self.name, (ctypes.Structure, ),
                           dict(_fields_=self._fields, _pack_=self._pack,
                                _anonymous_=tuple(self._anonymous)))
         self._data = self()
