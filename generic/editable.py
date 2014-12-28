@@ -741,7 +741,7 @@ class XEditable(Emitter, AtomicStruct):
         Fired if an invalid value is passed. The rest of the event signature
         looks matches the method's arguments
     """
-    __metaclass__ = abc.ABCMeta
+    # __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         AtomicStruct.__init__(self)
@@ -878,14 +878,15 @@ class XEditable(Emitter, AtomicStruct):
             except AttributeError:
                 pass
             else:
-                setattr(self._data, name, value)
+                super(XEditable, self).__setattr__(name, value)
                 if old_value != value:
                     self.fire('set', (name, value))
 
     def __getattr__(self, name):
-        if name not in self.__dict__:
+        if name not in self.__dict__ and self._data is not None:
             return getattr(self._data, name)
-        super(XEditable, self).__getattr__(name)
+        return object.__getattribute__(self, name)
+        # super(XEditable, self).__getattr__(name)
 
     def __insert__(self, name, index, value):
         try:

@@ -6,7 +6,7 @@ from util.io import BinaryIO
 
 
 class Archive(object):
-    __metaclass__ = abc.ABCMeta
+    # __metaclass__ = abc.ABCMeta
     files = {}
     extension = '.bin'
 

@@ -35,6 +35,11 @@ class AtomicContext(object):
             self.atomic.context[self.key] = self.old_value
 
 
+class OneAndDone(object):
+    def __init__(self):
+        pass
+
+
 class AtomicStruct(object):
     """Structure and data representation for a given inherited model.
 
@@ -475,12 +480,15 @@ class AtomicStruct(object):
         No modifications are able to be done after this. This is required
         before the compiled type and data become accessible.
         """
-        self._type = type(self.name+'_s', (ctypes.Structure, ),
-                          dict(_fields_=self._fields, _pack_=self.alignment,
-                               _anonymous_=tuple(self._anonymous)))
+        self._pack_ = self.alignment
+        self._anonymous_ = tuple(self._anonymous)
+        self._fields_ = self._fields
+        self._type = type(self.name+'_s', (OneAndDone, self.__class__,
+                                           ctypes.Structure),
+                          dict(self.__dict__))
         self._data = self._type()
         for key, value in self._defaults.iteritems():
-            setattr(self._data, key, value)
+            setattr(self, key, value)
 
     def describe(self):
         """Create a string representation of this struct.
