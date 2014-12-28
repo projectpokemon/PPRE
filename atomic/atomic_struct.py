@@ -109,6 +109,19 @@ class AtomicStruct(object):
         Returns
         -------
         AtomicContext : context
+
+        Examples
+        --------
+        >>> atomic = AtomicStruct('Example')
+        >>> atomic.uint8('a')
+        >>> with atomic.simulate():
+            field = atomic.uint8('b')
+        >>> atomic.describe()
+        struct Example_s {
+          ubyte a;
+        }
+        >>> field
+        ('b', ctypes.c_ubyte)
         """
         return AtomicContext(self, 'simulate')
 
@@ -147,6 +160,25 @@ class AtomicStruct(object):
         Returns
         -------
         AtomicContext : context
+
+        Examples
+        --------
+        >>> atomic = AtomicStruct('Example')
+        >>> atomic.uint8('a')
+        >>> atomic.uint8('b')
+        >>> atomic.uint8('c')
+        >>> with atomic.after('b'):
+            atomic.uint8('d')
+            atomic.uint8('e')
+        >>> print(atomic.describe())
+        struct Example_s {
+          ubyte a;
+          ubyte b;
+          ubyte d;
+          ubyte e;
+          ubyte c;
+        }
+        >>>
         """
         if name is None:
             pos = 0
@@ -173,6 +205,17 @@ class AtomicStruct(object):
             If the field cannot be found
         AtomicError
             If this field could not be removed
+
+        Examples
+        --------
+        >>> atomic = AtomicStruct('Example')
+        >>> atomic.uint8('a')
+        >>> atomic.uint8('b')
+        >>> atomic.remove('a')
+        >>> atomic.describe()
+        struct Example_s {
+          ubyte b;
+        }
         """
         pos = self._find(name)
         if self.context['simulate']:
@@ -203,10 +246,18 @@ class AtomicStruct(object):
 
         Examples
         --------
-        >>> atomic = AtomicStruct()
+        >>> atomic = AtomicStruct('Example')
         >>> atomic.uint8('a')
+        >>> print(atomic.describe())
+        struct Example_s {
+          ubyte a;
+        }
         >>> with atomic.replace('a'):
                 atomic.uint16('a')
+        >>> print(atomic.describe())
+        struct Example_s {
+          ushort a;
+        }
         >>>
         """
         pos = self._find(name)
@@ -298,6 +349,19 @@ class AtomicStruct(object):
         Returns
         -------
         field : (str, type)
+
+        Examples
+        --------
+        >>> atomic = AtomicStruct('Example')
+        >>> atomic.uint8('a')
+        >>> atomic.uint8('b')
+        >>> atomic.array('c', atomic.uint16, length=4):
+        >>> atomic.describe()
+        struct Example_s {
+          ubyte a;
+          ubyte b;
+          ushort c[4];
+        }
         """
         return self._add(name,
                          self.get_type(type_callable, base_obj) * length)
@@ -320,6 +384,26 @@ class AtomicStruct(object):
         Returns
         -------
         field : (str, type)
+
+        Examples
+        --------
+        >>> atomic = AtomicStruct('Example')
+        >>> atomic.uint8('a')
+        >>> atomic.uint8('b')
+        >>> other = AtomicStruct('Other')
+        >>> other.uint8('a')
+        >>> other.uint8('b')
+        >>> other.freeze()
+        >>> atomic.struct('c', atomic.base_struct)
+        >>> atomic.describe()
+        struct Example_s {
+          ubyte a;
+          ubyte b;
+          struct Other_s {
+            ubyte a;
+            ubyte b;
+          } c;
+        }
         """
         return self._add(name, self.get_type(type_callable, base_obj))
 
