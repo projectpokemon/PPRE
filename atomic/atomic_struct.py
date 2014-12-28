@@ -71,7 +71,7 @@ class AtomicStruct(object):
     def simulate(self):
         return AtomicContext(self, 'simulate')
 
-    def find(self, name):
+    def _find(self, name):
         """Get the field position of a field by name"""
         for idx, field in enumerate(self._fields):
             if field[0] == name:
@@ -82,8 +82,20 @@ class AtomicStruct(object):
         if name is None:
             pos = 0
         else:
-            pos = self.find(name)+1
+            pos = self._find(name)+1
         return AtomicContext(self, 'field_pos', pos, rel=True)
+
+    def remove(self, name):
+        pos = self._find(name)
+        if self.context['simulate']:
+            return self._fields[pos]
+        if self.context['field_pos'] >= pos:
+            self.context['field_pos'] -= 1
+        else:
+            raise AtomicError('Cannot remove a field later than the '
+                              'current position. target = {0}, current = {1}'
+                              .format(pos, self.context['field_pos']))
+        return self._fields.pop(pos)
 
     def uint8(self, name, **kwargs):
         return self._add(name, ctypes.c_uint8, **kwargs)
