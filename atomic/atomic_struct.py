@@ -35,7 +35,7 @@ class AtomicContext(object):
             self.atomic.context[self.key] = self.old_value
 
 
-class OneAndDone(object):
+class NullInitializer(object):
     def __init__(self):
         pass
 
@@ -483,7 +483,7 @@ class AtomicStruct(object):
         self._pack_ = self.alignment
         self._anonymous_ = tuple(self._anonymous)
         self._fields_ = self._fields
-        self._type = type(self.name+'_s', (OneAndDone, self.__class__,
+        self._type = type(self.name+'_s', (NullInitializer, self.__class__,
                                            ctypes.Structure),
                           dict(self.__dict__))
         self._data = self._type()
