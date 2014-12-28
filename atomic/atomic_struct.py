@@ -6,8 +6,14 @@ substructures are compiled into a C-type equivalent.
 """
 import ctypes
 
+from util import BinaryIO
+
 
 class AtomicError(RuntimeError):
+    pass
+
+
+class AtomicExhaustionError(AtomicError):
     pass
 
 
@@ -78,6 +84,12 @@ class AtomicStruct(object):
     def int32(self, name, **kwargs):
         return self._add(name, ctypes.c_int32, **kwargs)
 
+    def char(self, name, **kwargs):
+        return self._add(name, ctypes.c_char, **kwargs)
+
+    def string(self, name, length=1, **kwargs):
+        return self.array(name, self.char, self, length=length)
+
     def get_type(self, type_callable, base_obj=None):
         with (base_obj or self).simulate():
             return type_callable('_')[1]
@@ -106,6 +118,19 @@ class AtomicStruct(object):
         self._type = type('struct_'+self.name, (ctypes.Structure, ),
                           dict(_fields_=self._fields, _pack_=self.alignment,
                                _anonymous_=tuple(self._anonymous)))
-        self._data = self()
+        self._data = self._type()
         for key, value in self._defaults.iteritems():
             setattr(self._data, key, value)
+
+    def load(self, reader):
+        reader = BinaryIO.reader(reader)
+        amount = len(self)
+        data = reader.read(amount)
+        self._data.from_buffer_copy(data)
+
+    def save(self, writer=None):
+        writer = writer if writer is not None else BinaryIO()
+        amount = len(self)
+        writer.write(ctypes.string_at(ctypes.addressof(self._data),
+                                      size=amount))
+        return writer
