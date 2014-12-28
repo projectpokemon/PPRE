@@ -120,7 +120,7 @@ class AtomicStruct(object):
             field = atomic.uint8('b')
         >>> atomic.describe()
         struct Example_s {
-          ubyte a;
+          uint8 a;
         }
         >>> field
         ('b', ctypes.c_ubyte)
@@ -174,11 +174,11 @@ class AtomicStruct(object):
             atomic.uint8('e')
         >>> print(atomic.describe())
         struct Example_s {
-          ubyte a;
-          ubyte b;
-          ubyte d;
-          ubyte e;
-          ubyte c;
+          uint8 a;
+          uint8 b;
+          uint8 d;
+          uint8 e;
+          uint8 c;
         }
         >>>
         """
@@ -216,7 +216,7 @@ class AtomicStruct(object):
         >>> atomic.remove('a')
         >>> atomic.describe()
         struct Example_s {
-          ubyte b;
+          uint8 b;
         }
         """
         pos = self._find(name)
@@ -252,13 +252,13 @@ class AtomicStruct(object):
         >>> atomic.uint8('a')
         >>> print(atomic.describe())
         struct Example_s {
-          ubyte a;
+          uint8 a;
         }
         >>> with atomic.replace('a'):
                 atomic.uint16('a')
         >>> print(atomic.describe())
         struct Example_s {
-          ushort a;
+          uint16 a;
         }
         >>>
         """
@@ -394,9 +394,9 @@ class AtomicStruct(object):
         >>> atomic.array('c', atomic.uint16, length=4):
         >>> atomic.describe()
         struct Example_s {
-          ubyte a;
-          ubyte b;
-          ushort c[4];
+          uint8 a;
+          uint8 b;
+          uint16 c[4];
         }
         """
         return self._add(name,
@@ -433,11 +433,11 @@ class AtomicStruct(object):
         >>> atomic.struct('c', atomic.base_struct)
         >>> atomic.describe()
         struct Example_s {
-          ubyte a;
-          ubyte b;
+          uint8 a;
+          uint8 b;
           struct Other_s {
-            ubyte a;
-            ubyte b;
+            uint8 a;
+            uint8 b;
           } c;
         }
         """
@@ -498,11 +498,19 @@ class AtomicStruct(object):
         struct_type = type(ctypes.Structure)
         handle_struct = None
 
+        type_name_map = {}
+        for sign in ['', 'u']:
+            for bits, size in [(8, 'byte'), (16, 'short'), (32, 'int'),
+                               (64, 'long')]:
+                type_name_map['c_{0}{1}'.format(sign, size)] = \
+                    '{0}int{1}_t'.format(sign, bits)
+        type_name_map['c_char'] = 'char'
+
         def handle_field(field, level):
             field_type = type(field[1])
             if field_type is data_type:
                 out.append('  '*level)
-                out.append(str(field[1].__name__)[2:])
+                out.append(type_name_map[str(field[1].__name__)])
             elif field_type is struct_type:
                 handle_struct(field[1], level)
             if field_type is array_type:
