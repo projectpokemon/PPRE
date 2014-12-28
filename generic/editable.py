@@ -791,7 +791,8 @@ class XEditable(Emitter, AtomicStruct):
         restriction = Restriction(name, **kwargs)
         if validator is not None:
             restriction.restrict(validator)
-        self.keys[name] = restriction
+        if not self.context['simulate']:
+            self.keys[name] = restriction
         return restriction
 
     def int8(self, name, **kwargs):
