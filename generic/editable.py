@@ -6,6 +6,7 @@ from collections import namedtuple
 
 from dispatch.events import Emitter
 
+from atomic import AtomicStruct
 from util.iter import auto_iterate
 from util import lcm
 
@@ -585,6 +586,301 @@ class Editable(Emitter):
 
     def __insert__(self, name, index, value):
         print('inserted into', name)
+        try:
+            restriction = self.keys[name]
+            restriction = restriction.child
+        except:
+            pass
+        else:
+            try:
+                restriction.validate(self, name, value)
+            except ValueError:
+                self.fire('invalid', ('insert', name, index, value))
+                raise
+            self.fire('insert', (name, index, value))
+
+    def __remove__(self, name, index, value):
+        # TODO: validate lengths?
+        self.fire('remove', (name, index, value))
+
+    def checksum(self):
+        """Returns a recursive weak_hash for this instance"""
+        weak_hash = 0
+        for key in self.keys:
+            try:
+                name = self.keys[key].name
+            except:
+                name = key
+            value = getattr(self, name)
+            for sub_key, sub_value in auto_iterate(value)[2]:
+                try:
+                    sub_value = sub_value.checksum()
+                except AttributeError as err:
+                    pass
+                weak_hash += hash(sub_value)
+        return weak_hash
+
+    def to_dict(self):
+        """Generates a dict recursively out of this instance
+
+        Returns
+        -------
+        out : dict
+        """
+        out = {}
+        for key in self.keys:
+            try:
+                name = self.keys[key].name
+            except:
+                name = key
+            value = getattr(self, name)
+            container, adder, iterator = auto_iterate(value)
+            for sub_key, sub_value in iterator:
+                try:
+                    sub_value = sub_value.to_dict()
+                except AttributeError as err:
+                    pass
+                container = adder(container, sub_key, sub_value)
+            out[key] = container
+        return out
+
+    def from_dict(self, source, merge=True):
+        """Loads a dict into this instance
+
+        Parameters
+        ----------
+        source : dict.
+            Dict to load in
+        merge : Bool
+            If true, this merges with the current data. Otherwise it
+            resets missing fields
+        """
+        for key in self.keys:
+            try:
+                value = source[key]
+            except:
+                # TODO: handle reset if merge=False
+                continue
+            old_value = getattr(self, key)
+            try:
+                old_value.from_dict(value, merge)
+            except AttributeError:
+                setattr(self, key, value)
+
+    def to_json(self, **json_args):
+        """Returns the JSON version of this instance
+
+        Returns
+        -------
+        json_string : string
+        """
+        return json.dumps(self.to_dict(), **json_args)
+
+    def print_restrictions(self, level=0):
+        """Pretty-prints restrictions recursively"""
+        prefix = '  '*level
+        for key in self.keys:
+            print('{prefix}{name}'.format(prefix=prefix, name=key))
+            restriction = self.keys[key]
+            try:
+                restriction.name
+            except:
+                continue
+            for restrict in ('min_value', 'max_value', 'min_length',
+                             'max_length', 'validator'):
+                value = getattr(restriction, restrict)
+                if value is None:
+                    continue
+                if restrict == 'validator':
+                    value = value.func_name
+                print('{prefix}>> {restrict}="{value}"'.format(
+                    prefix=prefix, restrict=restrict, value=value))
+            for child in restriction.children:
+                child.print_restrictions(level+1)
+
+    def __repr__(self):
+        return '<{cls}({value}) at {id}>'.format(cls=self.__class__.__name__,
+                                                 value=self.to_dict(),
+                                                 id=hex(id(self)))
+
+    def _repr_pretty_(self, printer, cycle):
+        if cycle:
+            printer.text('{cls}(...)'.format(cls=self.__class__.__name__))
+            return
+        with printer.group(2, '{cls}('.format(cls=self.__class__.__name__),
+                           ')'):
+            printer.pretty(self.to_dict())
+
+
+class XEditable(Emitter, AtomicStruct):
+    """Editable interface
+
+    Attributes
+    ----------
+    keys : dict
+        Mapping of restrictions
+
+    Methods
+    -------
+    restrict
+        Set restrictions on an attribute
+    to_dict
+        Generate a dict for this object
+    to_json
+        Generate a JSON string for this object
+
+    Events
+    ------
+    set : (name, value)
+        Fired before a restricted attribute is changed
+    insert : (name, index, value)
+        Fired before an item is inserted into a collection
+    remove : (name, index, value)
+        Fired before an item is removed from a collection
+    invalid : (method, *args)
+        Fired if an invalid value is passed. The rest of the event signature
+        looks matches the method's arguments
+    """
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self):
+        AtomicStruct.__init__(self)
+
+    @property
+    def keys(self):
+        """Map of restricted keys of this object. Keys are the names of the
+        attributes. Values are Restriction instances.
+
+        Returns
+        -------
+        keys : dict
+        """
+        try:
+            return self._keys
+        except AttributeError:
+            from collections import OrderedDict
+            self._keys = OrderedDict()
+            return self._keys
+
+    def restrict(self, name, validator=None, children=None, **kwargs):
+        """Restrict an attribute. This adds the attribute to the key
+        collection used to build textual representations.
+
+        Parameters not passed will not be used to check validity.
+
+        Parameters
+        ----------
+        name : string
+            Name of the attribute
+        min_value : optional
+            Require value to be greater or equal to this value
+        max_value : optional
+            Require value to be less or equal to this value
+        min_length : int, optional
+            Require length of value to be greater or equal to this value
+        max_length : int, optional
+            Require length of value to be less or equal to this value
+        validator : func(Editable, name, value), optional
+            If set, this function gets passed the instance, name, and new
+            value. This should raise a ValueError if the value should not
+            be allowed.
+        children : list of Restriction
+            If not set, this will automatically grab the type of the
+            currently set value
+        """
+        restriction = Restriction(name, **kwargs)
+        if validator is not None:
+            restriction.restrict(validator)
+        self.keys[name] = restriction
+        return restriction
+
+    def int8(self, name, **kwargs):
+        params = {'default': 0, 'min_value': -0x80, 'max_value': 0x7F, 'type': int}
+        params.update(kwargs)
+        AtomicStruct.int8(self, name, **kwargs)
+        return self.restrict(name, **params)
+
+    def uint8(self, name, **kwargs):
+        params = {'default': 0, 'min_value': 0, 'max_value': 0xFF, 'type': int}
+        params.update(kwargs)
+        AtomicStruct.uint8(self, name, **kwargs)
+        return self.restrict(name, **params)
+
+    def int16(self, name, **kwargs):
+        params = {'default': 0, 'min_value': -0x8000, 'max_value': 0x7FFF, 'type': int}
+        params.update(kwargs)
+        AtomicStruct.int16(self, name, **kwargs)
+        return self.restrict(name, **params)
+
+    def uint16(self, name, **kwargs):
+        params = {'default': 0, 'min_value': 0, 'max_value': 0xFFFF, 'type': int}
+        params.update(kwargs)
+        AtomicStruct.uint16(self, name, **kwargs)
+        return self.restrict(name, **params)
+
+    def int32(self, name, **kwargs):
+        params = {'default': 0, 'min_value': -0x80000000, 'max_value': 0x7FFFFFFF,
+                  'type': int}
+        params.update(kwargs)
+        AtomicStruct.int16(self, name, **kwargs)
+        return self.restrict(name, **params)
+
+    def uint32(self, name, **kwargs):
+        params = {'default': 0, 'min_value': 0, 'max_value': 0xFFFFFFFF, 'type': int}
+        params.update(kwargs)
+        AtomicStruct.uint32(self, name, **kwargs)
+        return self.restrict(name, **params)
+
+    def get_unrestricted(self, whitelist=None):
+        """Get a list of all attributes that are not restricted
+
+        This is a utility to verify all are restricted
+        """
+        keys = self.keys
+        unrestricted = []
+        if whitelist is None:
+            whitelist = []
+        for name, attr in self.__dict__.items():
+            if hasattr(attr, '__call__'):
+                continue
+            if name in keys:
+                continue
+            if name[0] == '_':
+                continue
+            if name in whitelist:
+                continue
+            unrestricted.append(name)
+        return unrestricted
+
+    def __setattr__(self, name, value):
+        if isinstance(value, list):
+            value = CollectionNotifier(self, name, value)
+        try:
+            restriction = self.keys[name]
+            restriction.name
+        except:
+            super(XEditable, self).__setattr__(name, value)
+        else:
+            try:
+                restriction.validate(self, name, value)
+            except ValueError:
+                self.fire('invalid', ('set', name, value))
+                raise
+            try:
+                old_value = getattr(self, name)
+            except AttributeError:
+                pass
+            else:
+                setattr(self._data, name, value)
+                if old_value != value:
+                    self.fire('set', (name, value))
+
+    def __getattr__(self, name):
+        if name not in self.__dict__:
+            return getattr(self._data, name)
+        super(XEditable, self).__getattr__(name)
+
+    def __insert__(self, name, index, value):
         try:
             restriction = self.keys[name]
             restriction = restriction.child

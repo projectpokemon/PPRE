@@ -3,6 +3,7 @@ from collections import namedtuple
 
 from atomic import AtomicStruct
 from generic.archive import ArchiveList
+from generic.editable import XEditable as Editable
 from util.io import BinaryIO
 
 
@@ -174,9 +175,9 @@ class FIMG(object):
         return writer
 
 
-class XNARC(ArchiveList, AtomicStruct):
+class XNARC(ArchiveList, Editable):
     def __init__(self, reader=None):
-        AtomicStruct.__init__(self)
+        Editable.__init__(self)
         self.string('magic', length=4, default='NARC')
         self.uint16('endian', default=0xFFFE)
         self.uint16('version', default=0x102)
