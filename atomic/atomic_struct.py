@@ -511,6 +511,9 @@ class AtomicStruct(object):
             else:
                 out.append(' ')
                 out.append(str(field[0]))
+            if len(field) > 2:
+                out.append(':')
+                out.append(str(field[2]))
 
         def handle_struct(struct, level=0):
             out.append('  '*level)
