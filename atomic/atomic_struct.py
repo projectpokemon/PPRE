@@ -44,6 +44,9 @@ class AtomicStruct(object):
         if not self.context['simulate']:
             if self._data is not None:
                 raise AtomicError('Frozen Atoms cannot be modified')
+            if name == '_':
+                raise AtomicError('Subtype is not being simulated when '
+                                  'fetched. base_obj={0}'.format(self))
             if 'width' in kwargs:
                 field = (name, type_, kwargs['width'])
             else:
@@ -63,8 +66,17 @@ class AtomicStruct(object):
     def int8(self, name, **kwargs):
         return self._add(name, ctypes.c_int8, **kwargs)
 
-    def uint16(self, name):
-        return self._add(name, ctypes.c_uint16)
+    def uint16(self, name, **kwargs):
+        return self._add(name, ctypes.c_uint16, **kwargs)
+
+    def int16(self, name, **kwargs):
+        return self._add(name, ctypes.c_int16, **kwargs)
+
+    def uint32(self, name, **kwargs):
+        return self._add(name, ctypes.c_uint32, **kwargs)
+
+    def int32(self, name, **kwargs):
+        return self._add(name, ctypes.c_int32, **kwargs)
 
     def get_type(self, type_callable, base_obj=None):
         with (base_obj or self).simulate():
