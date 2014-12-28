@@ -838,6 +838,21 @@ class XEditable(Emitter, AtomicStruct):
         self.restrict(name, **params)
         return field
 
+    def struct(self, name, *args, **kwargs):
+        field = AtomicStruct.struct(self, name, *args, **kwargs)
+        self.restrict(name, **kwargs)
+        return field
+
+    def array(self, name,  *args, **kwargs):
+        try:
+            params = {'max_length': kwargs['length']}
+            params.update(kwargs)
+        except:
+            params = kwargs
+        field = AtomicStruct.array(self, name, *args, **kwargs)
+        self.restrict(name, **params)
+        return field
+
     def get_unrestricted(self, whitelist=None):
         """Get a list of all attributes that are not restricted
 
