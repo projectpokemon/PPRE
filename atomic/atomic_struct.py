@@ -18,16 +18,21 @@ class AtomicExhaustionError(AtomicError):
 
 
 class AtomicContext(object):
-    def __init__(self, atomic, key):
+    def __init__(self, atomic, key, value=True, rel=False):
         self.atomic = atomic
         self.key = key
+        self.rel = rel
+        self.value = value
 
-    def __enter__(self, value=True):
+    def __enter__(self):
         self.old_value = self.atomic.context[self.key]
-        self.atomic.context[self.key] = value
+        self.atomic.context[self.key] = self.value
 
     def __exit__(self, type_, value_, traceback):
-        self.atomic.context[self.key] = self.old_value
+        if self.rel and self.old_value > self.value:
+            self.atomic.context[self.key] += self.old_value - self.value
+        else:
+            self.atomic.context[self.key] = self.old_value
 
 
 class AtomicStruct(object):
@@ -65,6 +70,20 @@ class AtomicStruct(object):
 
     def simulate(self):
         return AtomicContext(self, 'simulate')
+
+    def find(self, name):
+        """Get the field position of a field by name"""
+        for idx, field in enumerate(self._fields):
+            if field[0] == name:
+                return idx
+        raise IndexError('Could not find {0}'.format(name))
+
+    def after(self, name=None):
+        if name is None:
+            pos = 0
+        else:
+            pos = self.find(name)+1
+        return AtomicContext(self, 'field_pos', pos, rel=True)
 
     def uint8(self, name, **kwargs):
         return self._add(name, ctypes.c_uint8, **kwargs)
