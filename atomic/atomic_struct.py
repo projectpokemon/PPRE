@@ -307,7 +307,9 @@ class AtomicStruct(object):
         -------
         type : type
         """
-        with (base_obj or self).simulate():
+        if base_obj is None:
+            base_obj = self
+        with base_obj.simulate():
             return type_callable('_')[1]
 
     def embed(self, name, type_callable, base_obj=None):
@@ -502,9 +504,9 @@ class AtomicStruct(object):
         reader : BinaryIO, string, file, other readable
         """
         reader = BinaryIO.reader(reader)
-        amount = len(self)
+        amount = ctypes.sizeof(self._data)
         data = reader.read(amount)
-        self._data.from_buffer_copy(data)
+        self._data = self._type.from_buffer_copy(data)
 
     def save(self, writer=None):
         """Creates a writer for this model

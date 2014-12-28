@@ -1,6 +1,7 @@
 
 from collections import namedtuple
 
+from atomic import AtomicStruct
 from generic.archive import ArchiveList
 from util.io import BinaryIO
 
@@ -171,3 +172,83 @@ class FIMG(object):
         with writer.seek(sizeofs):
             writer.writeUInt32(size)
         return writer
+
+
+class XNARC(ArchiveList, AtomicStruct):
+    def __init__(self, reader=None):
+        AtomicStruct.__init__(self)
+        self.string('magic', length=4, default='NARC')
+        self.uint16('endian', default=0xFFFE)
+        self.uint16('version', default=0x102)
+        self.uint32('size')
+        self.uint16('headersize')
+        self.uint16('numblocks', default=3)
+        self.fatb = XFATB(self)
+        self.fntb = FNTB(self)
+        self.fimg = XFIMG(self)
+        self.freeze()
+        self.files = self.fimg.files
+        if reader is not None:
+            self.load(reader)
+
+    def load(self, reader):
+        reader = BinaryIO.reader(reader)
+        AtomicStruct.load(self, reader)
+        self.fatb.load(reader)
+        self.fntb.load(reader)
+        self.fimg.load(reader)
+
+    def save(self):
+        pass
+
+
+class XFATB(AtomicStruct):
+    def __init__(self, narc):
+        AtomicStruct.__init__(self)
+        self.narc = narc
+        self.entries_ = []
+        self.string('magic', length=4, default='BTAF')
+        self.uint32('size')
+        self.uint16('num')
+        self.uint16('u0')
+        self.freeze()
+
+    @property
+    def num(self):
+        return len(self.narc.files)
+
+    @property
+    def entries(self):
+        """List of slice objects that describe file image locations
+        """
+        entries = []
+        start = 0
+        for data in self.narc.fimg.files:
+            stop = start+len(data)
+            entries.append(slice(start, stop))
+            start = stop+((-stop) % 4)
+        return entries
+
+    def load(self, reader):
+        reader = BinaryIO.reader(reader)
+        AtomicStruct.load(self, reader)
+        for i in xrange(self._data.num):
+            self.entries_.append(slice(reader.readUInt32(),
+                                       reader.readUInt32()))
+
+
+class XFIMG(AtomicStruct):
+    def __init__(self, narc):
+        AtomicStruct.__init__(self)
+        self.narc = narc
+        self.files = []
+        self.string('magic', length=4, default='BTAF')
+        self.uint32('size')
+        self.freeze()
+
+    def load(self, reader):
+        reader = BinaryIO.reader(reader)
+        AtomicStruct.load(self, reader)
+        data = reader.read(self._data.size-8)
+        self.files.extend([data[entry]
+                           for entry in self.narc.fatb.entries_])
