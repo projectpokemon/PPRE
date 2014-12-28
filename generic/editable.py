@@ -797,39 +797,45 @@ class XEditable(Emitter, AtomicStruct):
     def int8(self, name, **kwargs):
         params = {'default': 0, 'min_value': -0x80, 'max_value': 0x7F, 'type': int}
         params.update(kwargs)
-        AtomicStruct.int8(self, name, **kwargs)
-        return self.restrict(name, **params)
+        field = AtomicStruct.int8(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
 
     def uint8(self, name, **kwargs):
         params = {'default': 0, 'min_value': 0, 'max_value': 0xFF, 'type': int}
         params.update(kwargs)
-        AtomicStruct.uint8(self, name, **kwargs)
-        return self.restrict(name, **params)
+        field = AtomicStruct.uint8(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
 
     def int16(self, name, **kwargs):
         params = {'default': 0, 'min_value': -0x8000, 'max_value': 0x7FFF, 'type': int}
         params.update(kwargs)
-        AtomicStruct.int16(self, name, **kwargs)
-        return self.restrict(name, **params)
+        field = AtomicStruct.int16(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
 
     def uint16(self, name, **kwargs):
         params = {'default': 0, 'min_value': 0, 'max_value': 0xFFFF, 'type': int}
         params.update(kwargs)
-        AtomicStruct.uint16(self, name, **kwargs)
-        return self.restrict(name, **params)
+        field = AtomicStruct.uint16(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
 
     def int32(self, name, **kwargs):
         params = {'default': 0, 'min_value': -0x80000000, 'max_value': 0x7FFFFFFF,
                   'type': int}
         params.update(kwargs)
-        AtomicStruct.int16(self, name, **kwargs)
-        return self.restrict(name, **params)
+        field = AtomicStruct.int16(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
 
     def uint32(self, name, **kwargs):
         params = {'default': 0, 'min_value': 0, 'max_value': 0xFFFFFFFF, 'type': int}
         params.update(kwargs)
-        AtomicStruct.uint32(self, name, **kwargs)
-        return self.restrict(name, **params)
+        field = AtomicStruct.uint32(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
 
     def get_unrestricted(self, whitelist=None):
         """Get a list of all attributes that are not restricted

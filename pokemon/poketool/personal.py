@@ -180,3 +180,41 @@ class Personal(Editable):
             writer.writeUInt8(tmx)
         writer.writeAlign(4)
         return writer
+
+from generic.editable import XEditable as Editable
+
+
+class Stats(Editable):
+    STATS = ['hp', 'attack', 'defense', 'speed', 'spatk', 'spdef']
+
+    def __init__(self, full=True):
+        Editable.__init__(self)
+        for stat in self.STATS:
+            if full:
+                self.uint8(stat)
+            else:
+                self.uint8(stat, width=2, max_value=3)
+        self.freeze()
+
+
+class Personal(Editable):
+    def __init__(self, reader=None, version='Diamond'):
+        Editable.__init__(self)
+        self.version = version
+        self.struct('base_stat', Stats().base_struct)
+        self.array('types', self.uint8, length=2)
+        self.uint8('catchrate', default=255)
+        self.uint8('baseexp')
+        self.struct('ev', Stats(False).base_struct)
+        self.array('items', self.uint16, length=2)
+        self.uint8('gender')
+        self.uint8('hatchcycle', default=1)
+        self.uint8('basehappy', default=70)
+        self.uint8('exprate')
+        self.array('egggroups', self.uint8, length=2)
+        self.array('abilities', self.uint8, length=2)
+        self.uint8('flag')
+        self.uint8('color')
+        self.uint16('reserved')
+        self.array('tmblock', self.uint8, length=16)
+        self.freeze()
