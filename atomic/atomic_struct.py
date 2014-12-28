@@ -62,6 +62,8 @@ class AtomicStruct(object):
         }
         if name is None:
             self.name = self.__class__.__name__  # : Name of the type
+        else:
+            self.name = name
 
     def _add(self, name, type_, **kwargs):
         """Adds a field to the structure
@@ -265,6 +267,38 @@ class AtomicStruct(object):
         with ctx:
             self.remove(name)
         return ctx
+
+    def offset(self, name, relative=None):
+        """Get the offset (in bytes) of a field
+
+        Parameters
+        ----------
+        name : str
+            Target field
+        relative : str, optional
+            If provided, the offset is measured starting from this field.
+            If not provided, the offset is from the start
+
+        Returns
+        -------
+        offset : int
+
+        Examples
+        --------
+        >>> atomic = AtomicStruct('Example')
+        >>> atomic.uint8('a')
+        >>> atomic.uint8('b')
+        >>> atomic.uint32('c')
+        >>> atomic.uint16('d')
+        >>> atomic.freeze()
+        >>> atomic.offset('d', relative='b')
+        7
+        """
+        if relative is None:
+            base = 0
+        else:
+            base = self.offset(name)
+        return getattr(self._type, name).offset - base
 
     def uint8(self, name, **kwargs):
         return self._add(name, ctypes.c_uint8, **kwargs)
