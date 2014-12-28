@@ -175,7 +175,7 @@ class FIMG(object):
         return writer
 
 
-class XNARC(ArchiveList, Editable):
+class NARC(ArchiveList, Editable):
     def __init__(self, reader=None):
         Editable.__init__(self)
         self.string('magic', length=4, default='NARC')
@@ -184,13 +184,16 @@ class XNARC(ArchiveList, Editable):
         self.uint32('size')
         self.uint16('headersize')
         self.uint16('numblocks', default=3)
-        self.fatb = XFATB(self)
+        self.fatb = FATB(self)
         self.fntb = FNTB(self)
-        self.fimg = XFIMG(self)
+        self.fimg = FIMG(self)
         self.freeze()
-        self.files = self.fimg.files
         if reader is not None:
             self.load(reader)
+
+    @property
+    def files(self):
+        return self.fimg.files
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
@@ -203,7 +206,7 @@ class XNARC(ArchiveList, Editable):
         pass
 
 
-class XFATB(AtomicStruct):
+class FATB(Editable):
     def __init__(self, narc):
         AtomicStruct.__init__(self)
         self.narc = narc
@@ -238,7 +241,7 @@ class XFATB(AtomicStruct):
                                        reader.readUInt32()))
 
 
-class XFIMG(AtomicStruct):
+class FIMG(Editable):
     def __init__(self, narc):
         AtomicStruct.__init__(self)
         self.narc = narc
