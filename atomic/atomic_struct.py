@@ -355,12 +355,60 @@ class AtomicStruct(object):
         No modifications are able to be done after this. This is required
         before the compiled type and data become accessible.
         """
-        self._type = type('struct_'+self.name, (ctypes.Structure, ),
+        self._type = type(self.name+'_s', (ctypes.Structure, ),
                           dict(_fields_=self._fields, _pack_=self.alignment,
                                _anonymous_=tuple(self._anonymous)))
         self._data = self._type()
         for key, value in self._defaults.iteritems():
             setattr(self._data, key, value)
+
+    def describe(self):
+        """Create a string representation of this struct.
+
+        The result is compatible in C headers.
+
+        Returns
+        -------
+        str
+        """
+        out = []
+
+        data_type = type(ctypes.c_char)
+        array_type = type(ctypes.c_char * 2)
+        struct_type = type(ctypes.Structure)
+        handle_struct = None
+
+        def handle_field(field, level):
+            field_type = type(field[1])
+            if field_type is data_type:
+                out.append('  '*level)
+                out.append(str(field[1].__name__)[2:])
+            elif field_type is struct_type:
+                handle_struct(field[1], level)
+            if field_type is array_type:
+                handle_field((field[0], field[1]._type_), level)
+                out.append('[{0}]'.format(field[1]._length_))
+            else:
+                out.append(' ')
+                out.append(str(field[0]))
+
+        def handle_struct(struct, level=0):
+            out.append('  '*level)
+            if not level:
+                fields = struct._fields
+                name = struct.name
+            else:
+                fields = struct._fields_
+                name = struct.__name__
+            out.append('struct {0}_s {{\n'.format(name))
+            for field in fields:
+                handle_field(field, level+1)
+                out.append(';\n')
+            out.append('  '*level)
+            out.append('}')
+
+        handle_struct(self)
+        return ''.join(out)
 
     def load(self, reader):
         """Loads a reader into this model
