@@ -185,6 +185,36 @@ class AtomicStruct(object):
                               .format(pos, self.context['field_pos']))
         return self._fields.pop(pos)
 
+    def replace(self, name):
+        """Creates a context at a replaced field
+
+        Parameters
+        ----------
+        name : str
+            Identifier to lookup and replace
+
+        Returns
+        -------
+        AtomicContext : context
+
+        See Also
+        ------
+        AtomicStruct.remove
+
+        Examples
+        --------
+        >>> atomic = AtomicStruct()
+        >>> atomic.uint8('a')
+        >>> with atomic.replace('a'):
+                atomic.uint16('a')
+        >>>
+        """
+        pos = self._find(name)
+        ctx = AtomicContext(self, 'field_pos', pos, rel=True)
+        with ctx:
+            self.remove(name)
+        return ctx
+
     def uint8(self, name, **kwargs):
         return self._add(name, ctypes.c_uint8, **kwargs)
 
@@ -304,9 +334,6 @@ class AtomicStruct(object):
         field : (str, type)
         """
         return (name, self._type)
-
-    def __call__(self):
-        return self._type
 
     def __len__(self):
         """Size of the data structure
