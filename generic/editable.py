@@ -853,6 +853,10 @@ class XEditable(Emitter, AtomicStruct):
         self.restrict(name, **params)
         return field
 
+    def remove(self, name):
+        self.keys.pop(name)
+        return AtomicStruct.remove(name)
+
     def get_unrestricted(self, whitelist=None):
         """Get a list of all attributes that are not restricted
 
