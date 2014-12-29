@@ -38,3 +38,22 @@ class Evolutions(Editable):
             writer.writeUInt16(evo.target)
         writer.writePadding(start+44)
         return writer
+
+
+from generic.editable import XEditable as Editable
+
+
+class Evolution(Editable):
+    def __init__(self):
+        Editable.__init__(self)
+        self.uint16('method')
+        self.uint16('param')
+        self.uint16('target')
+        self.freeze()
+
+
+class Evolutions(Editable):
+    def __init__(self, reader=None):
+        Editable.__init__(self)
+        self.array('evos', Evolution().base_struct, length=7)
+        self.freeze()
