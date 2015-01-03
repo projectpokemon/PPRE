@@ -81,15 +81,15 @@ class Version(object):
             idx = ['Diamond', 'Pearl', 'Platinum',
                    'HeartGold', 'SoulSilver'].index(name)
             gen = 4
-        except IndexError:
+        except (ValueError, IndexError):
             try:
                 idx = ['Black', 'White', 'Black2', 'White2'].index(name)
                 gen = 5
-            except IndexError:
+            except (ValueError, IndexError):
                 try:
                     idx = ['X', 'Y', 'OmegaRuby', 'AlphaSapphire'].index(name)
                     gen = 6
-                except IndexError:
+                except (ValueError, IndexError):
                     raise ValueError('Unknown version: {0}'.format(name))
         return Version(gen, idx)
 
