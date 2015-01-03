@@ -235,7 +235,12 @@ class Game(Editable):
 
     def __getattr__(self, name):
         if name[-8:] == '_archive':
-            return self.archive(getattr(self, name+'_file'))
+            try:
+                fnames = getattr(self, name+'_files')
+                fname = fnames[self.game_name]
+            except (AttributeError, KeyError):
+                fname = getattr(self, name+'_file')
+            return self.archive(fname)
         elif name[:4] == 'get_':
             def get_wrapper(fileid):
                 return getattr(self, name[4:]+'_archive').files[fileid]
@@ -295,7 +300,9 @@ class DPGame(Game):
     exp_archive_file = 'poketool/personal/growtbl.narc'
     move_data_archive_file = 'poketool/waza/waza_tbl.narc'
     baby_file = 'poketool/personal/pms.narc'
-    encounter_archive_file = 'fielddata/encountdata/d_enc_data.narc'
+    encounter_archive_files = {
+        'Diamond': 'fielddata/encountdata/d_enc_data.narc',
+        'Pearl': 'fielddata/encountdata/p_enc_data.narc'}
     trades_archive_file = 'fielddata/pokemon_trade/fld_trade.narc'
     event_archive_file = 'fielddata/eventdata/zone_event_release.narc'
     map_archive_file = 'fielddata/areadata/area_data.narc'
@@ -317,6 +324,7 @@ class DPGame(Game):
 
 class PtGame(DPGame):
     personal_archive_file = 'poketool/personal/pl_personal.narc'
+    encounter_archive_file = 'fielddata/encountdata/pl_enc_data.narc'
 
     def __init__(self):
         super(PtGame, self).__init__()
@@ -325,7 +333,11 @@ class PtGame(DPGame):
 class HGSSGame(Game):
     evo_archive_file = 'a/0/3/4'
     personal_archive_file = 'a/0/0/2'
+    exp_archive_file = 'a/0/0/3'
     wotbl_archive_file = 'a/0/3/3'
+    encounter_archive_files = {
+        'HeartGold': 'a/0/3/7',
+        'SoulSilver': 'a/1/3/6'}
 
     def __init__(self):
         super(HGSSGame, self).__init__()
@@ -335,6 +347,8 @@ class BWGame(Game):
     evo_archive_file = 'a/0/1/9'
     personal_archive_file = 'a/0/1/6'
     wotbl_archive_file = 'a/0/1/8'
+    exp_archive_file = 'a/0/1/7'
+    encounter_archive_file = 'a/1/2/6'
 
     def __init__(self):
         super(BWGame, self).__init__()
