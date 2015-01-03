@@ -227,7 +227,7 @@ class BaseUserInterface(object):
                             self.update_from_data(val, sub_group)
 
                 except:
-                    pass
+                    group.edit(name)
 
     # Events
     on = ui_pass('on')
