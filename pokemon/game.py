@@ -271,7 +271,7 @@ class DPGame(Game):
     personal_archive_file = 'poketool/personal/personal.narc'
     wotbl_archive_file = 'poketool/personal/wotbl.narc'
     pokemon_data_archive_file = personal_archive_file
-    levelup_archive_file = wotbl_archive_file
+    level_moves_archive_file = wotbl_archive_file
 
     exp_archive_file = 'poketool/personal/growtbl.narc'
     move_data_archive_file = 'poketool/waza/waza_tbl.narc'

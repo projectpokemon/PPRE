@@ -17,7 +17,7 @@ Restriction_ = namedtuple('Restriction', 'name min_value max_value min_length'
 
 
 class Restriction(object):
-    """Restriction defintion on an attribute's value
+    """Restriction definition on an attribute's value
 
     Methods
     -------
@@ -743,8 +743,21 @@ class XEditable(Emitter, AtomicStruct):
     """
     # __metaclass__ = abc.ABCMeta
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         AtomicStruct.__init__(self)
+        self.define()
+        reader = kwargs.pop('reader', None)
+        if self._data is None and self._fields:
+            # Check if frozen and has things to freeze.
+            self.freeze(*args, **kwargs)
+        if reader is not None:
+            self.load(reader)
+
+    def define(self, *args, **kwargs):
+        """This provides the definition of the underlying struct. When
+        overwritten, the editable will be automatically frozen.
+        """
+        pass
 
     @property
     def keys(self):
