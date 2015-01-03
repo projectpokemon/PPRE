@@ -1,4 +1,5 @@
 
+import functools
 import json
 import os
 
@@ -37,9 +38,46 @@ REGION_CODES = {
     'K': 'KO'
 }
 
+
+@functools.total_ordering
+class Version(object):
+    def __init__(self, gen=4, idx=None):
+        self.gen = gen
+        self.idx = idx
+
+    def __eq__(self, other):
+        if self.gen is None or other.gen is None:
+            return True
+        if self.gen != other.gen:
+            return False
+        if self.idx is None or other.idx is None:
+            return True
+        return self.idx == other.idx
+
+    def __lt__(self, other):
+        if self.gen is None and other.gen is None:
+            return True
+        if self.gen < other.gen:
+            return True
+        elif self.gen > other.gen:
+            return False
+        if self.idx is None or other.idx is None:
+            return True
+        return self.idx < other.idx
+
+    def __gt__(self, other):
+        if self.gen is None or other.gen is None:
+            return True
+        return not self.__lt__(other) and not self.__eq__(other)
+
 GEN_IV = ('Diamond', 'Pearl', 'Platinum', 'HeartGold', 'SoulSilver')
 GEN_V = ('Black', 'White', 'Black2', 'White2')
 GEN_VI = ('X', 'Y', 'OmegaRuby', 'AlphaSapphire')
+
+
+# GEN_IV = Version(4)
+# GEN_V = Version(5)
+# GEN_VI = Version(6)
 
 GAME_COLORS = {
     'Diamond': '#89d1e5',  # 'rgb(133, 218, 239)'
