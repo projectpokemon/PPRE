@@ -70,14 +70,33 @@ class Version(object):
             return True
         return not self.__lt__(other) and not self.__eq__(other)
 
-GEN_IV = ('Diamond', 'Pearl', 'Platinum', 'HeartGold', 'SoulSilver')
-GEN_V = ('Black', 'White', 'Black2', 'White2')
-GEN_VI = ('X', 'Y', 'OmegaRuby', 'AlphaSapphire')
+    def __contains__(self, item):
+        if not isinstance(item, Version):
+            item = Version.from_string(item)
+        return self.__eq__(item)
+
+    @staticmethod
+    def from_string(name):
+        try:
+            idx = ['Diamond', 'Pearl', 'Platinum',
+                   'HeartGold', 'SoulSilver'].index(name)
+            gen = 4
+        except IndexError:
+            try:
+                idx = ['Black', 'White', 'Black2', 'White2'].index(name)
+                gen = 5
+            except IndexError:
+                try:
+                    idx = ['X', 'Y', 'OmegaRuby', 'AlphaSapphire'].index(name)
+                    gen = 6
+                except IndexError:
+                    raise ValueError('Unknown version: {0}'.format(name))
+        return Version(gen, idx)
 
 
-# GEN_IV = Version(4)
-# GEN_V = Version(5)
-# GEN_VI = Version(6)
+GEN_IV = Version(4)
+GEN_V = Version(5)
+GEN_VI = Version(6)
 
 GAME_COLORS = {
     'Diamond': '#89d1e5',  # 'rgb(133, 218, 239)'
