@@ -214,6 +214,21 @@ class Game(Editable):
                 as handle:
             archive.save(BinaryIO.adapter(handle))
 
+    def __getattr__(self, name):
+        if name[-8:] == '_archive':
+            return self.archive(getattr(self, name+'_file'))
+        elif name[:4] == 'get_':
+            def get_wrapper(fileid):
+                return getattr(self, name[4:]+'_archive').files[fileid]
+            return get_wrapper
+        elif name[:4] == 'set_':
+            def set_wrapper(fileid, data):
+                archive = getattr(self, name[4:]+'_archive')
+                archive.files[fileid] = data
+                self.save_archive(archive, getattr(self, name+'_archive_file'))
+            return set_wrapper
+        return object.__getattribute__(self, name)
+
     @cached_property
     def personal_archive(self):
         return self.archive(self.personal_archive_file)
