@@ -217,6 +217,27 @@ class DPGame(Game):
     evo_archive_file = 'poketool/personal/evo.narc'
     personal_archive_file = 'poketool/personal/personal.narc'
     wotbl_archive_file = 'poketool/personal/wotbl.narc'
+    pokemon_data_archive_file = personal_archive_file
+    levelup_archive_file = wotbl_archive_file
+
+    exp_archive_file = 'poketool/personal/growtbl.narc'
+    move_data_archive_file = 'poketool/waza/waza_tbl.narc'
+    baby_file = 'poketool/personal/pms.narc'
+    encounter_archive_file = 'fielddata/encountdata/d_enc_data.narc'
+    trades_archive_file = 'fielddata/pokemon_trade/fld_trade.narc'
+    event_archive_file = 'fielddata/eventdata/zone_event_release.narc'
+    map_archive_file = 'fielddata/areadata/area_data.narc'
+    land_data_archive_file = 'fielddata/land_data/land_data_release.narc'
+    map_matrix_archive_file = 'fielddata/mapmatrix/map_matrix.narc'
+    mapname_file = 'fielddata/maptable/mapname.bin'
+    script_archive_file = 'fielddata/script/scr_seq_releease.narc'
+    item_archive_file = 'itemtool/itemdata/item_data.narc'
+    berry_archive_file = 'itemtool/itemdata/nuts_data.narc'
+    text_archive_file = 'msgdata/msg.narc'
+    trainer_archive_file = 'poketool/trainer/trdata.narc'
+    trainer_pokemon_archive_file = 'poketool/trainer/trpoke.narc'
+    battle_tower_trainer_archive_file = 'battle/b_tower/btdtr.narc'
+    battle_tower_trainer_pokemon_archive_file = 'battle/b_tower/btdpm.narc'
 
     def __init__(self):
         super(DPGame, self).__init__()
