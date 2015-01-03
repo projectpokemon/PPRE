@@ -745,11 +745,11 @@ class XEditable(Emitter, AtomicStruct):
 
     def __init__(self, *args, **kwargs):
         AtomicStruct.__init__(self)
-        self.define()
         reader = kwargs.pop('reader', None)
+        self.define(*args, **kwargs)
         if self._data is None and self._fields:
             # Check if frozen and has things to freeze.
-            self.freeze(*args, **kwargs)
+            self.freeze()
         if reader is not None:
             self.load(reader)
 
