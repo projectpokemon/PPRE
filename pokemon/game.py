@@ -346,6 +346,7 @@ class BW(Game):
 class B2W2(BW):
     idx = 2
     versions = {'Black2': 2, 'White2': 3}
+    encounter_archive_file = 'a/1/2/7'
 
 
 class XY(Game):
