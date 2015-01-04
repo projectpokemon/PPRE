@@ -560,6 +560,7 @@ class AtomicStruct(object):
         amount = ctypes.sizeof(self._data)
         data = reader.read(amount)
         self._data = self._type.from_buffer_copy(data)
+        return self
 
     def save(self, writer=None):
         """Creates a writer for this model
