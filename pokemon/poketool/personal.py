@@ -198,8 +198,7 @@ class Stats(Editable):
 
 
 class Personal(Editable):
-    def __init__(self, reader=None, version='Diamond'):
-        Editable.__init__(self)
+    def define(self, version='Diamond'):
         self.version = version
         self.struct('base_stat', Stats().base_struct)
         self.array('types', self.uint8, length=2)
@@ -216,5 +215,25 @@ class Personal(Editable):
         self.uint8('flag')
         self.uint8('color')
         self.uint16('reserved')
-        self.array('tmblock', self.uint8, length=16)
-        self.freeze()
+        self.array('tmblock', self.uint32, length=4)
+
+        if version > game.GEN_IV:
+            with self.replace('baseexp'):
+                self.uint8('stage')
+            with self.replace('items'):
+                self.array('items', self.uint16, length=3)
+            with self.replace('abilities'):
+                self.array('abilities', self.uint8, length=3)
+            with self.after('flag'):
+                self.uint16('formeid')
+                self.uint16('forme')
+                self.uint8('numforms')
+            with self.after('color'):
+                self.uint16('baseexp')
+                self.uint16('height')
+                self.uint16('weight')
+            self.remove('reserved')
+            if version < game.Version(5, 2):
+                self.array('tutorblock', self.uint32, length=1)
+            else:
+                self.array('tutorblock', self.uint32, length=5)

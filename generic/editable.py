@@ -868,7 +868,7 @@ class XEditable(Emitter, AtomicStruct):
 
     def remove(self, name):
         self.keys.pop(name)
-        return AtomicStruct.remove(name)
+        return AtomicStruct.remove(self, name)
 
     def get_unrestricted(self, whitelist=None):
         """Get a list of all attributes that are not restricted
