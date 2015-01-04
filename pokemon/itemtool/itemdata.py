@@ -29,6 +29,8 @@ class Boosts(Editable):
         self.int8('acc', width=4)
         self.int8('crit', width=2)
         self.uint8('pp', width=2)
+        self.uint8('target')
+        self.uint8('target2')  # Not aligned?
 
 
 class ItemData(Editable):
@@ -45,11 +47,11 @@ class ItemData(Editable):
         self.uint8('pocket')
         self.uint8('type')
         self.uint8('category')
-        self.uint16('u0')  # 1 for everything except pokeballs, orbs, mail, hold items
+        self.uint16('category2')  # Not aligned ? If it were, use the uint32
         self.uint8('index')
         self.struct('statboosts', Boosts().base_struct)
-        self.uint16('target')
         self.struct('evs', EVStats().base_struct)
         self.uint8('hprestore')
         self.int8('pprestore')
         self.array('happy', self.int8, length=3)
+        self.uint16('padding')  # I swear this is aligned on the wrong byte
