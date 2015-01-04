@@ -539,7 +539,7 @@ class AtomicStruct(object):
             else:
                 fields = struct._fields_
                 name = struct.__name__
-            out.append('struct {0}_s {{\n'.format(name))
+            out.append('struct {0} {{\n'.format(name))
             for field in fields:
                 handle_field(field, level+1)
                 out.append(';\n')
