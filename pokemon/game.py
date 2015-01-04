@@ -9,7 +9,7 @@ from ctr.header_bin import HeaderBin as CTRHeaderBin
 from ntr.header_bin import HeaderBin as NTRHeaderBin
 from ntr.narc import NARC
 from ctr.garc import GARC
-from util import cached_property
+from util import cached_property, subclasses
 from util import BinaryIO
 from generic.editable import Editable
 
@@ -41,13 +41,13 @@ REGION_CODES = {
 
 @functools.total_ordering
 class Version(object):
+    idx = None
+
     def __init__(self, gen=4, idx=None):
         self.gen = gen
         self.idx = idx
 
     def __eq__(self, other):
-        if self.gen is None or other.gen is None:
-            return True
         if self.gen != other.gen:
             return False
         if self.idx is None or other.idx is None:
@@ -55,19 +55,13 @@ class Version(object):
         return self.idx == other.idx
 
     def __lt__(self, other):
-        if self.gen is None and other.gen is None:
-            return True
         if self.gen < other.gen:
             return True
         elif self.gen > other.gen:
             return False
-        if self.idx is None or other.idx is None:
-            return True
         return self.idx < other.idx
 
     def __gt__(self, other):
-        if self.gen is None or other.gen is None:
-            return True
         return not self.__lt__(other) and not self.__eq__(other)
 
     def __contains__(self, item):
@@ -133,10 +127,12 @@ class Files(Editable):
         self.restrict('directory')
 
 
-class Game(Editable):
+class Game(Editable, Version):
     """A Loaded Game Instance
 
     """
+    versions = {'': 0}
+
     def __init__(self):
         self.files = None
         self.restrict('files')
@@ -149,8 +145,8 @@ class Game(Editable):
         self.header = None
         self.config = {}
 
-    @staticmethod
-    def from_workspace(workspace):
+    @classmethod
+    def from_workspace(cls, workspace):
         files = Files(workspace)
         try:
             # NTR
@@ -168,20 +164,14 @@ class Game(Editable):
             game_name = GAME_CODES[game_code]
         except:
             raise ValueError('Unknown game code: '+game_code)
-        if game_name in ('Diamond', 'Pearl'):
-            game = DPGame()
-        elif game_name == 'Platinum':
-            game = PtGame()
-        elif game_name in ('HeartGold', 'SoulSilver'):
-            game = HGSSGame()
-        elif game_name in ('Black', 'White'):
-            game = BWGame()
-        elif game_name in ('Black2', 'White2'):
-            game = B2W2Game()
-        elif game_name in ('X', 'Y'):
-            game = XYGame()
-        elif game_name in ('OmegaRuby', 'AlphaSapphire'):
-            game = ORASGame()
+        for game_cls in subclasses(cls, recursive=True):
+            if game_name in game_cls.versions:
+                game = game_cls()
+                game.idx = game_cls.versions[game_name]
+                break
+        else:
+            game = game_cls()
+            game.idx = min(game_cls.versions.values())
         game.files = files
         game.game_name = game_name
         game.game_code = game_code
@@ -290,7 +280,10 @@ class Game(Editable):
         pass
 
 
-class DPGame(Game):
+class DP(Game):
+    gen = 4
+    idx = 0
+    versions = {'Diamond': 0, 'Pearl': 1}
     evo_archive_file = 'poketool/personal/evo.narc'
     personal_archive_file = 'poketool/personal/personal.narc'
     wotbl_archive_file = 'poketool/personal/wotbl.narc'
@@ -318,19 +311,18 @@ class DPGame(Game):
     battle_tower_trainer_archive_file = 'battle/b_tower/btdtr.narc'
     battle_tower_trainer_pokemon_archive_file = 'battle/b_tower/btdpm.narc'
 
-    def __init__(self):
-        super(DPGame, self).__init__()
 
-
-class PtGame(DPGame):
+class Pt(DP):
+    idx = 3
+    versions = {'Platinum': 2}
     personal_archive_file = 'poketool/personal/pl_personal.narc'
     encounter_archive_file = 'fielddata/encountdata/pl_enc_data.narc'
 
-    def __init__(self):
-        super(PtGame, self).__init__()
 
-
-class HGSSGame(Game):
+class HGSS(Game):
+    idx = 3
+    gen = 4
+    versions = {'HeartGold': 3, 'SoulSilver': 4}
     evo_archive_file = 'a/0/3/4'
     personal_archive_file = 'a/0/0/2'
     exp_archive_file = 'a/0/0/3'
@@ -339,38 +331,35 @@ class HGSSGame(Game):
         'HeartGold': 'a/0/3/7',
         'SoulSilver': 'a/1/3/6'}
 
-    def __init__(self):
-        super(HGSSGame, self).__init__()
 
-
-class BWGame(Game):
+class BW(Game):
+    idx = 0
+    gen = 5
+    versions = {'Black': 0, 'White': 1}
     evo_archive_file = 'a/0/1/9'
     personal_archive_file = 'a/0/1/6'
     wotbl_archive_file = 'a/0/1/8'
     exp_archive_file = 'a/0/1/7'
     encounter_archive_file = 'a/1/2/6'
 
-    def __init__(self):
-        super(BWGame, self).__init__()
+
+class B2W2(BW):
+    idx = 2
+    versions = {'Black2': 2, 'White2': 3}
 
 
-class B2W2Game(BWGame):
-    def __init__(self):
-        super(B2W2Game, self).__init__()
-
-
-class XYGame(Game):
+class XY(Game):
+    idx = 0
+    gen = 6
+    versions = {'X': 0, 'Y': 1}
     evo_archive_file = 'a/2/1/5'
     personal_archive_file = 'a/2/1/8'
     wotbl_archive_file = 'a/2/1/4'
-
-    def __init__(self):
-        super(XYGame, self).__init__()
 
     def archive(self, filename):
         return GARC(open(os.path.join(self.files.directory, 'fs', filename)))
 
 
-class ORASGame(XYGame):
-    def __init__(self):
-        super(ORASGame, self).__init__()
+class ORAS(XY):
+    idx = 2
+    versions = {'OmegaRuby': 2, 'AlphaSapphire': 3}

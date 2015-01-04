@@ -60,5 +60,22 @@ def lcm(a, b):
     return a*b / gcf(a, b)
 
 
+def subclasses(cls, recursive=False):
+    """Get all subclasses of a class.
+
+    Parameters
+    ----------
+    cls : class
+        Target class
+    recursive : Bool, optional
+        Get subclasses of subclasses as well
+    """
+    subs = cls.__subclasses__()
+    if recursive:
+        for subcls in subs[:]:
+            subs += subclasses(subcls, True)
+    return subs
+
+
 __all__ = ['cached_property', 'temporary_attr', 'AttrDict', 'BinaryIO',
            'lget', 'gcf', 'lcm']
