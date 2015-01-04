@@ -1,2 +1,2 @@
-pressure-layout
-newdispatch==1.0
+-e git+http://github.com/Alphadelta14/pressure-layout.git#egg=pressure-layout
+-e git+http://github.com/Alphadelta14/newdispatch.git#egg=newdispatch
