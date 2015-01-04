@@ -42,12 +42,13 @@ REGION_CODES = {
 @functools.total_ordering
 class Version(object):
     idx = None
+    gen = None
 
     def __init__(self, gen=4, idx=None):
         self.gen = gen
         self.idx = idx
 
-    def __eq__(self, other):
+    def __eqx__(self, other):
         if self.gen != other.gen:
             return False
         if self.idx is None or other.idx is None:
@@ -62,12 +63,12 @@ class Version(object):
         return self.idx < other.idx
 
     def __gt__(self, other):
-        return not self.__lt__(other) and not self.__eq__(other)
+        return not self.__lt__(other) and not self.__eqx__(other)
 
     def __contains__(self, item):
         if not isinstance(item, Version):
             item = Version.from_string(item)
-        return self.__eq__(item)
+        return self.__eqx__(item)
 
     @staticmethod
     def from_string(name):
@@ -317,6 +318,7 @@ class Pt(DP):
     versions = {'Platinum': 2}
     personal_archive_file = 'poketool/personal/pl_personal.narc'
     encounter_archive_file = 'fielddata/encountdata/pl_enc_data.narc'
+    item_archive_file = 'itemtool/itemdata/pl_item_data.narc'
 
 
 class HGSS(Game):
@@ -341,6 +343,7 @@ class BW(Game):
     wotbl_archive_file = 'a/0/1/8'
     exp_archive_file = 'a/0/1/7'
     encounter_archive_file = 'a/1/2/6'
+    item_archive_file = 'a/0/2/4'
 
 
 class B2W2(BW):
