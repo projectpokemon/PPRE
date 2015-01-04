@@ -55,3 +55,9 @@ class ItemData(Editable):
         self.int8('pprestore')
         self.array('happy', self.int8, length=3)
         self.uint16('padding')  # I swear this is aligned on the wrong byte
+
+        if version in game.GEN_V:
+            with self.after('category2'):
+                self.uint8('category3')
+            with self.after('index'):
+                self.uint8('antiindex')
