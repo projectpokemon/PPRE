@@ -43,7 +43,6 @@ class Walking(Editable):
         else:
             num_pokemon = 12
             self.array('levels', self.uint8, length=num_pokemon)
-            self.array('normal', natid_only_s, length=num_pokemon)
             self.array('morning', natid_only_s, length=num_pokemon)
             self.array('day', natid_only_s, length=num_pokemon)
             self.array('night', natid_only_s, length=num_pokemon)
