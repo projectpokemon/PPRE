@@ -55,6 +55,19 @@ class AtomicStruct(object):
     """
     alignment = 32  # : Bit alignment
 
+    @classmethod
+    def instance(cls, *args):
+        try:
+            return cls._instances[tuple(args)]
+        except AttributeError:
+            inst = cls(*args)
+            cls._instances = {tuple(args): inst}
+            return inst
+        except KeyError:
+            inst = cls(*args)
+            cls._instances[tuple(args)] = inst
+            return inst
+
     def __init__(self, name=None):
         self._fields = []
         self._anonymous = []

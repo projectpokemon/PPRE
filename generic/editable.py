@@ -743,19 +743,6 @@ class XEditable(Emitter, AtomicStruct):
     """
     # __metaclass__ = abc.ABCMeta
 
-    @classmethod
-    def instance(cls, *args):
-        try:
-            return cls._instances[tuple(args)]
-        except AttributeError:
-            inst = cls(*args)
-            cls._instances = {tuple(args): inst}
-            return inst
-        except KeyError:
-            inst = cls(*args)
-            cls._instances[tuple(args)] = inst
-            return inst
-
     def __init__(self, *args, **kwargs):
         AtomicStruct.__init__(self)
         reader = kwargs.pop('reader', None)
