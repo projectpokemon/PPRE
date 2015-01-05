@@ -344,7 +344,8 @@ class BW(Game):
     exp_archive_file = 'a/0/1/7'
     encounter_archive_file = 'a/1/2/6'
     item_archive_file = 'a/0/2/4'
-    text_archive_file = 'a/0/0/2'
+    menu_archive_file = 'a/0/0/2'
+    text_archive_file = 'a/0/0/3'
 
 
 class B2W2(BW):
