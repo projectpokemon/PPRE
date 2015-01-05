@@ -1,6 +1,7 @@
 
 import codecs
 import os
+import re
 
 from atomic import AtomicStruct
 from generic.archive import Archive
@@ -11,6 +12,9 @@ from util.io import BinaryIO
 
 table = {}
 rtable = {}
+
+TEXT_KEY4_INIT = 0x91BD3  # Gen IV encryption initializer
+TEXT_KEY4_STEP = 0x493D
 
 
 def load_table():
@@ -70,10 +74,13 @@ def decompress(string, incr=15):
 
 
 class TableEntry(Editable):
-    def define(self):
+    def define(self, version=game.Version(4, 0)):
         self.uint32('offset')
-        self.uint16('charcount')
-        self.uint16('flags')
+        self.uint32('charcount')
+        if version > game.GEN_IV:
+            with self.replace('charcount'):
+                self.uint16('charcount')
+                self.uint16('flags')
 
 
 class Text(Archive, Editable):
@@ -117,10 +124,10 @@ class Text(Archive, Editable):
                 reader.seek(offsets[i])
                 size = sizes[i]
                 string = []
-                key = (0x91BD3*(i+1)) & 0xFFFF
+                key = (TEXT_KEY4_INIT*(i+1)) & 0xFFFF
                 for j in range(size):
                     string.append(reader.readUInt16() ^ key)
-                    key = (key+0x493D) & 0xFFFF
+                    key = (key+TEXT_KEY4_STEP) & 0xFFFF
                 if string[0] == 0xF100:
                     compressed = True
                     string = decompress(string)
@@ -152,7 +159,8 @@ class Text(Archive, Editable):
                 offsets.append(reader.readUInt32())
             block = Editable()
             block.uint32('size')
-            block.array('entries', TableEntry().base_struct, length=self.num)
+            block.array('entries', TableEntry(self.version).base_struct,
+                        length=self.num)
             block.freeze()
             for i, block_offset in enumerate(offsets):
                 reader.seek(block_offset)
@@ -219,3 +227,96 @@ class Text(Archive, Editable):
                     name = '0c_{0:05}'.format(commentid)
                     self.files[name] = text
         return self
+
+    def save(self, writer=None):
+        writer = BinaryIO()  # FIXME
+        blocks = {}
+        num = 0
+        for name in self.files:
+            match = re.match(
+                '^(?P<block>[0-9]+c?)_'
+                '(?P<idx>[0-9]{1,5})'
+                '(?P<flags>[A-O]+c)?'
+                '(:\\[(?P<key>[0-9A-F]{1,4})\\])?$', name)
+            if not match:
+                raise ValueError('{0} is not a valid identifier+options'
+                                 .format(name))
+            block_name = match.group('block')
+            if block_name not in blocks:
+                blocks[block_name] = {}
+            idx = int(match.group('idx'))
+            num = max(idx, num)
+            flags = match.group('flags')
+            try:
+                key = int(match.group('key'), 16)
+            except:
+                key = 0
+            blocks[block_name][idx] = (flags, key, self.files[name])
+        if self.version in game.GEN_IV:
+            if set(blocks.keys()) | {'0c', '0'} != {'0c', '0'}:
+                raise ValueError('Gen IV cannot have any blocks other than'
+                                 ' 0 (and 0c). Got: {0}'.format(blocks.keys()))
+            blocks.pop('0c', None)  # TODO: handle comment blocks
+            self.numblocks = 1
+        else:
+            self.numblocks = len(blocks)
+        # base_offset = self.size()
+        # if self.version > game.GEN_IV:
+        #    base_offset += 4*self.numblocks
+        # base_offset += TableEntry.instance(self.version).size()*self.numblocks
+        self.num = num
+        start = writer.tell()
+        writer = AtomicStruct.save(self, writer)
+        text_writer = BinaryIO()
+        text_offs = writer.tell()+8*self.num
+        prev_text_pos = 0
+        for i, block_name in enumerate(blocks):
+            # if self.version > game.GEN_IV:
+            #     text_offs += 4*self.numblocks+text_writer.tell()-prev_text_pos
+            #     prev_text_pos = text_writer.tell()
+            for j in xrange(self.num):
+                try:
+                    flags, key, text = blocks[block_name][j]
+                except KeyError:
+                    flags = key = None
+                    text = ''
+                string = []
+                cidx = 0
+                while cidx < len(text):
+                    char = text[cidx]
+                    cidx += 1
+                    if char == '\\':
+                        char = text[cidx]
+                        cidx += 1
+                        if char == 'x':
+                            n = int(text[cidx:cidx+4], 16)
+                            cidx += 4
+                        elif char == 'n':
+                            n = 0xE000
+                        elif char == 'r':
+                            n = 0x25BC
+                        elif char == 'f':
+                            n = 0x25BD
+                        else:
+                            n = 1
+                        string.append(n)
+                    elif text[:3] == 'VAR':
+                        pass
+                    else:
+                        string.append(rtable[char])
+                if flags and 'c' in flags:
+                    raise NotImplementedError('Compression not yet Impld')
+                string.append(0xFFFF)
+                size = len(string)
+                text_writer.writeAlign(4)
+                state = (((self.seed*0x2FD) & 0xFFFF)*(i+1)) & 0xFFFF
+                key = state | state << 16
+                writer.writeUInt32(key ^ (text_offs+text_writer.tell()))
+                writer.writeUInt32(key ^ size)
+                key = (TEXT_KEY4_INIT*(i+1)) & 0xFFFF
+                for char in string:
+                    text_writer.writeUInt16(char ^ key)
+                    key = (key+TEXT_KEY4_STEP) & 0xFFFF
+            # TODO: comments
+            writer.write(text_writer.getvalue())
+        return writer

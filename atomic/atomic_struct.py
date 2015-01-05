@@ -473,7 +473,7 @@ class AtomicStruct(object):
         """
         return (name, self._type)
 
-    def __len__(self):
+    def size(self):
         """Size of the data structure
 
         Returns
@@ -486,6 +486,15 @@ class AtomicStruct(object):
             If this model is not yet frozen.
         """
         return ctypes.sizeof(self._data)
+
+    def __len__(self):
+        """Size of the data structure
+
+        See Also
+        --------
+        AtomicStruct.size()
+        """
+        return self.size()
 
     def freeze(self):
         """Lock the model's fields in place and compile the custom type.
