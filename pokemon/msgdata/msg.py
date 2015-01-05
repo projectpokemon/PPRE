@@ -35,6 +35,40 @@ def load_table():
             rtable[value] = key
 
 
+def decompress(string, incr=15):
+    """Decompress a character list
+
+    Parameters
+    ----------
+    string : list
+        List of char codes starting with 0xF100
+    incr : int
+        Width to increment by when moving. 15 for DPPt. 16 for BW
+
+    Returns
+    -------
+    string : list
+        The decompressed string
+    """
+    if string.pop(0) != 0xF100:
+        raise ValueError('Invalid compression character')
+    newstring = []
+    container = 0
+    bit = 0
+    while string:
+        container |= string.pop(0) << bit
+        bit += incr
+        while bit >= 9:
+            bit -= 9
+            char = container & 0x1FF
+            if char == 0x1FF:
+                newstring.append(0xFFFF)
+            else:
+                newstring.append(char)
+            container >>= 9
+    return newstring
+
+
 class TableEntry(Editable):
     def define(self):
         self.uint32('offset')
@@ -89,22 +123,7 @@ class Text(Archive, Editable):
                     key = (key+0x493D) & 0xFFFF
                 if string[0] == 0xF100:
                     compressed = True
-                    string.pop(0)
-                    newstring = []
-                    container = 0
-                    bit = 0
-                    while string:
-                        container |= string.pop(0) << bit
-                        bit += 15
-                        while bit >= 9:
-                            bit -= 9
-                            char = container & 0x1FF
-                            if char == 0x1FF:
-                                newstring.append(0xFFFF)
-                            else:
-                                newstring.append(char)
-                            container >>= 9
-                    string = newstring
+                    string = decompress(string)
                 text = ''
                 while string:
                     char = string.pop(0)
@@ -144,14 +163,15 @@ class Text(Archive, Editable):
                     reader.seek(block_offset+entry.offset)
                     encchars = [reader.readUInt16()
                                 for k in xrange(entry.charcount)]
-                    key = encchars[-1] ^ 0xFFFF
+                    seed = key = encchars[-1] ^ 0xFFFF
                     string = []  # decrypted chars
                     while encchars:
                         char = encchars.pop() ^ key
                         key = ((key >> 3) | (key << 13)) & 0xFFFF
                         string.insert(0, char)
                     if string[0] == 0xF100:
-                        raise NotImplementedError('Compression not impld')
+                        compressed = True
+                        string = decompress(string, 16)
                     while string:
                         char = string.pop(0)
                         if char == 0xFFFF:
@@ -176,7 +196,14 @@ class Text(Archive, Editable):
                                 text += ')'
                         else:
                             text += unichr(char)
-                    name = '{0}_{1}'.format(i, j)
+                    name = '{0}_{1:05}'.format(i, j)
+                    c = 65
+                    for k in xrange(16):
+                        if (entry.flags >> k) & 0x1:
+                            name += ord(c+k)
+                    if compressed:
+                        name += 'c'
+                    name += '[{0:04X}]'.format(seed)
                     self.files[name] = text
         if commented:
             reader.seek(comment_ofs)
