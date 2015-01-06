@@ -599,7 +599,7 @@ class AtomicStruct(object):
             A new or modified writer that has this data in it
         """
         writer = writer if writer is not None else BinaryIO()
-        amount = len(self)
+        amount = self.size()
         writer.write(ctypes.string_at(ctypes.addressof(self._data),
                                       size=amount))
         return writer

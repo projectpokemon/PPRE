@@ -264,7 +264,7 @@ class Text(Archive, Editable):
         # if self.version > game.GEN_IV:
         #    base_offset += 4*self.numblocks
         # base_offset += TableEntry.instance(self.version).size()*self.numblocks
-        self.num = num
+        self.num = num+1
         start = writer.tell()
         writer = AtomicStruct.save(self, writer)
         text_writer = BinaryIO()
@@ -297,6 +297,9 @@ class Text(Archive, Editable):
                             n = 0x25BC
                         elif char == 'f':
                             n = 0x25BD
+                        elif char == 'u':
+                            n = rtable['\\u'+text[cidx:cidx+4]]
+                            cidx += 4
                         else:
                             n = 1
                         string.append(n)
@@ -309,11 +312,11 @@ class Text(Archive, Editable):
                 string.append(0xFFFF)
                 size = len(string)
                 text_writer.writeAlign(4)
-                state = (((self.seed*0x2FD) & 0xFFFF)*(i+1)) & 0xFFFF
+                state = (((self.seed*0x2FD) & 0xFFFF)*(j+1)) & 0xFFFF
                 key = state | state << 16
                 writer.writeUInt32(key ^ (text_offs+text_writer.tell()))
                 writer.writeUInt32(key ^ size)
-                key = (TEXT_KEY4_INIT*(i+1)) & 0xFFFF
+                key = (TEXT_KEY4_INIT*(j+1)) & 0xFFFF
                 for char in string:
                     text_writer.writeUInt16(char ^ key)
                     key = (key+TEXT_KEY4_STEP) & 0xFFFF
