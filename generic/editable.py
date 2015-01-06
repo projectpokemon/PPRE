@@ -910,7 +910,10 @@ class XEditable(Emitter, AtomicStruct):
             except AttributeError:
                 pass
             else:
-                super(XEditable, self).__setattr__(name, value)
+                if self._data is None:
+                    super(XEditable, self).__setattr__(name, value)
+                else:
+                    setattr(self._data, name, value)
                 if old_value != value:
                     self.fire('set', (name, value))
 
