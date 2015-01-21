@@ -369,3 +369,4 @@ class XY(Game):
 class ORAS(XY):
     idx = 2
     versions = {'OmegaRuby': 2, 'AlphaSapphire': 3}
+    personal_archive_file = 'a/1/9/5'
