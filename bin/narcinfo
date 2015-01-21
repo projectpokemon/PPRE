@@ -7,8 +7,8 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
-from rawdb.ntr.narc import NARC
-from rawdb.util.io import BinaryIO
+from ntr.narc import NARC
+from util.io import BinaryIO
 
 try:
     with open(sys.argv[1]) as handle:
