@@ -77,7 +77,6 @@ class FATO(object):
         size = reader.readUInt32()
         num = reader.readUInt16()
         res = reader.readUInt16()
-        print(self.magic, size, num, res)
 
         self.offsets_ = [reader.readUInt32() for x in range(num)]
         if size:
@@ -133,10 +132,10 @@ class FATB(object):
         self.entries_ = []
         for i in range(num):
             u0 = reader.readUInt32()
-            start = reader.readUInt32()
+            entry_start = reader.readUInt32()
             end = reader.readUInt32()
-            size = reader.readUInt32()
-            self.entries_.append(slice(start, end))
+            entry_size = reader.readUInt32()
+            self.entries_.append(slice(entry_start, end))
         if size:
             reader.seek(start+size)
 
@@ -170,6 +169,7 @@ class FIMB(object):
     def load(self, reader):
         start = reader.tell()
         self.magic = reader.read(4)
+        header_size = reader.readUInt32()
         size = reader.readUInt32()
         data = reader.read(size-8)
         self.files.extend([data[entry]
@@ -182,6 +182,7 @@ class FIMB(object):
             writer = BinaryIO()
         start = writer.tell()
         writer.write(self.magic)
+        writer.writeUInt32(0xC)
         sizeofs = writer.tell()
         writer.writeUInt32(0)
         data = []
