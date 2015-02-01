@@ -237,7 +237,7 @@ class Text(Archive, Editable):
                 '^(?P<block>[0-9]+c?)_'
                 '(?P<idx>[0-9]{1,5})'
                 '(?P<flags>[A-O]+c)?'
-                '(:\\[(?P<key>[0-9A-F]{1,4})\\])?$', name)
+                '(?:\\[(?P<key>[0-9A-F]{1,4})\\])?$', name)
             if not match:
                 raise ValueError('{0} is not a valid identifier+options'
                                  .format(name))
@@ -270,56 +270,136 @@ class Text(Archive, Editable):
         text_writer = BinaryIO()
         text_offs = writer.tell()+8*self.num
         prev_text_pos = 0
-        for i, block_name in enumerate(blocks):
-            # if self.version > game.GEN_IV:
-            #     text_offs += 4*self.numblocks+text_writer.tell()-prev_text_pos
-            #     prev_text_pos = text_writer.tell()
-            for j in xrange(self.num):
-                try:
-                    flags, key, text = blocks[block_name][j]
-                except KeyError:
-                    flags = key = None
-                    text = ''
-                string = []
-                cidx = 0
-                while cidx < len(text):
-                    char = text[cidx]
-                    cidx += 1
-                    if char == '\\':
+        if self.version in game.GEN_IV:
+            for i, block_name in enumerate(blocks):
+                # if self.version > game.GEN_IV:
+                #     text_offs += 4*self.numblocks+text_writer.tell()-prev_text_pos
+                #     prev_text_pos = text_writer.tell()
+                for j in xrange(self.num):
+                    try:
+                        flags, key, text = blocks[block_name][j]
+                    except KeyError:
+                        flags = key = None
+                        text = ''
+                    string = []
+                    cidx = 0
+                    while cidx < len(text):
                         char = text[cidx]
                         cidx += 1
-                        if char == 'x':
-                            n = int(text[cidx:cidx+4], 16)
-                            cidx += 4
-                        elif char == 'n':
-                            n = 0xE000
-                        elif char == 'r':
-                            n = 0x25BC
-                        elif char == 'f':
-                            n = 0x25BD
-                        elif char == 'u':
-                            n = rtable['\\u'+text[cidx:cidx+4]]
-                            cidx += 4
+                        if char == '\\':
+                            char = text[cidx]
+                            cidx += 1
+                            if char == 'x':
+                                n = int(text[cidx:cidx+4], 16)
+                                cidx += 4
+                            elif char == 'n':
+                                n = 0xE000
+                            elif char == 'r':
+                                n = 0x25BC
+                            elif char == 'f':
+                                n = 0x25BD
+                            elif char == 'u':
+                                n = rtable['\\u'+text[cidx:cidx+4]]
+                                cidx += 4
+                            else:
+                                n = 1
+                            string.append(n)
+                        elif char == 'V' and text[cidx:cidx+3] == 'VAR':
+                            pass
                         else:
-                            n = 1
-                        string.append(n)
-                    elif text[:3] == 'VAR':
-                        pass
-                    else:
-                        string.append(rtable[char])
-                if flags and 'c' in flags:
-                    raise NotImplementedError('Compression not yet Impld')
-                string.append(0xFFFF)
-                size = len(string)
+                            string.append(rtable[char])
+                    if flags and 'c' in flags:
+                        raise NotImplementedError('Compression not yet Impld')
+                    string.append(0xFFFF)
+                    size = len(string)
+                    text_writer.writeAlign(4)
+                    state = (((self.seed*0x2FD) & 0xFFFF)*(j+1)) & 0xFFFF
+                    key = state | state << 16
+                    writer.writeUInt32(key ^ (text_offs+text_writer.tell()))
+                    writer.writeUInt32(key ^ size)
+                    key = (TEXT_KEY4_INIT*(j+1)) & 0xFFFF
+                    for char in string:
+                        text_writer.writeUInt16(char ^ key)
+                        key = (key+TEXT_KEY4_STEP) & 0xFFFF
+                # TODO: comments
+                writer.write(text_writer.getvalue())
+        else:
+            block = Editable()
+            block.uint32('size')
+            block.array('entries', TableEntry(self.version).base_struct,
+                        length=self.num)
+            block.freeze()
+            block_offset_pos = writer.tell()
+            for i in xrange(self.numblocks):
+                writer.writeUInt32(0)
+            for i, block_name in enumerate(blocks):
+                text_writer = BinaryIO()
+                block.save(text_writer)
+                for j, entry in enumerate(block.entries):
+                    entry.offset = text_writer.tell()
+                    try:
+                        flags, key, text = blocks[block_name][j]
+                    except KeyError:
+                        flags = key = None
+                        text = ''
+                    string = []
+                    cidx = 0
+                    while cidx < len(text):
+                        char = text[cidx]
+                        cidx += 1
+                        if char == '\\':
+                            char = text[cidx]
+                            cidx += 1
+                            if char == 'x' or char == 'u':
+                                n = int(text[cidx:cidx+4], 16)
+                                cidx += 4
+                            elif char == 'n':
+                                n = 0xFFFE
+                            elif char == 'r':
+                                string.append(0xF000)
+                                string.append(0xBE01)
+                                string.append(0)
+                                continue
+                            elif char == 'f':
+                                string.append(0xF000)
+                                string.append(0xBE00)
+                                string.append(0)
+                                continue
+                            else:
+                                n = 1
+                            string.append(n)
+                        elif char == 'V' and text[cidx:cidx+3] == 'VAR':
+                            pass
+                        else:
+                            string.append(ord(char))
+                    flag = 0
+                    if flags:
+                        for i in range(16):
+                            if chr(65+i) in flags:
+                                flag |= 1 << i
+                        if 'c' in flags:
+                            raise NotImplementedError('Compression not yet Implemented')
+                    if not key:
+                        key = 0
+                    string.append(0xFFFF)
+                    encchars = []
+                    while string:
+                        char = string.pop() ^ key
+                        key = ((key >> 3) | (key << 13)) & 0xFFFF
+                        encchars.insert(0, char)
+                    entry.charcount = len(encchars)
+                    entry.flags = flag
+                    for char in encchars:
+                        text_writer.writeUInt16(char)
                 text_writer.writeAlign(4)
-                state = (((self.seed*0x2FD) & 0xFFFF)*(j+1)) & 0xFFFF
-                key = state | state << 16
-                writer.writeUInt32(key ^ (text_offs+text_writer.tell()))
-                writer.writeUInt32(key ^ size)
-                key = (TEXT_KEY4_INIT*(j+1)) & 0xFFFF
-                for char in string:
-                    text_writer.writeUInt16(char ^ key)
-                    key = (key+TEXT_KEY4_STEP) & 0xFFFF
-            # TODO: comments
-            writer.write(text_writer.getvalue())
+                block.size = text_writer.tell()
+                with text_writer.seek(0):
+                    block.save(text_writer)
+                block_offset = writer.tell()-start
+                with writer.seek(block_offset_pos+4*i):
+                    writer.writeUInt32(block_offset)
+                writer.write(text_writer.getvalue())
+            self.filesize = writer.tell()-start
+            with writer.seek(start):
+                AtomicStruct.save(self, writer)
         return writer
