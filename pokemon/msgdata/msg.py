@@ -305,7 +305,17 @@ class Text(Archive, Editable):
                                 n = 1
                             string.append(n)
                         elif char == 'V' and text[cidx:cidx+3] == 'VAR':
-                            pass
+                            eov = text.find(')', cidx+3)
+                            if eov == -1:
+                                raise RuntimeError('Could not find end of VAR()')
+                            args = []
+                            for arg in text[cidx+3:eov].split(','):
+                                args.append(int(arg.strip(), 0))
+                            cidx = eov+1
+                            string.append(0xFFFE)
+                            string.append(args.pop(0))
+                            string.append(len(args))
+                            string.extend(args)
                         else:
                             string.append(rtable[char])
                     if flags and 'c' in flags:
@@ -368,8 +378,18 @@ class Text(Archive, Editable):
                             else:
                                 n = 1
                             string.append(n)
-                        elif char == 'V' and text[cidx:cidx+3] == 'VAR':
-                            pass
+                        elif char == 'V' and text[cidx:cidx+3] == 'AR(':
+                            eov = text.find(')', cidx+3)
+                            if eov == -1:
+                                raise RuntimeError('Could not find end of VAR()')
+                            args = []
+                            for arg in text[cidx+3:eov].split(','):
+                                args.append(int(arg.strip(), 0))
+                            cidx = eov+1
+                            string.append(0xF000)
+                            string.append(args.pop(0))
+                            string.append(len(args))
+                            string.extend(args)
                         else:
                             string.append(ord(char))
                     flag = 0
