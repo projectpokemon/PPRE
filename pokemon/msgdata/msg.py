@@ -73,6 +73,40 @@ def decompress(string, incr=15):
     return newstring
 
 
+def compress(string, incr=15):
+    """Compress a character list
+
+    Parameters
+    ----------
+    string : list
+        List of char codes
+    incr : int, optional
+        Width to compress from. 15 for DPPt. 16 for BW
+
+    Returns
+    -------
+    string : list
+        The compressed string. Starting with 0xF100
+    """
+    newstring = [0xF100]
+    container = 0
+    bit = 0
+    while string:
+        char = string.pop(0)
+        if char >> 9:
+            raise RuntimeError('"{1}" ({0:#X}) is not a compressable character'
+                               .format(char, char))
+        container |= char << bit
+        bit += 9
+        while bit >= incr:
+            bit -= incr
+            newstring.append(container & 0xFFFF)
+            container >>= incr
+    container |= 0xFFFF << bit
+    newstring.append(container & 0xFFFF)
+    return newstring
+
+
 class TableEntry(Editable):
     def define(self, version=game.Version(4, 0)):
         self.uint32('offset')
@@ -236,7 +270,7 @@ class Text(Archive, Editable):
             match = re.match(
                 '^(?P<block>[0-9]+c?)_'
                 '(?P<idx>[0-9]{1,5})'
-                '(?P<flags>[A-O]+c)?'
+                '(?P<flags>[A-O]*c)?'
                 '(?:\\[(?P<key>[0-9A-F]{1,4})\\])?$', name)
             if not match:
                 raise ValueError('{0} is not a valid identifier+options'
@@ -319,7 +353,7 @@ class Text(Archive, Editable):
                         else:
                             string.append(rtable[char])
                     if flags and 'c' in flags:
-                        raise NotImplementedError('Compression not yet Impld')
+                            string = compress(string, 15)
                     string.append(0xFFFF)
                     size = len(string)
                     text_writer.writeAlign(4)
@@ -394,11 +428,11 @@ class Text(Archive, Editable):
                             string.append(ord(char))
                     flag = 0
                     if flags:
-                        for i in range(16):
-                            if chr(65+i) in flags:
-                                flag |= 1 << i
+                        for shift in range(16):
+                            if chr(65+shift) in flags:
+                                flag |= 1 << shift
                         if 'c' in flags:
-                            raise NotImplementedError('Compression not yet Implemented')
+                            string = compress(string, 16)
                     if not key:
                         key = 0
                     string.append(0xFFFF)
