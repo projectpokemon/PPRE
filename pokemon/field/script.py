@@ -3,12 +3,14 @@ from pokemon import game
 from util.io import BinaryIO
 
 MAX_ARGS = 8
+MIN_REFS = 25
+MIN_CONFIDENCE = .75
 
 
 class Method(object):
     def __init__(self, name=None):
         self.name = name
-        self.forms = []
+        self.forms = {}
         self.args = None
         self.known = False
         self.minbytes = 0
@@ -20,6 +22,23 @@ class Method(object):
         if not self.args:
             return 0
         return sum(self.args)
+
+    def add_form(self, *args):
+        if self.minbytes <= sum(args) <= self.maxbytes:
+            if args in self.forms:
+                self.forms[args] += 1
+            else:
+                self.forms[args] = 1
+
+    def resolve(self):
+        ref_count = sum(self.forms.values())
+        if ref_count > MIN_REFS:
+            for args, count in self.forms.iteritems():
+                if self.minbytes <= sum(args) <= self.maxbytes:
+                    if count/ref_count > MIN_CONFIDENCE:
+                        self.args = args
+                        break
+            self.forms = {}
 
     def __repr__(self):
         if self.known:
@@ -74,7 +93,7 @@ class Script(object):
             offset = reader.readUInt32()
         except:
             return
-        while offset & 0xFFFF != 0xFD13 and offset:
+        while offset:
             # print(reader.tell(), self._regions)
             if not check():
                 break
@@ -87,6 +106,10 @@ class Script(object):
                 offset = reader.readUInt32()
             except:
                 return
+            if offset & 0xFFFF == 0xFD13:
+                with reader.seek(reader.tell()-2):
+                    mark(2)
+                break
         if not self._offsets:
             return
 
@@ -186,3 +209,82 @@ class Script(object):
             with reader.seek(offset):
                 # mark(2, True)
                 parse()
+
+        spaces = []
+        space_start = None
+        reader.seek(start)
+        for i in xrange(start, max(self._regions)):
+            if check(1):
+                if space_start is None:
+                    space_start = i
+                space_end = i
+            else:
+                if space_start is not None:
+                    spaces.append([space_start, space_end+1])
+                space_start = None
+            reader.readUInt8()
+
+        def check_parse(size):
+            print('Size', size)
+            if not size:
+                return True
+            if not check():
+                return True
+            if size == 1:
+                if check(1):
+                    return reader.readUInt8() == 0
+            size -= 2
+            if size < 0:
+                return False
+            if not check(2):
+                # If we started inside of a parameter of the last, seek forward
+                with reader.seek(reader.tell()+2):
+                    return check_parse(size)
+            cmd = reader.readUInt16()
+            print('Active', cmd)
+            if not cmd:
+                return True
+            if cmd > 0x1000:
+                return False
+            try:
+                method = methods[cmd]
+            except KeyError:
+                method = Method(cmd)
+                methods[cmd] = method
+            if method.known:
+                argsize = method.argsize()
+                if size > argsize:
+                    return False
+                reader.read(argsize)
+                passed = False
+                with reader.seek(reader.tell()):
+                    if check_parse(size-argsize):
+                        passed = True
+                return passed
+            elif method.minbytes:
+                if size < method.minbytes:
+                    return False
+            elif not size:
+                method.add_form()
+                return True
+            passed = False
+            for k in xrange(method.minbytes, size+1):
+                with reader.seek(reader.tell()):
+                    print(k)
+                    reader.read(size-k)
+                    if check_parse(k):
+                        method.add_form(*[1]*(size-k))
+                        passed = True
+            return passed
+
+        for space in spaces:
+            if space[1] - space[0] < 8:
+                # print(self._regions)
+                for i in xrange(space[0], space[1]):
+                    for j in xrange(i, space[1]):
+                        # print(j, i, space)
+                        with reader.seek(j-2):
+                            # print(reader.tell(), check(), check(2))
+                            with reader.seek(reader.tell()):
+                                print([reader.readUInt8() for k in xrange(space[1]-j+2)])
+                            check_parse(space[1]-j+2)
