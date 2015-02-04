@@ -2,7 +2,7 @@
 from pokemon import game
 from util.io import BinaryIO
 
-MAX_ARGS = 8
+MAX_ARGS = 16
 MIN_REFS = 25
 MIN_CONFIDENCE = .75
 
@@ -23,12 +23,13 @@ class Method(object):
             return 0
         return sum(self.args)
 
-    def add_form(self, *args):
+    def add_form(self, *args, **kwargs):
+        weight = kwargs.get('weight')
         if self.minbytes <= sum(args) <= self.maxbytes:
             if args in self.forms:
-                self.forms[args] += 1
+                self.forms[args] += weight
             else:
-                self.forms[args] = 1
+                self.forms[args] = weight
 
     def resolve(self):
         ref_count = sum(self.forms.values())
@@ -224,28 +225,29 @@ class Script(object):
                 space_start = None
             reader.readUInt8()
 
-        def check_parse(size):
+        def check_parse(size, affinity=1.0):
             print('Size', size)
             if not size:
-                return True
+                return 1*affinity
             if not check():
-                return True
+                return 1*affinity
             if size == 1:
                 if check(1):
-                    return reader.readUInt8() == 0
+                    if reader.readUInt8():
+                        return -1*affinity
             size -= 2
             if size < 0:
-                return False
+                return 0
             if not check(2):
                 # If we started inside of a parameter of the last, seek forward
-                with reader.seek(reader.tell()+2):
-                    return check_parse(size)
+                with reader.seek(reader.tell()+1):
+                    return check_parse(size-1, affinity)*affinity
             cmd = reader.readUInt16()
             print('Active', cmd)
             if not cmd:
-                return True
-            if cmd > 0x1000:
-                return False
+                return 0
+            if cmd > 0x500:
+                return -2*affinity
             try:
                 method = methods[cmd]
             except KeyError:
@@ -254,31 +256,30 @@ class Script(object):
             if method.known:
                 argsize = method.argsize()
                 if size > argsize:
-                    return False
+                    return -2*affinity
                 reader.read(argsize)
-                passed = False
+                passed = 0
                 with reader.seek(reader.tell()):
-                    if check_parse(size-argsize):
-                        passed = True
-                return passed
+                    passed += check_parse(size-argsize, affinity)
+                return passed*affinity
             elif method.minbytes:
                 if size < method.minbytes:
-                    return False
+                    return -2*affinity
             elif not size:
-                method.add_form()
-                return True
-            passed = False
-            for k in xrange(method.minbytes, size+1):
+                method.add_form(weight=0.5)
+                return 0.5*affinity
+            passed = 0
+            for k in xrange(method.minbytes, min(size+1, MAX_ARGS)):
                 with reader.seek(reader.tell()):
                     print(k)
                     reader.read(size-k)
-                    if check_parse(k):
-                        method.add_form(*[1]*(size-k))
-                        passed = True
-            return passed
+                    ret = check_parse(k, affinity/2.0)
+                    method.add_form(*[1]*(size-k), weight=ret)
+                    passed += ret*.5
+            return passed/k*affinity
 
         for space in spaces:
-            if space[1] - space[0] < 8:
+            if space[1] - space[0] < 16:
                 # print(self._regions)
                 for i in xrange(space[0], space[1]):
                     for j in xrange(i, space[1]):
