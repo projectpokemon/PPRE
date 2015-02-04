@@ -46,3 +46,11 @@ try:
                               PyFile_AsFile(out))
 except KeyError:
     pass
+
+
+if __name__ == '__main__':
+    import sys
+
+    if len(sys.argv) < 4:
+        print('Usage: {0} <file 1> <file 2> <out file>'.format(sys.argv[0]))
+    xorstream(sys.argv[1], sys.argv[2], sys.argv[3])
