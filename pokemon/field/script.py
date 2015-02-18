@@ -31,7 +31,15 @@ class Method(object):
             else:
                 self.forms[args] = weight
 
+    def prune(self):
+        for args, count in self.forms.items()[:]:
+            if not (self.minbytes <= sum(args) <= self.maxbytes):
+                self.forms.pop(args)
+
     def resolve(self):
+        if self.known:
+            self.forms = {}
+            return
         ref_count = sum(self.forms.values())
         if ref_count > MIN_REFS:
             for args, count in self.forms.iteritems():
@@ -44,7 +52,29 @@ class Method(object):
     def __repr__(self):
         if self.known:
             return '<Method "{0}" argsize={1}>'.format(self.name, self.argsize())
-        return '<Method "{0}">'.format(self.name)
+        return '<Method "{0}" [{1}-{2}]>'.format(self.name, self.minbytes, self.maxbytes)
+
+    @classmethod
+    def from_dict(cls, src):
+        method = cls()
+        for attr in src:
+            if attr == 'forms':
+                method.forms = {}
+                for key, value in src[attr]:
+                    method.forms[tuple(key)] = value
+            else:
+                method.__dict__[attr] = src[attr]
+        print(method, src)
+        return method
+
+    def to_dict(self):
+        out = {}
+        for attr in self.__dict__:
+            if attr == 'forms':
+                out[attr] = self.forms.items()
+            else:
+                out[attr] = self.__dict__[attr]
+        return out
 
 
 class Script(object):
@@ -226,7 +256,6 @@ class Script(object):
             reader.readUInt8()
 
         def check_parse(size, affinity=1.0):
-            print('Size', size)
             if not size:
                 return 1*affinity
             if not check():
@@ -243,7 +272,6 @@ class Script(object):
                 with reader.seek(reader.tell()+1):
                     return check_parse(size-1, affinity)*affinity
             cmd = reader.readUInt16()
-            print('Active', cmd)
             if not cmd:
                 return 0
             if cmd > 0x500:
@@ -271,21 +299,82 @@ class Script(object):
             passed = 0
             for k in xrange(method.minbytes, min(size+1, MAX_ARGS)):
                 with reader.seek(reader.tell()):
-                    print(k)
                     reader.read(size-k)
                     ret = check_parse(k, affinity/2.0)
                     method.add_form(*[1]*(size-k), weight=ret)
                     passed += ret*.5
             return passed/k*affinity
 
+        print('MAP START')
+        regions_map = ''
+        with reader.seek(start):
+            until = 0
+            for i in xrange(max(self._regions)-1):
+                if i in self._regions:
+                    regions_map += '\033[92m{0:02X} \033[0m'.format(reader.readUInt8())
+                    for j in xrange(1, self._regions[i]):
+                        regions_map += '\033[94m{0:02X} \033[0m'.format(reader.readUInt8())
+                    until = i+j
+                elif i > until:
+                    regions_map += '{0:02X} '.format(reader.readUInt8())
+        print(regions_map)
+        prev_end = 0
         for space in spaces:
             if space[1] - space[0] < 16:
-                # print(self._regions)
+                # print('regions', self._regions)
+                # print('offsets', self._offsets)
                 for i in xrange(space[0], space[1]):
                     for j in xrange(i, space[1]):
                         # print(j, i, space)
                         with reader.seek(j-2):
-                            # print(reader.tell(), check(), check(2))
-                            with reader.seek(reader.tell()):
-                                print([reader.readUInt8() for k in xrange(space[1]-j+2)])
+                            if reader.tell() == prev_end:
+                                maxbytes = space[1] - j
+                                with reader.seek(reader.tell()):
+                                    cmd = reader.readUInt16()
+                                try:
+                                    method = methods[cmd]
+                                except KeyError:
+                                    method = Method(cmd)
+                                    methods[cmd] = method
+                                if method.maxbytes > maxbytes:
+                                    method.maxbytes = maxbytes
+                                    method.prune()
+                            # with reader.seek(reader.tell()):
+                            #    print([reader.readUInt8() for k in xrange(space[1]-j+2)])
                             check_parse(space[1]-j+2)
+            prev_end = space[1]
+
+
+def learn_game():
+    import sys
+    import json
+    try:
+        target_game = game.Game.from_workspace(sys.argv[1])
+        sys.argv[2]
+    except:
+        print('Usage: {0} <workspace directory> <output/input methods.json>'
+              .format(sys.argv[0]))
+        exit()
+    methods = {}
+    try:
+        with open(sys.argv[2]) as handle:
+            dict_methods = json.load(handle)
+        for cmd in dict_methods:
+            methods[int(cmd)] = Method.from_dict(dict_methods[cmd])
+    except IOError:
+        pass
+    script = Script(target_game)
+    script_files = target_game.script_archive.files
+
+    for i, script_file in enumerate(script_files[:10]):
+        script.learn(script_file, methods)
+    dict_methods = {}
+    for cmd in methods:
+        methods[cmd].resolve()
+        dict_methods[cmd] = methods[cmd].to_dict()
+    with open(sys.argv[2], 'w') as handle:
+        json.dump(dict_methods, handle, indent=2, sort_keys=True)
+
+
+if __name__ == '__main__':
+    learn_game()
