@@ -80,5 +80,43 @@ class Thumb(Disassembler):
             if reg == 'lr':
                 return [self.end()]
             return [self.build('bx', reg)]
+        elif cmd & 0b1111100000000000 == 0b0100100000000000:
+            # ldr dest [pc, #v]
+            pass
+        elif cmd & 0b1111001000000000 == 0b0101000000000000:
+            # ldr/str Rd [Rb, Ro]
+            if cmd & 0x400:
+                size = 'byte'
+            else:
+                size = 'word'
+            ofs = self.get_reg((cmd >> 6) & 7)
+            base = self.get_reg((cmd >> 3) & 7)
+            dest = self.get_reg(cmd & 7)
+            if cmd & 0x800:
+                func = 'get'  # ldr
+                return [self.assign(dest, self.build(
+                    'ram.get_{0}'.format(size), self.add(base, ofs)))]
+            else:
+                func = 'set'  # str
+                return [self.build('ram.set_{0}'.format(size),
+                                   self.add(base, ofs), dest)]
+        elif cmd & 0b1110000000000000 == 0b0110000000000000:
+            # ldr/str Rd [Rb, #ofs]
+            ofs = (cmd >> 6) & 0x1F
+            base = self.get_reg((cmd >> 3) & 7)
+            dest = self.get_reg(cmd & 7)
+            if cmd & 0x1000:
+                size = 'byte'
+            else:
+                size = 'word'
+                ofs <<= 2
+            if cmd & 0x800:
+                func = 'get'  # ldr
+                return [self.assign(dest, self.build(
+                    'ram.get_{0}'.format(size), self.add(base, ofs)))]
+            else:
+                func = 'set'  # str
+                return [self.build('ram.set_{0}'.format(size),
+                                   self.add(base, ofs), dest)]
         else:
             return [self.unknown(cmd)]
