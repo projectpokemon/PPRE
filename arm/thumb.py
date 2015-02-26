@@ -45,13 +45,20 @@ class Thumb(Disassembler):
             return [self.assign(dest, self.statement(oper, src, val))]
             # TODO: cspr
         elif cmd & 0b1110000000000000 == 0b0010000000000000:
+            # add/sub/cmp/mov immediate
             oper = (cmd >> 11) & 3
-            if oper == 2:
+            src = self.get_reg((cmd >> 8) & 0x7)
+            val = cmd & 0xFF
+            if oper == 0:
+                # mov
+                return [self.assign(src, val)]
+            elif oper == 1:
+                # TODO: cmp
+                pass
+            elif oper == 2:
                 oper = '+'
             elif oper == 3:
                 oper = '-'
-            src = self.get_reg((cmd >> 8) & 0x7)
-            val = cmd & 0xFF
             return [self.assign(src, self.statement(oper, src, val))]
         elif cmd & 0b1111011000000000 == 0b1011010000000000:
             regs = self.get_regs(cmd & 0x7F)
@@ -77,7 +84,7 @@ class Thumb(Disassembler):
         elif cmd & 0b1111111100000000 == 0b0100011100000000:
             # bx
             reg = self.get_reg((cmd >> 3) & 0x7, cmd & 0x40)
-            if reg == 'lr':
+            if reg == 'engine.lr':
                 return [self.end()]
             return [self.build('bx', reg)]
         elif cmd & 0b1111100000000000 == 0b0100100000000000:
@@ -95,7 +102,7 @@ class Thumb(Disassembler):
             if cmd & 0x800:
                 func = 'get'  # ldr
                 return [self.assign(dest, self.build(
-                    'ram.get_{0}'.format(size), self.add(base, ofs)))]
+                    'ram.get_{0}'.format(size), self.add(base, ofs), level=0))]
             else:
                 func = 'set'  # str
                 return [self.build('ram.set_{0}'.format(size),
@@ -113,10 +120,10 @@ class Thumb(Disassembler):
             if cmd & 0x800:
                 func = 'get'  # ldr
                 return [self.assign(dest, self.build(
-                    'ram.get_{0}'.format(size), self.add(base, ofs)))]
+                    'ram.get_{0}'.format(size), self.add(base, ofs), level=0))]
             else:
                 func = 'set'  # str
                 return [self.build('ram.set_{0}'.format(size),
                                    self.add(base, ofs), dest)]
         else:
-            return [self.unknown(cmd)]
+            return [self.unknown(cmd, 2)]
