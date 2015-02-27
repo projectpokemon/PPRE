@@ -127,3 +127,37 @@ class Thumb(Disassembler):
                                    self.add(base, ofs), dest)]
         else:
             return [self.unknown(cmd, 2)]
+
+    def simplify(self, parsed):
+        reparsed = []
+        for expr in parsed:
+            # recurse
+            try:
+                subexpr = expr.expression
+            except:
+                pass
+            else:
+                expr.expression, = self.simplify([subexpr])
+            try:
+                args = expr.args
+            except:
+                pass
+            else:
+                newargs = []
+                expr.args = [self.simplify([arg])[0] for arg in args]
+            # remove +0, *1, <<0 ,etc.
+            try:
+                oper = expr.operator
+                args = expr.args
+            except:
+                pass
+            else:
+                if oper in ('+', '-', '<<', '>>'):
+                    args = [arg for arg in args if arg != 0]
+                elif oper in ('*', ):
+                    args = [arg for arg in args if arg != 1]
+                if len(args) == 1:
+                    reparsed.append(args[0])
+                    continue
+            reparsed.append(expr)
+        return reparsed
