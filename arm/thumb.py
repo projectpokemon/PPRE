@@ -2,6 +2,24 @@
 from compileengine.assembler import Disassembler
 
 
+class Register(object):
+    SLOT_LR = 14
+    SLOT_PC = 15
+
+    def __init__(self, slot):
+        self.slot = slot
+
+    def __str__(self):
+        if self.slot == self.SLOT_LR:
+            return 'engine.lr'
+        elif self.slot == self.SLOT_PC:
+            return 'engine.pc'
+        return 'engine.r{0}'.format(self.slot)
+
+    def __eq__(self, other):
+        return self.slot == other.slot
+
+
 class Thumb(Disassembler):
     stack = []
 
@@ -10,16 +28,14 @@ class Thumb(Disassembler):
         regs = []
         for i in range(16):
             if data & (1 << i):
-                regs.append('r{0}'.format(i))
+                regs.append(Register(i))
         return regs
 
     @staticmethod
     def get_reg(data, high=False):
         if high:
             data += 8
-        if data == 14:
-            return 'engine.lr'
-        return 'engine.r{0}'.format(data)
+        return Register(data)
 
     @staticmethod
     def sign(value, bits):
@@ -65,11 +81,11 @@ class Thumb(Disassembler):
             if cmd & 0x800:
                 func = 'pop'
                 if cmd & 0x100:
-                    regs.append('pc')
+                    regs.append(Register(Register.SLOT_PC))
             else:
                 func = 'push'
                 if cmd & 0x100:
-                    regs.append('lr')
+                    regs.append(Register(Register.SLOT_LR))
             return [self.build(func, *regs)]
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
@@ -84,7 +100,7 @@ class Thumb(Disassembler):
         elif cmd & 0b1111111100000000 == 0b0100011100000000:
             # bx
             reg = self.get_reg((cmd >> 3) & 0x7, cmd & 0x40)
-            if reg == 'engine.lr':
+            if reg.slot == Register.SLOT_LR:
                 return [self.end()]
             return [self.build('bx', reg)]
         elif cmd & 0b1111100000000000 == 0b0100100000000000:
