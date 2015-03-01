@@ -106,6 +106,31 @@ int read16(script_state *r0) {
     return r0 & 0xFFFF;
 }
 
+int read32(script_state *r0){
+    // 0x38c48
+    int r1 = r0->buf_ptr;
+    int r2 = r1+1;
+    r0->buf_ptr = r2;
+    unsigned char r3 = ((unsigned char*)r1)[0];
+    r1 = r2+1;
+    int r5 = r1+1;
+    r0->buf_ptr = r1;
+    r2 = ((unsigned char*)r2)[0];
+    int r4 = r5+1;
+    r0->buf_ptr = r5;
+    r1 = ((unsigned char*)r1)[0];
+    r0->buf_ptr = r4;
+    int r0 = ((unsigned char*)r5)[0];
+    r4 = 0;
+    r0 <<= 8;
+    r0 += r1;
+    r0 <<= 8;
+    r0 += r2;
+    r0 <<= 8;
+    r0 += r3;
+    return r0;
+}
+
 // Diamond commands (some for reference)
 
 int cmd_0000(script_state *r0) {
