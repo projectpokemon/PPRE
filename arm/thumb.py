@@ -70,7 +70,7 @@ class Thumb(Disassembler):
                 return [self.assign(src, val)]
             elif oper == 1:
                 # TODO: cmp
-                pass
+                oper = '~'
             elif oper == 2:
                 oper = '+'
             elif oper == 3:
@@ -82,6 +82,8 @@ class Thumb(Disassembler):
                 func = 'pop'
                 if cmd & 0x100:
                     regs.append(Register(Register.SLOT_PC))
+                    return [self.end()]  # TODO: return r0, r1, ...
+                    # (all regs not popped but used)
             else:
                 func = 'push'
                 if cmd & 0x100:
