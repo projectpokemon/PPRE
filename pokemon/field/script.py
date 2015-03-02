@@ -214,6 +214,21 @@ class Script(object):
                         mark(2)
                 parse()
                 return
+            elif cmd in (0x21d, ):
+                arg = reader.readUInt16()
+                mark(2)
+                if arg in (4, 5):
+                    argsize = 4
+                elif arg == 6:
+                    argsize = 2
+                else:
+                    argsize = 6
+                argsize -= 2  # Already read two
+                reader.read(argsize)
+                if argsize:
+                    mark(argsize)
+                parse()
+                return
             if cmd not in methods:
                 method = Method(cmd)
                 methods[cmd] = method

@@ -334,6 +334,48 @@ int cmd_0044(script_state *r0){
     return 1;
 }
 
+int cmd_0541(script_state *r0){
+    // 0x41c38
+    int a, b, c;
+
+    script_state* r4 = r0;
+    int r6 = func_39438(r0->u5, 15);
+    int r5 = func_2881c(r0->u5[12]);
+    script_state* r0 = r4;
+    int r7 = r0->u5[12];
+    int r0 = read16(r0);
+    switch(r0) {
+        case 0:  // 0x41c86
+            script_state* r0 = r4;
+            int r1 = read16(r0);
+            r6 = func_394f0(r0->u5, r1);
+            r1 = read16(r0);
+            r4 = func_394b8(r0->u5, r1);
+            r0 =func_28828(r5, r6);
+            *r4 = r0;
+            return 0;
+        case 1: // 0x41cbc
+            // read16() *2
+            return 0;
+        case 2: // 0x41cf2
+            // read16() *2
+            return 0;
+        case 3: // 0x41d28
+            // read16() *2
+            return 0;
+        case 4: // 0x41d5e
+            // read16() *1
+            return 0;
+        case 5: // 0x41d94
+            // read16() *1
+            return 0;
+        case 6: // 0x41dce
+            return 0;
+        default:  // > 6
+            return 0;
+    }
+}
+
 int cmd_0649(script_state *r0){
     uint8_t a[8];
     script_state* r5 = r0;
