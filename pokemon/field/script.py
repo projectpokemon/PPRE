@@ -187,7 +187,8 @@ class Script(object):
                 with reader.seek(offset+reader.tell()):
                     if check():  # Only need to check dest once
                         parse()
-                parse()
+                if cmd == 0x1A:
+                    parse()
                 return
             elif cmd in (0x1C, 0x1D):
                 arg = reader.readUInt8()
