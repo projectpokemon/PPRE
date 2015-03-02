@@ -29,5 +29,27 @@ def dump(fname, directory, xorpad):
                      ])
 
 
+def dump_all(fname, directory):
+    for section in ['exefs', 'exheader', 'romfs']:
+        subprocess.call([binary, '-p',
+                         '--'+section, os.path.join(directory, section+'.bin'),
+                         fname
+                         ])
+        xorstream(os.path.join(directory, section+'.bin'),
+                  os.path.join(directory, section+'.xorpad'),
+                  outname=os.path.join(directory, section+'.dec.bin'))
+    subprocess.call([binary,
+                     '--exefsdir', os.path.join(directory, 'exefs'),
+                     '--decompresscode',
+                     '-t', 'exefs',
+                     os.path.join(directory, 'exefs.dec.bin')
+                     ])
+    with open(os.path.join(directory, 'exheader.txt'), 'w') as header_info:
+        subprocess.call([binary,
+                         '-t', 'exheader',
+                         os.path.join(directory, 'exheader.dec.bin')
+                         ], stdout=header_info)
+
+
 def build(fname, directory):
     pass
