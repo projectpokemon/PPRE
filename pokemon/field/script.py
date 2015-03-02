@@ -233,6 +233,13 @@ class Script(object):
                     mark(argsize)
                 parse()
                 return
+            else:
+                if cmd > 750:
+                    mark(-1)
+                    print(self._regions)
+                    print_regions()
+                    print(cmd, reader.tell())
+                    raise Exception
             minbytes = 0
             while True:
                 if check(1):
@@ -397,7 +404,7 @@ def learn_game():
     script = Script(target_game)
     script_files = target_game.script_archive.files
 
-    for i, script_file in enumerate(script_files[:50]):
+    for i, script_file in enumerate(script_files[:5000]):
         print('FILE ', i)
         script.learn(script_file, methods)
     dict_methods = {}

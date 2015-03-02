@@ -1,5 +1,6 @@
 
 // Platinum offsets
+#include "../../include/ppre.h"
 
 typedef int (*func_t)(int, int, int, int);
 
@@ -11,7 +12,7 @@ struct script_state {
     // 0x4
     int *command; // used when ret == 2
     // 0x8
-    int *buf_ptr;
+    uint8_t *buf_ptr;
     unsigned char u4[0x50];
     // 0x5c
     int *command_table;
@@ -331,5 +332,34 @@ int cmd_0044(script_state *r0){
     func_1e2bd0(r0, r1);
     func_38b5c(r0, 0x203a2f1);
     return 1;
+}
+
+int cmd_0649(script_state *r0){
+    uint8_t a[8];
+    script_state* r5 = r0;
+    int r1 = read16(r0);
+    int r4 = func_394b8(r0->u5, r1);
+    int r2 = 0;
+    uint8_t *r3 = a;
+
+    do {
+        int r6 = r0->buf_ptr;
+        r1 = r5->buf_ptr;
+        r6 += 1;
+        r0->buf_ptr = r6;
+        uint8_t r1 = *((uint8_t *)r1);
+        r2 += 1;
+        r3[0] = 1;
+        r3 += 1;
+    } while(r2 < 5);
+
+    int r6 = *((unsigned char*)(r5->buf_ptr++));
+    int r0 = func_27e5c(4);
+    r1 = a;
+    r2 = r6;
+    r3 = 0;
+    int r7 = r0;
+    func_27f04(r0, r1, r2, r3);
+    r0 = r5->u5[12];
 }
 
