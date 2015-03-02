@@ -241,6 +241,12 @@ class FATB(Editable):
                                        reader.readUInt32()))
 
 
+class LazyFiles(list):
+    def __init__(self, handle, entries):
+        self.offset = handle.tell()
+        self.entries = entries
+
+
 class FIMG(Editable):
     def __init__(self, narc):
         AtomicStruct.__init__(self)

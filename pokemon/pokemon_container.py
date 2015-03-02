@@ -12,11 +12,11 @@ class Pokemon(Editable):
         self.game = game
         self.natid = None
         self.restrict('natid', min_value=0, values=self.available)
-        self.personal = Personal(version=game.game_name)
+        self.personal = Personal(version=game)
         self.restrict('personal')
         self.evolutions = Evolutions()
         self.restrict('evolutions')
-        self.levelmoves = LevelMoves(version=game.game_name)
+        self.levelmoves = LevelMoves(version=game)
         self.restrict('levelmoves')
 
     def load_id(self, natid):

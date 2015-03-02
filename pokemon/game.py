@@ -244,6 +244,10 @@ class Game(Editable, Version):
             return set_wrapper
         return object.__getattribute__(self, name)
 
+    def text(self, file_id):
+        from pokemon.msgdata.msg import Text
+        return Text(self).load(self.get_text(file_id))
+
     @cached_property
     def personal_archive(self):
         return self.archive(self.personal_archive_file)
@@ -303,7 +307,7 @@ class DP(Game):
     land_data_archive_file = 'fielddata/land_data/land_data_release.narc'
     map_matrix_archive_file = 'fielddata/mapmatrix/map_matrix.narc'
     mapname_file = 'fielddata/maptable/mapname.bin'
-    script_archive_file = 'fielddata/script/scr_seq_releease.narc'
+    script_archive_file = 'fielddata/script/scr_seq_release.narc'
     item_archive_file = 'itemtool/itemdata/item_data.narc'
     berry_archive_file = 'itemtool/itemdata/nuts_data.narc'
     text_archive_file = 'msgdata/msg.narc'

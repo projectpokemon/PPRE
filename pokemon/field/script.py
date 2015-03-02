@@ -165,16 +165,18 @@ class Script(object):
                 offset = reader.readInt32()
                 mark(4)
                 with reader.seek(offset+reader.tell()):
-                    parse()
+                    if check():  # Only need to check dest once
+                        parse()
                 parse()
                 return
-            elif cmd in (0x1C, 0x1D) and 0:
+            elif cmd in (0x1C, 0x1D):
                 arg = reader.readUInt8()
                 mark(1)
                 offset = reader.readInt32()
                 mark(4)
                 with reader.seek(offset+reader.tell()):
-                    parse()
+                    if check():  # Only need to check dest once
+                        parse()
                 parse()
                 return
             elif cmd in (0x5E,):
@@ -236,6 +238,7 @@ class Script(object):
                     parse()
                     return
 
+        okay = True
         for offset in self._offsets:
             with reader.seek(offset):
                 # mark(2, True)
@@ -274,6 +277,8 @@ class Script(object):
             cmd = reader.readUInt16()
             if not cmd:
                 return 0
+            if not size and cmd == 0x2:
+                return 8*affinity
             if cmd > 0x500:
                 return -2*affinity
             try:
@@ -283,7 +288,7 @@ class Script(object):
                 methods[cmd] = method
             if method.known:
                 argsize = method.argsize()
-                if size > argsize:
+                if size < argsize:
                     return -2*affinity
                 reader.read(argsize)
                 passed = 0
@@ -366,7 +371,8 @@ def learn_game():
     script = Script(target_game)
     script_files = target_game.script_archive.files
 
-    for i, script_file in enumerate(script_files[:10]):
+    for i, script_file in enumerate(script_files[:50]):
+        print('FILE ', i)
         script.learn(script_file, methods)
     dict_methods = {}
     for cmd in methods:
