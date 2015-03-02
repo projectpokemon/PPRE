@@ -64,7 +64,7 @@ class Method(object):
                     method.forms[tuple(key)] = value
             else:
                 method.__dict__[attr] = src[attr]
-        print(method, src)
+        # print(method, src)
         return method
 
     def to_dict(self):
@@ -93,6 +93,24 @@ class Script(object):
         start = reader.tell()
         self._offsets = []
         self._regions = {}
+
+        def print_regions():
+            print('MAP START')
+            regions_map = ''
+            with reader.seek(start):
+                until = 0
+                for i in xrange(max(self._regions)-1):
+                    if i in self._regions:
+                        if self._regions[i] == -1:
+                            regions_map += '\033[91m{0:02X} \033[0m'.format(reader.readUInt8())
+                        else:
+                            regions_map += '\033[92m{0:02X} \033[0m'.format(reader.readUInt8())
+                        for j in xrange(1, self._regions[i]):
+                            regions_map += '\033[94m{0:02X} \033[0m'.format(reader.readUInt8())
+                        until = i+j
+                    elif i > until:
+                        regions_map += '{0:02X} '.format(reader.readUInt8())
+            print(regions_map)
 
         def mark(size, advance=False):
             if advance:
@@ -161,7 +179,9 @@ class Script(object):
             mark(2)
             if not cmd:
                 return
-            if cmd in (0x16, 0x1A):
+            if cmd in (0x2, 0x1b):
+                return
+            elif cmd in (0x16, 0x1A):
                 offset = reader.readInt32()
                 mark(4)
                 with reader.seek(offset+reader.tell()):
@@ -191,6 +211,7 @@ class Script(object):
                             raise Exception('Movement')
                         arg = reader.readUInt16()
                         mark(2)
+                parse()
                 return
             if cmd not in methods:
                 method = Method(cmd)
@@ -200,7 +221,10 @@ class Script(object):
             if method.known:
                 argsize = method.argsize()
                 if not check(argsize):
+                    mark(-1)
                     print(cmd, argsize, reader.tell(), self._regions)
+                    print_regions()
+                    print(reader.tell())
                     raise Exception
                     return
                 reader.read(argsize)
@@ -242,7 +266,12 @@ class Script(object):
         for offset in self._offsets:
             with reader.seek(offset):
                 # mark(2, True)
-                parse()
+                try:
+                    parse()
+                except:
+                    from util.code import print_helpful_traceback
+                    print_helpful_traceback()
+                    raise
 
         spaces = []
         space_start = None
@@ -310,19 +339,7 @@ class Script(object):
                     passed += ret*.5
             return passed/k*affinity
 
-        print('MAP START')
-        regions_map = ''
-        with reader.seek(start):
-            until = 0
-            for i in xrange(max(self._regions)-1):
-                if i in self._regions:
-                    regions_map += '\033[92m{0:02X} \033[0m'.format(reader.readUInt8())
-                    for j in xrange(1, self._regions[i]):
-                        regions_map += '\033[94m{0:02X} \033[0m'.format(reader.readUInt8())
-                    until = i+j
-                elif i > until:
-                    regions_map += '{0:02X} '.format(reader.readUInt8())
-        print(regions_map)
+        print_regions()
         prev_end = 0
         for space in spaces:
             if space[1] - space[0] < 16:
@@ -360,7 +377,15 @@ def learn_game():
         print('Usage: {0} <workspace directory> <output/input methods.json>'
               .format(sys.argv[0]))
         exit()
-    methods = {}
+
+    class HollowDict(dict):
+        def __str__(self):
+            return 'HollowDict(...)'
+
+        def __repr__(self):
+            return '<HollowDict(...) at {0}>'.format(hex(id(self)))
+
+    methods = HollowDict()
     try:
         with open(sys.argv[2]) as handle:
             dict_methods = json.load(handle)
