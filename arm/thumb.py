@@ -1,5 +1,5 @@
 
-from compileengine.assembler import Disassembler
+from compileengine.decompiler import Decompiler
 
 
 class Register(object):
@@ -20,7 +20,7 @@ class Register(object):
         return self.slot == other.slot
 
 
-class Thumb(Disassembler):
+class Thumb(Decompiler):
     stack = []
 
     @staticmethod
