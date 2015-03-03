@@ -214,7 +214,7 @@ class Script(object):
                         mark(2)
                 parse()
                 return
-            elif cmd in (0x21d, ):
+            elif cmd == 0x21d:
                 arg = reader.readUInt16()
                 mark(2)
                 if arg in (4, 5):
@@ -223,6 +223,21 @@ class Script(object):
                     argsize = 2
                 else:
                     argsize = 6
+                argsize -= 2  # Already read two
+                reader.read(argsize)
+                if argsize:
+                    mark(argsize)
+                parse()
+                return
+            elif cmd == 0x23e:
+                arg = reader.readUInt16()
+                mark(2)
+                if arg in (1, 2, 3, 4):
+                    argsize = 4
+                elif arg in (5, 6):
+                    argsize = 6
+                else:
+                    argsize = 2
                 argsize -= 2  # Already read two
                 reader.read(argsize)
                 if argsize:
