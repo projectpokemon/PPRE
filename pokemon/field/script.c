@@ -425,6 +425,50 @@ int cmd_0574(script_state *r0){
     }
 }
 
+int cmd_0565(script_state *r0){
+    script_state* r4 = r0;
+    int r0 = read16(r0);
+    switch(r0){
+        case 0:
+            // 0x41e68
+            // read16()
+            break;
+        case 1:
+            // 0x41e88
+            // read16()
+            // read16()
+            // read16()
+            break;
+        case 2:
+            // 0x41f24
+
+            break;
+        case 3:
+            // 0x41eca
+            // read16()
+            // read16()
+            // read16()
+            break;
+        case 4:
+            // 0x41f2e
+            // read16()
+            // read16()
+            break;
+        case 5:
+            // 0x41f68
+            // read16()
+            // read16()
+            // read16()
+            break;
+        case 6:
+            // 0x41fb4
+            // read16()
+        default:
+            break;
+    }
+    return 0;
+}
+
 int cmd_0649(script_state *r0){
     uint8_t a[8];
     script_state* r5 = r0;
