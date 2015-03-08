@@ -1,5 +1,5 @@
 
-from compileengine.decompiler import Decompiler
+from compileengine import Decompiler
 
 
 class Register(object):
@@ -44,7 +44,10 @@ class Thumb(Decompiler):
             value -= opp
         return value
 
-    def parse_next(self):
+    def get_command(self):
+        """Read the next command and return the split values for logic operation
+        """
+        # TODO: interface change
         cmd = self.read_value(2)
         if cmd & 0b1111100000000000 == 0b0001100000000000:
             # add/sub
@@ -92,7 +95,7 @@ class Thumb(Decompiler):
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
             self.seek(self.tell()+(cmd & 0x3FF))
-            return []
+            return [self.noop()]
         elif cmd & 0b1111000000000000 == 0b1111000000000000:
             # bl
             ofs = (cmd & 0x7FF) << 12
@@ -145,6 +148,17 @@ class Thumb(Decompiler):
                                    self.add(base, ofs), dest)]
         else:
             return [self.unknown(cmd, 2)]
+
+    def parse(self):
+        """Read expressoin until return
+
+        """
+        while True:
+            cmd_parts = self.get_command()
+
+            # TODO: logic
+            break
+        return self.lines
 
     def simplify(self, parsed):
         reparsed = []
