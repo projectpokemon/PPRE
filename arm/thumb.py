@@ -1,41 +1,9 @@
 
-from compileengine import Decompiler
+from arm.arm import ARM, Register
 
 
-class Register(object):
-    SLOT_LR = 14
-    SLOT_PC = 15
-
-    def __init__(self, slot):
-        self.slot = slot
-
-    def __str__(self):
-        if self.slot == self.SLOT_LR:
-            return 'engine.lr'
-        elif self.slot == self.SLOT_PC:
-            return 'engine.pc'
-        return 'engine.r{0}'.format(self.slot)
-
-    def __eq__(self, other):
-        return self.slot == other.slot
-
-
-class Thumb(Decompiler):
+class Thumb(ARM):
     stack = []
-
-    @staticmethod
-    def get_regs(data):
-        regs = []
-        for i in range(16):
-            if data & (1 << i):
-                regs.append(Register(i))
-        return regs
-
-    @staticmethod
-    def get_reg(data, high=False):
-        if high:
-            data += 8
-        return Register(data)
 
     @staticmethod
     def sign(value, bits):
@@ -148,17 +116,6 @@ class Thumb(Decompiler):
                                    self.add(base, ofs), dest)]
         else:
             return [self.unknown(cmd, 2)]
-
-    def parse(self):
-        """Read expressoin until return
-
-        """
-        while True:
-            cmd_parts = self.get_command()
-
-            # TODO: logic
-            break
-        return self.lines
 
     def simplify(self, parsed):
         reparsed = []
