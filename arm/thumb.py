@@ -1,4 +1,6 @@
 
+from __future__ import absolute_import
+
 from arm.arm import ARM, Register
 
 
@@ -58,7 +60,7 @@ class Thumb(ARM):
                 func = 'push'
                 if cmd & 0x100:
                     regs.append(Register(Register.SLOT_LR))
-            return [self.build(func, *regs)]
+            return [self.func(func, *regs)]
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
             self.seek(self.tell()+(cmd & 0x3FF))
@@ -68,13 +70,13 @@ class Thumb(ARM):
             ofs = (cmd & 0x7FF) << 12
             ofs += (self.read_value(2) & 0x7FF) << 1
             ofs = self.sign(ofs, 23) + self.tell()
-            return [self.build('bl', ofs)]
+            return [self.func('bl', ofs)]
         elif cmd & 0b1111111100000000 == 0b0100011100000000:
             # bx
             reg = self.get_reg((cmd >> 3) & 0x7, cmd & 0x40)
             if reg.slot == Register.SLOT_LR:
                 return [self.end()]
-            return [self.build('bx', reg)]
+            return [self.func('bx', reg)]
         elif cmd & 0b1111100000000000 == 0b0100100000000000:
             # ldr dest [pc, #v]
             pass
@@ -89,12 +91,12 @@ class Thumb(ARM):
             dest = self.get_reg(cmd & 7)
             if cmd & 0x800:
                 func = 'get'  # ldr
-                return [self.assign(dest, self.build(
+                return [self.assign(dest, self.func(
                     'ram.get_{0}'.format(size), self.add(base, ofs), level=0))]
             else:
                 func = 'set'  # str
-                return [self.build('ram.set_{0}'.format(size),
-                                   self.add(base, ofs), dest)]
+                return [self.func('ram.set_{0}'.format(size),
+                                  self.add(base, ofs), dest)]
         elif cmd & 0b1110000000000000 == 0b0110000000000000:
             # ldr/str Rd [Rb, #ofs]
             ofs = (cmd >> 6) & 0x1F
@@ -107,14 +109,13 @@ class Thumb(ARM):
                 ofs <<= 2
             if cmd & 0x800:
                 func = 'get'  # ldr
-                return [self.assign(dest, self.build(
+                return [self.assign(dest, self.func(
                     'ram.get_{0}'.format(size), self.add(base, ofs), level=0))]
             else:
                 func = 'set'  # str
-                return [self.build('ram.set_{0}'.format(size),
+                return [self.func('ram.set_{0}'.format(size),
                                    self.add(base, ofs), dest)]
-        else:
-            return [self.unknown(cmd, 2)]
+        return [self.unknown(cmd, 2)]
 
     def simplify(self, parsed):
         reparsed = []

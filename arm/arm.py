@@ -32,6 +32,14 @@ class ARM(Decompiler):
         return Register(data)
 
     @staticmethod
+    def get_regs(data):
+        regs = []
+        for i in range(16):
+            if data & (1 << i):
+                regs.append(Register(i))
+        return regs
+
+    @staticmethod
     def sign(value, bits):
         opp = 1 << bits
         if value & (opp >> 1):
@@ -43,12 +51,24 @@ class ARM(Decompiler):
         return [self.unknown(cmd, 4)]
 
     def parse(self):
-        """Read expressoin until return
+        """Read expression until return
 
         """
+        parsed = []
+        vars = []
         while True:
-            cmd_parts = self.parse_next()
-
-            # TODO: logic
-            break
+            if not parsed:
+                parsed = self.parse_next()
+            try:
+                expr = parsed.pop(0)
+            except IndexError:
+                # previous parse returned an empty list, request next
+                continue
+            try:
+                expr.dest
+            except AttributeError:
+                pass
+            self.lines.append(expr)
+            if expr.is_return():
+                break
         return self.lines
