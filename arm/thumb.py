@@ -12,10 +12,9 @@ class Thumb(ARM):
             value -= opp
         return value
 
-    def get_command(self):
+    def parse_next(self):
         """Read the next command and return the split values for logic operation
         """
-        # TODO: interface change
         cmd = self.read_value(2)
         if cmd & 0b1111100000000000 == 0b0001100000000000:
             # add/sub

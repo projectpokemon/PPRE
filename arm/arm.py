@@ -38,7 +38,7 @@ class ARM(Decompiler):
             value -= opp
         return value
 
-    def get_command(self):
+    def parse_next(self):
         cmd = self.read_value(4)
         return [self.unknown(cmd, 4)]
 
@@ -47,7 +47,7 @@ class ARM(Decompiler):
 
         """
         while True:
-            cmd_parts = self.get_command()
+            cmd_parts = self.parse_next()
 
             # TODO: logic
             break
