@@ -43,6 +43,8 @@ class ARM(Decompiler):
 
     def get_var(self, reg, left=False):
         try:
+            if left:
+                raise KeyError
             var = self.registers[reg.slot]
         except KeyError:
             var = Variable(reg)
@@ -67,7 +69,7 @@ class ARM(Decompiler):
         """Read expression until return
 
         """
-        parsed = []
+        parsed = self.prepare()
         while True:
             if not parsed:
                 parsed = self.parse_next()

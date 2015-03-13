@@ -32,21 +32,22 @@ class Thumb(ARM):
                 if isinstance(val, int) and not val and\
                         src_slot in self.registers:
                     self.registers[cmd & 0x7] = \
-                        self.registers[(cmd >> 3) & 0x7]
+                        self.registers[src_slot]
                     return []
-            dest = self.get_var(self.get_reg(cmd & 0x7), left=True)
+                    return [self.assign(self.registers[src_slot],
+                                        self.registers[src_slot])]
             src = self.get_var(self.get_reg(src_slot))
+            dest = self.get_var(self.get_reg(cmd & 0x7), left=True)
             return [self.assign(dest, self.statement(oper, src, val))]
             # TODO: cspr
         elif cmd & 0b1110000000000000 == 0b0010000000000000:
             # add/sub/cmp/mov immediate
             oper = (cmd >> 11) & 3
             reg = self.get_reg((cmd >> 8) & 0x7)
-            dest = self.get_var(reg, left=True)
             val = cmd & 0xFF
             if oper == 0:
                 # mov
-                return [self.assign(dest, val)]
+                return [self.assign(self.get_var(reg, left=True), val)]
             elif oper == 1:
                 # TODO: cmp
                 oper = '~'
@@ -55,6 +56,7 @@ class Thumb(ARM):
             elif oper == 3:
                 oper = '-'
             src = self.get_var(reg)
+            dest = self.get_var(reg, left=True)
             return [self.assign(dest, self.statement(oper, src, val))]
         elif cmd & 0b1111011000000000 == 0b1011010000000000:
             regs = self.get_regs(cmd & 0x7F)
@@ -62,12 +64,16 @@ class Thumb(ARM):
                 func = 'pop'
                 if cmd & 0x100:
                     regs.append(Register(Register.SLOT_PC))
-                    return [self.end()]  # TODO: return r0, r1, ...
+                    return [self.end(*[self.get_var(self.get_reg(idx))
+                                       for idx in xrange(4)])]
                     # (all regs not popped but used)
             else:
                 func = 'push'
                 if cmd & 0x100:
                     regs.append(Register(Register.SLOT_LR))
+                for reg in regs:
+                    self.stack.append(self.registers.pop(reg.slot, None))
+                    self.get_var(reg)
             return [self.func(func, *regs)]
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
@@ -78,7 +84,9 @@ class Thumb(ARM):
             ofs = (cmd & 0x7FF) << 12
             ofs += (self.read_value(2) & 0x7FF) << 1
             ofs = self.sign(ofs, 23) + self.tell()
-            return [self.func('bl', ofs)]
+            return [self.func('bl', ofs,
+                              *[self.get_var(self.get_reg(idx))
+                                for idx in xrange(4)])]
         elif cmd & 0b1111111100000000 == 0b0100011100000000:
             # bx
             reg = self.get_reg((cmd >> 3) & 0x7, cmd & 0x40)
@@ -95,8 +103,8 @@ class Thumb(ARM):
             else:
                 size = 'word'
             ofs = self.get_reg((cmd >> 6) & 7)
-            base = self.get_reg((cmd >> 3) & 7)
-            dest = self.get_reg(cmd & 7)
+            base = self.get_var(self.get_reg((cmd >> 3) & 7))
+            dest = self.get_var(self.get_reg(cmd & 7), left=True)
             if cmd & 0x800:
                 func = 'get'  # ldr
                 return [self.assign(dest, self.func(
@@ -108,8 +116,8 @@ class Thumb(ARM):
         elif cmd & 0b1110000000000000 == 0b0110000000000000:
             # ldr/str Rd [Rb, #ofs]
             ofs = (cmd >> 6) & 0x1F
-            base = self.get_reg((cmd >> 3) & 7)
-            dest = self.get_reg(cmd & 7)
+            base = self.get_var(self.get_reg((cmd >> 3) & 7))
+            dest = self.get_var(self.get_reg(cmd & 7), left=True)
             if cmd & 0x1000:
                 size = 'byte'
             else:
@@ -124,6 +132,11 @@ class Thumb(ARM):
                 return [self.func('ram.set_{0}'.format(size),
                                    self.add(base, ofs), dest)]
         return [self.unknown(cmd, 2)]
+
+    def prepare(self):
+        for idx in xrange(4):
+            self.get_var(self.get_reg(idx))
+        return []
 
     def simplify(self, parsed):
         reparsed = []
