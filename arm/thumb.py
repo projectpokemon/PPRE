@@ -20,8 +20,8 @@ class Thumb(ARM):
         cmd = self.read_value(2)
         if cmd & 0b1111100000000000 == 0b0001100000000000:
             # add/sub
-            src = self.get_reg((cmd >> 3) & 0x7)
-            dest = self.get_reg(cmd & 0x7)
+            src = self.get_var(self.get_reg((cmd >> 3) & 0x7))
+            dest = self.get_var(self.get_reg(cmd & 0x7), left=True)
             if cmd & 0x200:
                 oper = '-'
             else:
@@ -29,17 +29,18 @@ class Thumb(ARM):
             if cmd & 0x400:
                 val = (cmd >> 6) & 7
             else:
-                val = self.get_reg((cmd >> 6) & 0x7)
+                val = self.get_var(self.get_reg((cmd >> 6) & 0x7))
             return [self.assign(dest, self.statement(oper, src, val))]
             # TODO: cspr
         elif cmd & 0b1110000000000000 == 0b0010000000000000:
             # add/sub/cmp/mov immediate
             oper = (cmd >> 11) & 3
-            src = self.get_reg((cmd >> 8) & 0x7)
+            reg = self.get_reg((cmd >> 8) & 0x7)
+            dest = self.get_var(reg, left=True)
             val = cmd & 0xFF
             if oper == 0:
                 # mov
-                return [self.assign(src, val)]
+                return [self.assign(dest, val)]
             elif oper == 1:
                 # TODO: cmp
                 oper = '~'
@@ -47,7 +48,8 @@ class Thumb(ARM):
                 oper = '+'
             elif oper == 3:
                 oper = '-'
-            return [self.assign(src, self.statement(oper, src, val))]
+            src = self.get_var(reg)
+            return [self.assign(dest, self.statement(oper, src, val))]
         elif cmd & 0b1111011000000000 == 0b1011010000000000:
             regs = self.get_regs(cmd & 0x7F)
             if cmd & 0x800:

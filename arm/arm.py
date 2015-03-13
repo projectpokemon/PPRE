@@ -1,5 +1,5 @@
 
-from compileengine import Decompiler
+from compileengine import Decompiler, Variable
 
 
 class Register(object):
@@ -24,6 +24,8 @@ class ARM(Decompiler):
     """ARM 9 decompiler
 
     """
+    variables = []
+    registers = {}
 
     @staticmethod
     def get_reg(data, high=False):
@@ -38,6 +40,16 @@ class ARM(Decompiler):
             if data & (1 << i):
                 regs.append(Register(i))
         return regs
+
+    def get_var(self, reg, left=False):
+        try:
+            var = self.registers[reg.slot]
+        except KeyError:
+            var = Variable(reg)
+            self.variables.append(var)
+        if not left:
+            var.refcount += 1
+        return var
 
     @staticmethod
     def sign(value, bits):
@@ -55,7 +67,6 @@ class ARM(Decompiler):
 
         """
         parsed = []
-        vars = []
         while True:
             if not parsed:
                 parsed = self.parse_next()
@@ -64,11 +75,10 @@ class ARM(Decompiler):
             except IndexError:
                 # previous parse returned an empty list, request next
                 continue
-            try:
-                expr.dest
-            except AttributeError:
-                pass
             self.lines.append(expr)
             if expr.is_return():
                 break
+        var_name = Variable.name_generator()
+        for variable in self.variables:
+            variable.name = var_name.next()
         return self.lines
