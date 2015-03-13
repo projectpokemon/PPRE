@@ -47,6 +47,7 @@ class ARM(Decompiler):
         except KeyError:
             var = Variable(reg)
             self.variables.append(var)
+            self.registers[reg.slot] = var
         if not left:
             var.refcount += 1
         return var

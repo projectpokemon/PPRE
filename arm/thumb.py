@@ -20,16 +20,22 @@ class Thumb(ARM):
         cmd = self.read_value(2)
         if cmd & 0b1111100000000000 == 0b0001100000000000:
             # add/sub
-            src = self.get_var(self.get_reg((cmd >> 3) & 0x7))
-            dest = self.get_var(self.get_reg(cmd & 0x7), left=True)
-            if cmd & 0x200:
-                oper = '-'
-            else:
-                oper = '+'
+            src_slot = (cmd >> 3) & 0x7
             if cmd & 0x400:
                 val = (cmd >> 6) & 7
             else:
                 val = self.get_var(self.get_reg((cmd >> 6) & 0x7))
+            if cmd & 0x200:
+                oper = '-'
+            else:
+                oper = '+'
+                if isinstance(val, int) and not val and\
+                        src_slot in self.registers:
+                    self.registers[cmd & 0x7] = \
+                        self.registers[(cmd >> 3) & 0x7]
+                    return []
+            dest = self.get_var(self.get_reg(cmd & 0x7), left=True)
+            src = self.get_var(self.get_reg(src_slot))
             return [self.assign(dest, self.statement(oper, src, val))]
             # TODO: cspr
         elif cmd & 0b1110000000000000 == 0b0010000000000000:
