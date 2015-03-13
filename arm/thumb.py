@@ -64,6 +64,13 @@ class Thumb(ARM):
                 func = 'pop'
                 if cmd & 0x100:
                     regs.append(Register(Register.SLOT_PC))
+                for reg in regs:
+                    var = self.stack.pop()
+                    if var is not None:
+                        self.registers[reg.slot] = var
+                    else:
+                        self.registers.pop(reg.slot, None)
+                if cmd & 0x100:
                     return [self.end(*[self.get_var(self.get_reg(idx))
                                        for idx in xrange(4)])]
                     # (all regs not popped but used)
@@ -136,6 +143,7 @@ class Thumb(ARM):
     def prepare(self):
         for idx in xrange(4):
             self.get_var(self.get_reg(idx))
+        self.registers[0].name = 'state'
         return []
 
     def simplify(self, parsed):
