@@ -78,16 +78,23 @@ class ARM(Decompiler):
             except IndexError:
                 # previous parse returned an empty list, request next
                 continue
-            try:
-                if expr.dest.refcount < 2:
-                    continue
-            except:
-                pass
             self.lines.append(expr)
             if expr.is_return():
                 break
+        self.lines = self.simplify(self.lines)
         var_name = Variable.name_generator()
         for variable in self.variables:
             if variable.name is None:
                 variable.name = var_name.next()
         return self.lines
+
+    def simplify(self, parsed):
+        reparsed = []
+        for expr in parsed:
+            try:
+                if expr.dest.refcount < 2:
+                    continue
+            except:
+                pass
+            reparsed.append(expr)
+        return reparsed

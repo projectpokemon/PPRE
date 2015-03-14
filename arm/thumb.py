@@ -14,6 +14,13 @@ class Thumb(ARM):
             value -= opp
         return value
 
+    def get_args4(self, left=False):
+        args = [self.get_var(self.get_reg(idx), left) for idx in xrange(4)]
+        if 0 and left:
+            for arg in args:
+                arg.persist = True
+        return args
+
     def parse_next(self):
         """Read the next command and return the split values for logic operation
         """
@@ -92,9 +99,10 @@ class Thumb(ARM):
             ofs = (cmd & 0x7FF) << 12
             ofs += (self.read_value(2) & 0x7FF) << 1
             ofs = self.sign(ofs, 23) + self.tell()
-            return [self.func('funcs.func_{0:x}'.format(ofs),
-                              *[self.get_var(self.get_reg(idx))
-                                for idx in xrange(4)])]
+            return [self.func('funcs.func_{0:x}'.format(ofs), *self.get_args4())]
+            return [self.assign(self.get_args4(True),
+                                self.func('funcs.func_{0:x}'.format(ofs),
+                                          *self.get_args4()))]
             return [self.func('bl', ofs,
                               *[self.get_var(self.get_reg(idx))
                                 for idx in xrange(4)])]
@@ -153,7 +161,7 @@ class Thumb(ARM):
         self.registers[0].name = 'state'
         return []
 
-    def simplify(self, parsed):
+    def simplify_x(self, parsed):
         reparsed = []
         for expr in parsed:
             # recurse
