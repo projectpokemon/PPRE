@@ -25,7 +25,19 @@ class Thumb(ARM):
         """Read the next command and return the split values for logic operation
         """
         cmd = self.read_value(2)
-        if cmd & 0b1111100000000000 == 0b0001100000000000:
+        if cmd & 0b1111000000000000 == 0b0000000000000000:
+            # lsl/lsr
+            # TODO: asr: & 0b1110000000000000
+            oper = (cmd >> 11) & 0x3
+            val = (cmd >> 6) & 0x1F
+            if oper == 0:
+                oper = '>>'
+            elif oper == 1:
+                oper = '<<'
+            src = self.get_var(self.get_reg(cmd & 0x7))
+            dest = self.get_var(self.get_reg((cmd >> 3) & 0x7), left=True)
+            return [self.assign(dest, self.statement(oper, src, val))]
+        elif cmd & 0b1111100000000000 == 0b0001100000000000:
             # add/sub
             src_slot = (cmd >> 3) & 0x7
             if cmd & 0x400:
