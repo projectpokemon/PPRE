@@ -124,12 +124,15 @@ class Thumb(ARM):
                 func = 'set'  # str
                 return [self.func('ram.set_{0}'.format(size),
                                   self.add(base, ofs), dest)]
-        elif cmd & 0b1110000000000000 == 0b0110000000000000:
+        elif cmd & 0b1110000000000000 == 0b0110000000000000 or\
+                cmd & 0b1111000000000000 == 0b1000000000000000:
             # ldr/str Rd [Rb, #ofs]
             ofs = (cmd >> 6) & 0x1F
             base = self.get_var(self.get_reg((cmd >> 3) & 7))
             dest = self.get_var(self.get_reg(cmd & 7), left=True)
-            if cmd & 0x1000:
+            if cmd & 0x8000:
+                size = 'halfword'
+            elif cmd & 0x1000:
                 size = 'byte'
             else:
                 size = 'word'
@@ -141,7 +144,7 @@ class Thumb(ARM):
             else:
                 func = 'set'  # str
                 return [self.func('ram.set_{0}'.format(size),
-                                   self.add(base, ofs), dest)]
+                                  self.add(base, ofs), dest)]
         return [self.unknown(cmd, 2)]
 
     def prepare(self):
