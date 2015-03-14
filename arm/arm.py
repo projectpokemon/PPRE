@@ -92,7 +92,7 @@ class ARM(Decompiler):
         reparsed = []
         for expr in parsed:
             try:
-                if expr.dest.refcount < 2:
+                if expr.dest.refcount == 1:
                     continue
             except:
                 pass

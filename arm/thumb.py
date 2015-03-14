@@ -125,15 +125,21 @@ class Thumb(ARM):
                 return [self.end()]
             return [self.func('bx', reg)]
         elif cmd & 0b1111100000000000 == 0b0100100000000000:
-            # ldr dest [pc, #v]
-            pass
+            # ldr dest [pc, #ofs]
+            current = self.tell()
+            ofs = cmd & 0x7F
+            dest = self.get_var(self.get_reg((cmd >> 8) & 7), left=True)
+            self.seek(current+ofs)
+            val = self.read_value(4)
+            self.seek(current)
+            return [self.assign(dest, val)]
         elif cmd & 0b1111001000000000 == 0b0101000000000000:
             # ldr/str Rd [Rb, Ro]
             if cmd & 0x400:
                 size = 'byte'
             else:
                 size = 'word'
-            ofs = self.get_reg((cmd >> 6) & 7)
+            ofs = self.get_var(self.get_reg((cmd >> 6) & 7))
             base = self.get_var(self.get_reg((cmd >> 3) & 7))
             dest = self.get_var(self.get_reg(cmd & 7), left=True)
             if cmd & 0x800:
