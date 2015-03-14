@@ -81,7 +81,8 @@ class Thumb(ARM):
                 for reg in regs:
                     self.stack.append(self.registers.pop(reg.slot, None))
                     self.get_var(reg)
-            return [self.func(func, *regs)]
+            return []
+            # return [self.func(func, *regs)]
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
             self.seek(self.tell()+(cmd & 0x3FF))
@@ -91,6 +92,9 @@ class Thumb(ARM):
             ofs = (cmd & 0x7FF) << 12
             ofs += (self.read_value(2) & 0x7FF) << 1
             ofs = self.sign(ofs, 23) + self.tell()
+            return [self.func('funcs.func_{0:x}'.format(ofs),
+                              *[self.get_var(self.get_reg(idx))
+                                for idx in xrange(4)])]
             return [self.func('bl', ofs,
                               *[self.get_var(self.get_reg(idx))
                                 for idx in xrange(4)])]
