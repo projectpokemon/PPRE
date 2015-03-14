@@ -64,7 +64,7 @@ class Thumb(ARM):
                 func = 'pop'
                 if cmd & 0x100:
                     regs.append(Register(Register.SLOT_PC))
-                for reg in regs:
+                for reg in regs[::-1]:
                     var = self.stack.pop()
                     if var is not None:
                         self.registers[reg.slot] = var
