@@ -3,6 +3,8 @@ from __future__ import absolute_import
 
 from arm.arm import ARM, Register
 
+CMP_OPER = '<=>'
+
 
 class Thumb(ARM):
     stack = []
@@ -67,14 +69,15 @@ class Thumb(ARM):
             if oper == 0:
                 # mov
                 return [self.assign(self.get_var(reg, left=True), val)]
-            elif oper == 1:
+            src = self.get_var(reg)
+            if oper == 1:
                 # TODO: cmp
-                oper = '~'
+                self.cspr_state = self.statement(CMP_OPER, src, val)
+                return []
             elif oper == 2:
                 oper = '+'
             elif oper == 3:
                 oper = '-'
-            src = self.get_var(reg)
             dest = self.get_var(reg, left=True)
             return [self.assign(dest, self.statement(oper, src, val))]
         elif cmd & 0b1111011000000000 == 0b1011010000000000:
@@ -102,6 +105,11 @@ class Thumb(ARM):
                     self.get_var(reg)
             return []
             # return [self.func(func, *regs)]
+        elif cmd & 0b1111000000000000 == 0b1101000000000000:
+            # b conditional
+            # TODO: read from cspr_state
+            ofs = self.tell()+self.sign(cmd & 0xFF, 8)+6
+            return [self.func('bc', ofs)]
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
             self.seek(self.tell()+(cmd & 0x3FF))
