@@ -7,8 +7,6 @@ CMP_OPER = '<=>'
 
 
 class Thumb(ARM):
-    stack = []
-
     @staticmethod
     def sign(value, bits):
         opp = 1 << bits

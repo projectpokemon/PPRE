@@ -24,8 +24,21 @@ class ARM(Decompiler):
     """ARM 9 decompiler
 
     """
-    variables = []
-    registers = {}
+    def __init__(self, handle, level=0, variables=None, registers=None,
+                 stack=None):
+        Decompiler.__init__(self, handle, level)
+        if variables is None:
+            self.variables = {}
+        else:
+            self.variables = variables
+        if registers is None:
+            self.registers = []
+        else:
+            self.registers = registers
+        if stack is None:
+            self.stack = []
+        else:
+            self.stack = stack
 
     @staticmethod
     def get_reg(data, high=False):
