@@ -23,6 +23,23 @@ class Thumb(ARM):
                 arg.persist = True
         return args
 
+    def get_condition(self, data):
+        statement = self.cspr_state
+        try:
+            if self.cspr_state.operator != CMP_OPER:
+                raise Exception
+        except:
+            statement = self.statement(CMP_OPER, self.cspr_state, 0)
+        statement.operator = {
+            0: '==',
+            1: '!=',
+            2: '>=',
+            3: '<',
+            8: '>',
+            9: '<='
+        }.get(data)
+        return [self.condition(statement)]
+
     def parse_next(self):
         """Read the next command and return the split values for logic operation
         """
@@ -107,9 +124,8 @@ class Thumb(ARM):
             # return [self.func(func, *regs)]
         elif cmd & 0b1111000000000000 == 0b1101000000000000:
             # b conditional
-            # TODO: read from cspr_state
             ofs = self.tell()+self.sign(cmd & 0xFF, 8)+6
-            return [self.func('bc', ofs)]
+            return self.get_condition((cmd >> 8) & 0xF)+[self.func('bc', ofs, level=self.level+1)]
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
             self.seek(self.tell()+(cmd & 0x3FF))
