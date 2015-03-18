@@ -96,7 +96,7 @@ class ARM(Decompiler):
         if not self.deferred:
             var_name = Variable.name_generator()
             for variable in self.variables:
-                if variable.name is None:
+                if variable.name is None and variable.refcount != 1:
                     variable.name = var_name.next()
         return self.lines
 
