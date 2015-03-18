@@ -122,13 +122,14 @@ class Thumb(ARM):
             # return [self.func(func, *regs)]
         elif cmd & 0b1111000000000000 == 0b1101000000000000:
             # b conditional
-            ofs = self.tell()+self.sign(cmd & 0xFF, 8)+6
+            ofs = self.tell()+(self.sign(cmd & 0xFF, 8) << 1)+2
             exprs = self.get_condition((cmd >> 8) & 0xF)
             restore = self.tell()
             if ofs > restore:
                 self.seek(ofs)
                 block = self.branch_duplicate()
                 block.level = self.level+1
+                block.start = ofs
                 block.parse()
                 exprs.append(block)
             else:
