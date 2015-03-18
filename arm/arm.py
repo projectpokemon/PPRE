@@ -24,22 +24,19 @@ class ARM(Decompiler):
     """ARM 9 decompiler
 
     """
-    def __init__(self, handle, level=0, variables=None, registers=None,
-                 stack=None):
-        Decompiler.__init__(self, handle, level)
-        if variables is None:
-            self.variables = {}
-        else:
-            self.variables = variables
-        if registers is None:
-            self.registers = []
-        else:
-            self.registers = registers
-        if stack is None:
-            self.stack = []
-        else:
-            self.stack = stack
-        self.deferred = False
+    variables = []
+    registers = {}
+    stack = []
+    deferred = False
+
+    def branch_duplicate(self):
+        dup = self.__class__(self.handle, self.level)
+        dup.start = self.start
+        dup.stack = self.stack[:]
+        dup.deferred = True
+        dup.variables = self.variables
+        dup.registers = self.registers.copy()
+        return dup
 
     @staticmethod
     def get_reg(data, high=False):

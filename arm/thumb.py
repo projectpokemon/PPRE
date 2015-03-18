@@ -127,12 +127,8 @@ class Thumb(ARM):
             restore = self.tell()
             if ofs > restore:
                 self.seek(ofs)
-                block = Thumb(self.handle, self.level+1,
-                              variables=self.variables,
-                              registers=self.registers,
-                              stack=self.stack[:])
-                block.start = ofs
-                block.deferred = True
+                block = self.branch_duplicate()
+                block.level = self.level+1
                 block.parse()
                 exprs.append(block)
             else:
