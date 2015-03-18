@@ -123,7 +123,23 @@ class Thumb(ARM):
         elif cmd & 0b1111000000000000 == 0b1101000000000000:
             # b conditional
             ofs = self.tell()+self.sign(cmd & 0xFF, 8)+6
-            return self.get_condition((cmd >> 8) & 0xF)+[self.func('bc', ofs, level=self.level+1)]
+            exprs = self.get_condition((cmd >> 8) & 0xF)
+            restore = self.tell()
+            if ofs > restore:
+                self.seek(ofs)
+                block = Thumb(self.handle, self.level+1,
+                              variables=self.variables,
+                              registers=self.registers,
+                              stack=self.stack[:])
+                block.start = ofs
+                block.deferred = True
+                block.parse()
+                exprs.append(block)
+            else:
+                # TODO: ofs < restore -> loop
+                exprs += [self.func('bc', ofs, level=self.level+1)]
+            self.seek(restore)
+            return exprs
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
             self.seek(self.tell()+(cmd & 0x3FF))
@@ -177,7 +193,6 @@ class Thumb(ARM):
             # ldr/str Rd [Rb, #ofs]
             ofs = (cmd >> 6) & 0x1F
             base = self.get_var(self.get_reg((cmd >> 3) & 7))
-            dest = self.get_var(self.get_reg(cmd & 7), left=True)
             if cmd & 0x8000:
                 size = 'halfword'
             elif cmd & 0x1000:
@@ -187,18 +202,21 @@ class Thumb(ARM):
                 ofs <<= 2
             if cmd & 0x800:
                 func = 'get'  # ldr
+                dest = self.get_var(self.get_reg(cmd & 7), left=True)
                 return [self.assign(dest, self.func(
                     'ram.get_{0}'.format(size), self.add(base, ofs), level=0))]
             else:
                 func = 'set'  # str
+                src = self.get_var(self.get_reg(cmd & 7))
                 return [self.func('ram.set_{0}'.format(size),
-                                  self.add(base, ofs), dest)]
+                                  self.add(base, ofs), src)]
         return [self.unknown(cmd, 2)]
 
     def prepare(self):
-        for idx in xrange(4):
-            self.get_var(self.get_reg(idx))
-        self.registers[0].name = 'state'
+        if not self.deferred:
+            for idx in xrange(4):
+                self.get_var(self.get_reg(idx))
+            self.registers[0].name = 'state'
         return []
 
     def simplify_x(self, parsed):

@@ -39,6 +39,7 @@ class ARM(Decompiler):
             self.stack = []
         else:
             self.stack = stack
+        self.deferred = False
 
     @staticmethod
     def get_reg(data, high=False):
@@ -95,10 +96,11 @@ class ARM(Decompiler):
             if expr.is_return():
                 break
         self.lines = self.simplify(self.lines)
-        var_name = Variable.name_generator()
-        for variable in self.variables:
-            if variable.name is None:
-                variable.name = var_name.next()
+        if not self.deferred:
+            var_name = Variable.name_generator()
+            for variable in self.variables:
+                if variable.name is None:
+                    variable.name = var_name.next()
         return self.lines
 
     def simplify(self, parsed):
