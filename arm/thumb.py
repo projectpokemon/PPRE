@@ -16,8 +16,8 @@ class Thumb(ARM):
 
     def get_args4(self, left=False):
         args = [self.get_var(self.get_reg(idx), left) for idx in xrange(4)]
-        if 0 and left:
-            for arg in args:
+        if left:
+            for idx, arg in enumerate(args):
                 arg.persist = True
         return args
 
@@ -130,6 +130,7 @@ class Thumb(ARM):
                 block = self.branch_duplicate()
                 block.level = self.level+1
                 block.start = ofs
+                block.cspr_state = self.cspr_state
                 block.parse()
                 exprs.append(block)
             else:
@@ -139,17 +140,18 @@ class Thumb(ARM):
             return exprs
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
-            self.seek(self.tell()+(cmd & 0x3FF))
+            self.seek(self.tell()+((cmd & 0x3FF) << 1)+2)
             return [self.noop()]
         elif cmd & 0b1111000000000000 == 0b1111000000000000:
             # bl
             ofs = (cmd & 0x7FF) << 12
             ofs += (self.read_value(2) & 0x7FF) << 1
             ofs = self.sign(ofs, 23) + self.tell()
-            return [self.func('funcs.func_{0:x}'.format(ofs), *self.get_args4())]
+            # return [self.func('funcs.func_{0:x}'.format(ofs), *self.get_args4())]
+            args = self.get_args4()
             return [self.assign(self.get_args4(True),
                                 self.func('funcs.func_{0:x}'.format(ofs),
-                                          *self.get_args4()))]
+                                          *args, level=0))]
             return [self.func('bl', ofs,
                               *[self.get_var(self.get_reg(idx))
                                 for idx in xrange(4)])]

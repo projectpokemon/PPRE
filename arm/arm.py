@@ -95,9 +95,14 @@ class ARM(Decompiler):
         self.lines = self.simplify(self.lines)
         if not self.deferred:
             var_name = Variable.name_generator()
+            var_return_name = Variable.name_generator('ret_')
             for variable in self.variables:
-                if variable.name is None and variable.refcount != 1:
+                if variable.name is None and variable.refcount == 0:
+                    variable.name = 'unused'
+                elif variable.name is None and variable.refcount != 1:
                     variable.name = var_name.next()
+                elif variable.name is None and variable.persist:
+                    variable.name = var_return_name.next()
         return self.lines
 
     def simplify(self, parsed):
