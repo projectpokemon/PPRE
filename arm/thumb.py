@@ -32,10 +32,10 @@ class Thumb(ARM):
         statement.operator = {
             0: '==',
             1: '!=',
-            2: '>=',
-            3: '<',
-            8: '>',
-            9: '<='
+            10: '>=',
+            11: '<',
+            12: '>',
+            13: '<='
         }.get(data)
         return [self.condition(statement)]
 
