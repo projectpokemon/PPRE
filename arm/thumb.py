@@ -19,6 +19,7 @@ class Thumb(ARM):
         if left:
             for idx, arg in enumerate(args):
                 arg.persist = True
+                arg.fallback_name = 'ret_{0}'.format(idx)
         return args
 
     def get_condition(self, data):

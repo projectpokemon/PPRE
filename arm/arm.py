@@ -101,8 +101,8 @@ class ARM(Decompiler):
                     variable.name = 'unused'
                 elif variable.name is None and variable.refcount != 1:
                     variable.name = var_name.next()
-                elif variable.name is None and variable.persist:
-                    variable.name = var_return_name.next()
+                # elif variable.name is None and variable.persist:
+                #     variable.name = var_return_name.next()
         return self.lines
 
     def simplify(self, parsed):
