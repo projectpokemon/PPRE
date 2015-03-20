@@ -353,23 +353,23 @@ class Interface(BaseInterface):
 
     def title(self, text, color=None):
         self.widget.setWindowTitle(text)
-        if color is not None:
-            try:
-                color = int(color[1:7], 16)
-            except:
-                pass
-            red = (color >> 16) & 0xFF
-            green = (color >> 8) & 0xFF
-            blue = color & 0xFF
-            bands = []
-            for shift in range(16, -1, -8):
-                tmp = (color >> shift) & 0xFF
-                bands.append(str(tmp + ((190-tmp)/1.5)))
-            color = 'rgb({0})'.format(','.join(bands))
-            self.widget.setAutoFillBackground(False)
-            self.widget.setStyleSheet("""
-            QMainWindow {{ background-color: {color}; }}
-            """.format(color=color))
+        # if color is not None:
+        #    try:
+        #        color = int(color[1:7], 16)
+        #    except:
+        #        pass
+        #    red = (color >> 16) & 0xFF
+        #    green = (color >> 8) & 0xFF
+        #    blue = color & 0xFF
+        #    bands = []
+        #    for shift in range(16, -1, -8):
+        #        tmp = (color >> shift) & 0xFF
+        #        bands.append(str(tmp + ((190-tmp)/1.5)))
+        #    color = 'rgb({0})'.format(','.join(bands))
+        #    self.widget.setAutoFillBackground(False)
+        #    self.widget.setStyleSheet("""
+        #    QMainWindow {{ background-color: {color}; }}
+        #    """.format(color=color))
 
     def icon(self, filename):
         icon = QtWidgets.QIcon()
