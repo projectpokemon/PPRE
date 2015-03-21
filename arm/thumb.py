@@ -58,6 +58,7 @@ class Thumb(ARM):
         elif cmd & 0b1111100000000000 == 0b0001100000000000:
             # add/sub
             src_slot = (cmd >> 3) & 0x7
+            dest_slot = cmd & 0x7
             if cmd & 0x400:
                 val = (cmd >> 6) & 7
             else:
@@ -74,7 +75,10 @@ class Thumb(ARM):
                     return [self.assign(self.registers[src_slot],
                                         self.registers[src_slot])]
             src = self.get_var(self.get_reg(src_slot))
-            dest = self.get_var(self.get_reg(cmd & 0x7), left=True)
+            if src_slot == dest_slot:
+                dest = src
+            else:
+                dest = self.get_var(self.get_reg(cmd & 0x7), left=True)
             return [self.assign(dest, self.statement(oper, src, val))]
             # TODO: cspr
         elif cmd & 0b1110000000000000 == 0b0010000000000000:
@@ -94,7 +98,8 @@ class Thumb(ARM):
                 oper = '+'
             elif oper == 3:
                 oper = '-'
-            dest = self.get_var(reg, left=True)
+            # dest = self.get_var(reg, left=True)
+            dest = src
             return [self.assign(dest, self.statement(oper, src, val))]
         elif cmd & 0b1111011000000000 == 0b1011010000000000:
             regs = self.get_regs(cmd & 0x7F)
