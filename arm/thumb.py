@@ -101,6 +101,13 @@ class Thumb(ARM):
             # dest = self.get_var(reg, left=True)
             dest = src
             return [self.assign(dest, self.statement(oper, src, val))]
+        elif cmd & 0b1111110000000000 == 0b0100000000000000:
+            oper = (cmd >> 6) & 0xF
+            if oper == 0b1010:
+                src = self.get_var(self.get_reg((cmd >> 3) & 7))
+                src2 = self.get_var(self.get_reg(cmd & 7))
+                self.cspr_state = self.statement(CMP_OPER, src, src2)
+                return []
         elif cmd & 0b1111011000000000 == 0b1011010000000000:
             regs = self.get_regs(cmd & 0x7F)
             if cmd & 0x800:
