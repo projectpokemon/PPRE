@@ -82,6 +82,8 @@ class ARM(Decompiler):
         """
         parsed = self.prepare()
         while True:
+            if self.stop is not None and self.tell() >= self.stop:
+                break
             if not parsed:
                 parsed = self.parse_next()
             try:
