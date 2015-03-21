@@ -136,7 +136,16 @@ class Thumb(ARM):
                 exprs.append(block)
             else:
                 # TODO: ofs < restore -> loop
-                exprs += [self.func('bc', ofs, level=self.level+1)]
+                # exprs += [self.func('bc', ofs, level=self.level+1)]
+                exprs[0].loop_type = exprs[0].TYPE_WHILE
+                self.seek(ofs)
+                block = self.branch_duplicate()
+                block.stop = restore-2
+                block.level = self.level+1
+                block.start = ofs
+                block.cspr_state = self.cspr_state
+                block.parse()
+                exprs.append(block)
             self.seek(restore)
             return exprs
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
