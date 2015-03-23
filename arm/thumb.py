@@ -108,6 +108,21 @@ class Thumb(ARM):
                 src2 = self.get_var(self.get_reg(cmd & 7))
                 self.cspr_state = self.statement(CMP_OPER, src, src2)
                 return []
+        elif cmd & 0b1111000000000000 == 0b1010000000000000:
+            # Rd = (pc/sp)+b
+            dest_reg = self.get_reg((cmd >> 8) & 0x7)
+            ofs = (cmd & 0xFF) << 2
+            if cmd & 0x800:
+                # sp
+                src = self.get_var(self.get_reg(14))
+                return [self.assign(self.get_var(dest_reg, left=True),
+                                    self.add(src, ofs))]
+            else:
+                # pc
+                current = self.tell()
+                # TODO: validate offset
+                return [self.assign(self.get_var(dest_reg, left=True),
+                                    current+ofs+2)]
         elif cmd & 0b1111111100000000 == 0b1011000000000000:
             # sp add/sub
             ofs = (cmd & 0x7F) << 2
@@ -244,11 +259,12 @@ class Thumb(ARM):
 
     def prepare(self):
         if not self.deferred:
-            for idx in [0, 1, 2, 3, 13, 14]:
+            for idx in [0, 1, 2, 3, 13, 14, 15]:
                 self.get_var(self.get_reg(idx))
             self.registers[0].name = 'state'
             self.registers[13].name = 'stack'
             self.registers[14].name = 'lr'
+            self.registers[15].name = 'pc'
         return []
 
     def simplify_x(self, parsed):
