@@ -75,7 +75,7 @@ class Thumb(ARM):
                     return [self.assign(self.registers[src_slot],
                                         self.registers[src_slot])]
             src = self.get_var(self.get_reg(src_slot))
-            if src_slot == dest_slot:
+            if src_slot == dest_slot and not src.const:
                 dest = src
             else:
                 dest = self.get_var(self.get_reg(cmd & 0x7), left=True)
@@ -99,7 +99,10 @@ class Thumb(ARM):
             elif oper == 3:
                 oper = '-'
             # dest = self.get_var(reg, left=True)
-            dest = src
+            if not src.const:
+                dest = src
+            else:
+                dest = self.get_var(reg, left=True)
             return [self.assign(dest, self.statement(oper, src, val))]
         elif cmd & 0b1111110000000000 == 0b0100000000000000:
             oper = (cmd >> 6) & 0xF
@@ -260,7 +263,8 @@ class Thumb(ARM):
     def prepare(self):
         if not self.deferred:
             for idx in [0, 1, 2, 3, 13, 14, 15]:
-                self.get_var(self.get_reg(idx))
+                var = self.get_var(self.get_reg(idx))
+                var.const = True
             self.registers[0].name = 'state'
             self.registers[13].name = 'stack'
             self.registers[14].name = 'lr'
