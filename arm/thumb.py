@@ -36,7 +36,7 @@ class Thumb(ARM):
             11: '<',
             12: '>',
             13: '<='
-        }.get(data)
+        }.get(data, CMP_OPER)
         return [self.condition(statement)]
 
     def parse_next(self):
@@ -304,3 +304,20 @@ class Thumb(ARM):
                     continue
             reparsed.append(expr)
         return reparsed
+
+
+if __name__ == '__main__':
+    import sys
+
+    try:
+        prog, fname, offset = sys.argv
+    except:
+        print('Usage: {program} <binary> <offset>'.format(program=sys.argv[0]))
+
+    with open(fname) as handle:
+        handle.seek(int(offset, 0))
+        decompiler = Thumb(handle)
+        decompiler.parse()
+
+        for line in decompiler.lines:
+            print line
