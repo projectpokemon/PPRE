@@ -210,6 +210,19 @@ class Thumb(ARM):
             if reg.slot == Register.SLOT_LR:
                 return [self.end()]
             return [self.func('bx', reg)]
+        elif cmd & 0b1111110000000000 == 0b0100010000000000:
+            src_reg = self.get_reg((cmd >> 3) & 7, cmd & (1 << 7))
+            dest_reg = self.get_reg(cmd & 7, cmd & (1 << 6))
+            src = self.get_var(src_reg)
+            if src_reg != dest_reg:
+                dest = self.get_var(dest_reg, left=True)
+            else:
+                dest = src
+            oper = (cmd >> 8) & 0x3
+            if oper == 0b00:
+                return [self.assign(dest, self.statement('+', src, val))]
+            elif oper == 0b10:
+                return [self.assign(dest, src)]
         elif cmd & 0b1111100000000000 == 0b0100100000000000:
             # ldr dest [pc, #ofs]
             current = self.tell()
