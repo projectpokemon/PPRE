@@ -117,7 +117,7 @@ class Thumb(ARM):
             ofs = (cmd & 0xFF) << 2
             if cmd & 0x800:
                 # sp
-                src = self.get_var(self.get_reg(14))
+                src = self.get_var(self.get_reg(13))
                 return [self.assign(self.get_var(dest_reg, left=True),
                                     self.add(src, ofs))]
             else:
