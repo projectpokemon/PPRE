@@ -1,24 +1,45 @@
 
-import os, subprocess
+import os
+import subprocess
 
 from compat import input
 
-if os.name == "nt":
-    binary = "bin/ndstool.exe"
+if os.name == 'nt':
+    binary = os.path.join(os.path.dirname(__file__), 'bin', 'ndstool.exe')
 else:
-    binary = "bin/ndstool"
-    
-def dump(f, d):
-    subprocess.call([binary, "-x", f, "-7", d+"/arm7.bin", 
-        "-y7", d+"/overarm7.bin", "-9", d+"/arm9.bin", "-y9", d+"/overarm9.bin",
-        "-y", d+"/overlays", "-t", d+"/banner.bin", "-h", d+"/header.bin",
-        "-d", d+"/fs"])
+    binary = os.path.join(os.path.dirname(__file__), 'bin', 'ndstool')
 
-def build(f, d):
-    subprocess.call([binary, "-c", f, "-7", d+"/arm7.bin", 
-        "-y7", d+"/overarm7.bin", "-9", d+"/arm9.bin", "-y9", d+"/overarm9.bin",
-        "-y", d+"/overlays", "-t", d+"/banner.bin", "-h", d+"/header.bin",
-        "-d", d+"/fs"])
+
+def dump(fname, directory):
+    subprocess.call([binary, '-x', fname,
+                     '-7', os.path.join(directory, 'arm7.bin'),
+                     '-y7', os.path.join(directory, 'overarm7.bin'),
+                     '-9', os.path.join(directory, 'arm9.bin'),
+                     '-y9', os.path.join(directory, 'overarm9.bin'),
+                     '-y', os.path.join(directory, 'overlays'),
+                     '-t', os.path.join(directory, 'banner.bin'),
+                     '-h', os.path.join(directory, 'header.bin'),
+                     '-d', os.path.join(directory, 'fs')
+                     ])
+
+
+def build(fname, directory):
+    arm9 = os.path.join(directory, 'arm9.dec.bin')
+    try:
+        if not os.path.getsize(arm9):
+            raise OSError()
+    except OSError:
+        arm9 = os.path.join(directory, 'arm9.bin')
+    subprocess.call([binary, '-c', fname,
+                     '-7', os.path.join(directory, 'arm7.bin'),
+                     '-y7', os.path.join(directory, 'overarm7.bin'),
+                     '-9', arm9,
+                     '-y9', os.path.join(directory, 'overarm9.bin'),
+                     '-y', os.path.join(directory, 'overlays'),
+                     '-t', os.path.join(directory, 'banner.bin'),
+                     '-h', os.path.join(directory, 'header.bin'),
+                     '-d', os.path.join(directory, 'fs')
+                     ])
 
 
 if __name__ == '__main__':
