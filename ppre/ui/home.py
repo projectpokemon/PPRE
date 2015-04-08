@@ -267,7 +267,7 @@ class HomeUserInterface(BaseUserInterface):
             prompt.focus('file')
 
     def export(self):
-        print(self.session.game.to_json())
+        self.session.game.to_file()
 
     def export_as(self):
         self.set_game(Game())

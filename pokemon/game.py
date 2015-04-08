@@ -4,6 +4,7 @@ import json
 import os
 
 import ndstool
+from compression import blz
 from ctr import ctrtool
 from ctr.header_bin import HeaderBin as CTRHeaderBin
 from ntr.header_bin import HeaderBin as NTRHeaderBin
@@ -118,6 +119,8 @@ class Project(Editable):
         self.restrict('description')
         self.version = 0.1
         self.restrict('version')
+        self.output = 'edit.nds'
+        self.restrict('output')
 
 
 class Files(Editable):
@@ -180,6 +183,8 @@ class Game(Editable, Version):
         game.color = GAME_COLORS[game_name]
         game.header = header
         game.load_config()
+        if game < GEN_VI:
+            blz.decompress_arm9(game)
         return game
 
     @staticmethod
@@ -202,6 +207,23 @@ class Game(Editable, Version):
         game = Game.from_workspace(workspace)
         game.write_config()
         return game
+
+    def to_file(self, filename=None):
+        """Exports workspace to a built ROM
+
+        Parameters
+        ----------
+        filename : string
+            If provided, the filename will be used. If not, the project's
+            default output filename will be used
+        """
+        if filename is None:
+            filename = os.path.join(self.files.directory, self.project.output)
+        if self < GEN_VI:
+            ndstool.build(filename, self.files.directory)
+        else:
+            # TODO: ctrtool build
+            ctrtool.build(filename, self.files.directory)
 
     def load_config(self):
         try:
