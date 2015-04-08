@@ -40,24 +40,20 @@ class Command(object):
     __metaclass__ = CommandMetaRegistry
     _fields = ('name', 'args', )
 
-    def __init__(self, name, **kwargs):
-        self.name = name
-        self.args = kwargs.get('args', [])
-
     def decompile_args(self, decompiler):
-    """Generates decompiled command expressions by reading its arguments
-    from the active decompiler
+        """Generates decompiled command expressions by reading its arguments
+        from the active decompiler
 
-    Parameters
-    ----------
-    decompiler : ScriptDecompiler
-        Active decompiler
+        Parameters
+        ----------
+        decompiler : ScriptDecompiler
+            Active decompiler
 
-    Returns
-    -------
-    exprs : list
-        List of expressions generated. This is typically just one function.
-    """
+        Returns
+        -------
+        exprs : list
+            List of expressions generated. This is typically just one function.
+        """
         args = []
         for size in self.args:
             args.append(decompiler.read_value(size))
@@ -80,8 +76,13 @@ class Command(object):
         """
         class_name = data.pop('class', 'Command')
         cls = CommandMetaRegistry.command_classes[class_name]
-        command = cls(data.pop('name', 'cmd_{0}'.format(cmd)),
-                      **data)
+        if 'name' not in data:
+            data['name'] = 'cmd_{0}'.format(cmd)
+        if 'args' not in data:
+            data['args'] = []
+        command = cls()
+        for field in cls._fields:
+            setattr(command, field, data.get(field))
         return command
 
     def to_dict(self):
@@ -98,6 +99,15 @@ class Command(object):
         return command_dict
 
 
+class EndCommand(Command):
+    _fields = Command.fields+('value', )
+
+    def decompile_args(self, decompiler):
+        if self.value is not False:
+            self.value = True
+        return [self.decompiler.end()]
+
+
 class ScriptDecompiler(Decompiler):
     def __init__(self, handle, commands, level=0):
         Decompiler.__init__(self, handle, level)
@@ -106,8 +116,6 @@ class ScriptDecompiler(Decompiler):
     def parse_next(self):
         cmd = self.read_value(2)
         if cmd is None:
-            return [self.end()]
-        elif cmd in (0x2, 0x1b):
             return [self.end()]
         if cmd > 750:
             return [self.unknown(cmd, 2)]
