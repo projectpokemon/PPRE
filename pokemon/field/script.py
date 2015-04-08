@@ -1,19 +1,101 @@
 
+import json
+
 from compileengine import Decompiler, Variable
 
 from util.io import BinaryIO
 
 
+class CommandMetaRegistry(type):
+    """Tracks the creation of Command derived classes
+    """
+    command_classes = {}
+
+    def __new__(cls, name, parents, attrs):
+        new_cls = type.__new__(cls, name, parents, attrs)
+        if name in CommandMetaRegistry.command_classes:
+            raise NameError('{0} is already a command class'.format(name))
+        CommandMetaRegistry.command_classes[name] = new_cls
+        return new_cls
+
+
 class Command(object):
-    def __init__(self, name, arg_sizes):
+    """General Command class
+
+    Subclasses are recorded into the meta registry and can be created via
+    `Command.from_dict({'class': 'DerivedCommand', ...})`.
+
+    Attributes
+    ----------
+    name : string
+        Name of the command function
+    args : list
+        List of arg sizes
+
+    Methods
+    -------
+    decompile_args : list of exprs
+    to_dict : dict
+    """
+    __metaclass__ = CommandMetaRegistry
+    _fields = ('name', 'args', )
+
+    def __init__(self, name, **kwargs):
         self.name = name
-        self.arg_sizes = arg_sizes
+        self.args = kwargs.get('args', [])
 
     def decompile_args(self, decompiler):
+    """Generates decompiled command expressions by reading its arguments
+    from the active decompiler
+
+    Parameters
+    ----------
+    decompiler : ScriptDecompiler
+        Active decompiler
+
+    Returns
+    -------
+    exprs : list
+        List of expressions generated. This is typically just one function.
+    """
         args = []
-        for size in self.arg_sizes:
+        for size in self.args:
             args.append(decompiler.read_value(size))
         return [decompiler.func(self.name, *args)]
+
+    @staticmethod
+    def from_dict(cmd, data):
+        """Generate a Command from a dictionary
+
+        Parameters
+        ----------
+        cmd : int
+            Command idx
+        data : dict
+            Dict to generate from
+
+        Returns
+        -------
+        command : Command
+        """
+        class_name = data.pop('class', 'Command')
+        cls = CommandMetaRegistry.command_classes[class_name]
+        command = cls(data.pop('name', 'cmd_{0}'.format(cmd)),
+                      **data)
+        return command
+
+    def to_dict(self):
+        """Saves this command back to a json-serializable dict.
+
+        This takes all attributes from `_fields` as well as the class
+        name (if not the default Command class).
+        """
+        command_dict = {}
+        for field in self._fields:
+            command_dict[field] = getattr(self, field)
+        if self.__class__.__name__ != 'Command':
+            command_dict['class'] = self.__class__.__name__
+        return command_dict
 
 
 class ScriptDecompiler(Decompiler):
@@ -40,6 +122,7 @@ class Script(object):
         self.offsets = []
         self.scripts = []
         self.commands = {}
+        self.game = game
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
@@ -73,3 +156,14 @@ class Script(object):
                 script.parse()
                 script.lines.insert(0, 'def script_{num}:'.format(num=scrnum))
                 self.scripts.append(script)
+
+    def load_commands(self, fname):
+        """Load commands from JSON file
+
+        Parameters
+        ----------
+        fname : string
+            Filename of JSON file
+        """
+        for cmd, data in json.load(fname).items():
+            self.commands[cmd] = Command.from_dict(cmd, data)
