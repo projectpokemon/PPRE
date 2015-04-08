@@ -316,6 +316,8 @@ class DP(Game):
     battle_tower_trainer_archive_file = 'battle/b_tower/btdtr.narc'
     battle_tower_trainer_pokemon_archive_file = 'battle/b_tower/btdpm.narc'
 
+    load_info = 0x2000b68
+
 
 class Pt(DP):
     idx = 3
@@ -337,6 +339,8 @@ class HGSS(Game):
         'HeartGold': 'a/0/3/7',
         'SoulSilver': 'a/1/3/6'}
 
+    load_info = 0x02000ba0
+
 
 class BW(Game):
     idx = 0
@@ -356,6 +360,8 @@ class B2W2(BW):
     idx = 2
     versions = {'Black2': 2, 'White2': 3}
     encounter_archive_file = 'a/1/2/7'
+
+    load_info = 0x2004fb0
 
 
 class XY(Game):
