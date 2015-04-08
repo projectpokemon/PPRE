@@ -238,6 +238,20 @@ class Game(Editable, Version):
                 as handle:
             json.dump(self.to_dict(), handle)
 
+    def open(self, *parts, **kwargs):
+        """Open a file relative to this workspace
+
+        Parameters
+        ----------
+        *parts : *string
+            File parts to be joined (by directory separator
+        mode : string
+            Mode to open file as
+        """
+        mode = kwargs.get('mode', 'r')
+        return open(os.path.join(os.path.dirname(__file__), '..',
+                                 self.files.directory, *parts), mode)
+
     def archive(self, filename):
         return NARC(open(os.path.join(self.files.directory, 'fs', filename)))
 
