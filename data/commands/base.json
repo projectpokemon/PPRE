@@ -1,0 +1,11 @@
+{
+  "2": {
+    "class": "EndCommand", 
+    "name": "End"
+  }, 
+  "27": {
+    "class": "EndCommand", 
+    "name": "KillScript", 
+    "value": false
+  }
+}

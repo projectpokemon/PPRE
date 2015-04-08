@@ -1,5 +1,6 @@
 
 import json
+import os
 
 from compileengine import Decompiler, Variable
 
@@ -100,12 +101,12 @@ class Command(object):
 
 
 class EndCommand(Command):
-    _fields = Command.fields+('value', )
+    _fields = Command._fields+('value', )
 
     def decompile_args(self, decompiler):
         if self.value is not False:
             self.value = True
-        return [self.decompiler.end()]
+        return [decompiler.end(self.value)]
 
 
 class ScriptDecompiler(Decompiler):
@@ -131,6 +132,8 @@ class Script(object):
         self.scripts = []
         self.commands = {}
         self.game = game
+        self.load_commands(os.path.join(os.path.dirname(__file__), '..', '..',
+                                        'data', 'commands', 'base.json'))
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
@@ -173,5 +176,8 @@ class Script(object):
         fname : string
             Filename of JSON file
         """
-        for cmd, data in json.load(fname).items():
+        with open(fname) as handle:
+            items = json.load(handle).items()
+        for cmd, data in items:
+            cmd = int(cmd, 0)
             self.commands[cmd] = Command.from_dict(cmd, data)
