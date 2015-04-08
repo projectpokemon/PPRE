@@ -17,7 +17,7 @@ class EditInterface(Interface):
 
     def build_widget(self, parent, text, *args, **kwargs):
         widget = QtWidgets.QLineEdit(parent.widget)
-        widget.setText(text)
+        widget.setText('')
         widget.setContentsMargins(0, 0, 0, 0)
         widget.setGeometry(QtCore.QRect(120, 0, 150, 20))
         self.widget = widget

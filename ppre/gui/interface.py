@@ -193,7 +193,7 @@ class Interface(BaseInterface):
     def set_value(self, value):
         if value == self._value:
             return
-        print('value', self._value, value)
+        # print('value', self._value, value)
         self._value = value
         try:
             self.widget.setValue(value)
