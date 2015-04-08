@@ -4,6 +4,8 @@ from six import StringIO
 
 __all__ = ['BinaryIO']
 
+NUL = chr(0)
+
 
 class StructReaders:
     """Cached built structs
@@ -127,6 +129,24 @@ class BinaryIO(StringIO):
             return
         data = char*((offset-position)/len(char)+1)
         self.write(data[:offset-position])
+
+    def writeString(self, chars):
+        """Write a null terminated string. If the input has a null byte in
+        it, it will not write past that byte. Null bytes will be added if
+        not provided.
+
+        Parameters
+        ----------
+        chars : string
+            String to write
+        """
+        chars = ""
+        nullidx = chars.find(NUL)
+        if nullidx == -1:
+            self.write(chars)
+            self.write(NUL)
+        else:
+            self.write(chars[:nullidx+1])
 
     def seek(self, offset, whence=0):
         """Seeks to the given offset
