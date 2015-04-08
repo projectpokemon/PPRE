@@ -111,23 +111,23 @@ void blz_decompress(int r0){
     r1 = r0-r1;  // stop address (top) ~ 41ba
     r4 = r2; // end (decompressed bottom)
     while(r3 > r1){
-        r5 = *((char*)r3--);
+        r5 = *((char*)--r3);
         r6 = 8;
         while(--r6 >= 0){
             if(r5 & 0x80){
-                ip = *((char*)r3--);
-                r7 = *((char*)r3--);
+                ip = *((char*)--r3);
+                r7 = *((char*)--r3);
                 r7 |= ip << 8;
                 r7 = r7 & ~0xf000;
                 r7 += 2;
                 ip += 32;
                 do{
                     r0 = *((char*)r2+r7);
-                    *((char*)r2--) = r0;
+                    *((char*)--r2) = r0;
                 }while((ip -= 16) >= 0);
             }else{
-                r0 = *((char*)r3--);
-                *((char*)r2--) = r0;
+                r0 = *((char*)--r3);
+                *((char*)--r2) = r0;
             }
             r5 <<= 1;
             if(r1 <= r3){
