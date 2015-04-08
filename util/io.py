@@ -140,7 +140,6 @@ class BinaryIO(StringIO):
         chars : string
             String to write
         """
-        chars = ""
         nullidx = chars.find(NUL)
         if nullidx == -1:
             self.write(chars)
