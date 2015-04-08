@@ -15,7 +15,7 @@ class SectionHeader(Editable):
     TYPE_SYMTAB = 2
     TYPE_STRTAB = 3
     FLAG_ALLOC = 2  # Memory section
-    FLAG_EXECINSTR = 3  # Executable section
+    FLAG_EXECINSTR = 4  # Executable section
 
     def define(self, name):
         self.namestring = name
@@ -38,6 +38,43 @@ class Section(object):
         self.header.type_ = type
         if type == SectionHeader.TYPE_STRTAB:
             self.data.writeUInt8(0)
+        elif type == SectionHeader.TYPE_SYMTAB:
+            self.header.entsize = Symbol(None).size()
+
+
+class Symbol(Editable):
+    BIND_LOCAL = 0
+    BIND_GLOBAL = 1
+    BIND_WEAK = 2
+    TYPE_OBJECT = 1
+    TYPE_FUNC = 2
+    TYPE_SECTION = 3
+    TYPE_FILE = 4
+
+    def define(self, name):
+        self.namestring = name
+        self.uint32('namepos')
+        self.uint32('value')
+        self.uint32('size_')
+        self.uint8('info')
+        self.uint8('other')
+        self.uint16('shndx')
+
+    @property
+    def bind(self):
+        return self.info >> 4
+
+    @bind.setter
+    def bind(self, value):
+        self.info = (self.info & 0xF) | (value << 4)
+
+    @property
+    def type_(self):
+        return self.info & 0xF
+
+    @type_.setter
+    def type_(self, value):
+        self.info = (self.info & 0xF0) | (value & 0xF)
 
 
 class ELF(object):
@@ -54,8 +91,16 @@ class ELF(object):
         self.symbols = []
         self.entry = 0x02000000
         self.sections = [Section(None)]
-        self.strtab = Section('.shstrtab', SectionHeader.TYPE_STRTAB)
+        self.shstrtab = Section('.shstrtab', SectionHeader.TYPE_STRTAB)
+        self.strtab = Section('.strtab', SectionHeader.TYPE_STRTAB)
+        self.symtab = Section('.symtab', SectionHeader.TYPE_SYMTAB)
+        self.symtab.header.link = 2
+        self.add_section(self.shstrtab)
         self.add_section(self.strtab)
+        self.add_section(self.symtab)
+        undef = self.add_symbol(None)
+        undef.info = 0
+        undef.shndx = 0
 
     def to_file(self, handle):
         writer = BinaryIO.adapter(handle)
@@ -97,8 +142,8 @@ class ELF(object):
     def add_section(self, section):
         self.sections.append(section)
         if section.header.namestring:
-            section.header.namepos = self.strtab.data.tell()
-            self.strtab.data.writeString(section.header.namestring)
+            section.header.namepos = self.shstrtab.data.tell()
+            self.shstrtab.data.writeString(section.header.namestring)
 
     def add_binary(self, handle, name='.text', address=0x02000000):
         section = Section(name, SectionHeader.TYPE_PROGBITS)
@@ -109,3 +154,19 @@ class ELF(object):
         section.header.flags = section.header.FLAG_EXECINSTR \
             | section.header.FLAG_ALLOC
         self.add_section(section)
+        symbol = self.add_symbol(name, address, Symbol.TYPE_SECTION)
+        symbol.type_ = symbol.TYPE_SECTION
+
+    def add_symbol(self, name, address=0x0, type=Symbol.TYPE_OBJECT):
+        symbol = Symbol(name)
+        symbol.bind = symbol.BIND_GLOBAL
+        symbol.type_ = type
+        symbol.value = address
+        symbol.shndx = 0xfff1
+        if name:
+            symbol.namepos = self.strtab.data.tell()
+            self.strtab.data.writeString(name)
+        self.symbols.append(symbol)
+        self.symtab.data.write(symbol.save().getvalue())
+        self.symtab.data.writeAlign(4)
+        return symbol
