@@ -126,7 +126,8 @@ class SetConditionCommand(Command):
         exprs = Command.decompile_args(self, decompiler)
         args = exprs[0].args  # super().get_args
         decompiler.cond_state = decompiler.statement('==', *args)
-        return exprs  # NOTE: This should be []. This is debug for now.
+        # return exprs
+        return []
 
 
 class ConditionalJumpCommand(Command):
@@ -254,6 +255,8 @@ class Script(object):
             pass
 
     def load(self, reader):
+        self.offsets = []
+        self.scripts = []
         reader = BinaryIO.reader(reader)
         start = reader.tell()
 
