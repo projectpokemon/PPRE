@@ -3,6 +3,14 @@
     "class": "EndCommand", 
     "name": "End"
   }, 
+  "17": {
+    "args": [
+      2,
+      2
+    ],
+    "class": "SetConditionCommand",
+    "name": "If"
+  },
   "22": {
     "class": "JumpCommand",
     "name": "Jump"
@@ -15,5 +23,21 @@
     "class": "EndCommand", 
     "name": "KillScript", 
     "value": false
+  },
+  "28": {
+    "args": [
+      1,
+      4
+    ],
+    "class": "ConditionalJumpCommand",
+    "name": "CheckLR"
+  },
+  "29": {
+    "args": [
+      1,
+      4
+    ],
+    "class": "ConditionalJumpCommand",
+    "name": "CheckLR1"
   }
 }

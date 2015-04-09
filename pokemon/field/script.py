@@ -121,10 +121,34 @@ class JumpCommand(Command):
         return []
 
 
+class SetConditionCommand(Command):
+    def decompile_args(self, decompiler):
+        exprs = Command.decompile_args(self, decompiler)
+        args = exprs[0].args  # super().get_args
+        decompiler.cond_state = decompiler.statement('==', *args)
+        return exprs  # NOTE: This should be []. This is debug for now.
+
+
+class ConditionalJumpCommand(Command):
+    def decompile_args(self, decompiler):
+        oper = decompiler.handle.readUInt8()  # FIXME: Handle this...
+        offset = decompiler.handle.readInt32()
+        restore = decompiler.tell()
+        offset += restore
+        decompiler.seek(offset)
+        block = decompiler.branch_duplicate()
+        block.start = offset
+        block.level = decompiler.level+1
+        block.parse()
+        decompiler.seek(restore)
+        return [decompiler.condition(decompiler.cond_state), block]
+
+
 class ScriptDecompiler(Decompiler):
     def __init__(self, handle, commands, level=0):
         Decompiler.__init__(self, handle, level)
         self.commands = commands
+        self.cond_state = None
 
     def parse_next(self):
         cmd = self.read_value(2)
@@ -136,6 +160,12 @@ class ScriptDecompiler(Decompiler):
         if command is not None:
             return command.decompile_args(self)
         return [self.unknown(cmd & 0xFF, 1), self.unknown(cmd >> 8, 1)]
+
+    def branch_duplicate(self):
+        dup = self.__class__(self.handle, self.commands, self.level)
+        dup.start = self.start
+        dup.deferred = True
+        return dup
 
 
 class Script(object):
