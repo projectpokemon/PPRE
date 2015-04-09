@@ -198,6 +198,54 @@ int cmd_0004(script_state *r0) {
     return 0;
 }
 
+int func_38bdc(script_state *r0, int r1) {
+    unsigned char r3 = r0->u0;
+    int r2 = r3+1;
+    if(r2 < 20){
+        r2 = r3 << 2;
+        r2 = r0+r2;
+        *(r2+12) = r1;
+        r1 = r0->u0+1;
+        r0->u0 = r1;
+        return 0;
+    }else{
+        return 1;
+    }
+}
+
+int func_38c10(script_state *r0, int r1) {
+    r0->buf_ptr = r1;
+    return;
+}
+
+int func_38c14(script_state *r0, int r1) {
+    script_state* r5 = r0;
+    int r4 = r1;
+    r1 = r5->buf_ptr;
+    r0 = func_38bdc(r0, r1);
+    r5->buf_ptr = r4;
+    return r0;
+}
+
+int cmd_0022(script_state *r0) {
+    // 0x39cf9 - Jump
+    int r2 = read32(r0);
+    uint8_t* r1 = r0->buf_ptr;
+    r1 += r2;
+    func_38c10(r0, r1);
+    return 0;
+}
+
+
+int cmd_0026(script_state *r0) {
+    // 0x39dad - Goto
+    int r2 = read32(r0);
+    uint8_t* r1 = r0->buf_ptr;
+    r1 += r2;
+    r0 = func_38c14(r0, r1);
+    return r0;
+}
+
 int func_462e4(int r0, int r1){
     int r4 = r1;
     r0 = func_46338(r0, r1);
