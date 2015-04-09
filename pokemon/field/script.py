@@ -200,7 +200,8 @@ class Script(object):
             with reader.seek(offset):
                 script = ScriptDecompiler(reader, self.commands, 1)
                 script.parse()
-                script.lines.insert(0, 'def script_{num}:'.format(num=scrnum))
+                script.lines.insert(0, 'def script_{num}(engine):'
+                                    .format(num=scrnum))
                 self.scripts.append(script)
 
     def load_commands(self, fname):
