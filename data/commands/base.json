@@ -3,6 +3,14 @@
     "class": "EndCommand", 
     "name": "End"
   }, 
+  "22": {
+    "class": "JumpCommand",
+    "name": "Jump"
+  },
+  "26": {
+    "class": "JumpCommand",
+    "name": "Goto"
+  },
   "27": {
     "class": "EndCommand", 
     "name": "KillScript", 

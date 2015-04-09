@@ -57,7 +57,11 @@ class Command(object):
         """
         args = []
         for size in self.args:
-            args.append(decompiler.read_value(size))
+            arg = decompiler.read_value(size)
+            bin_arg = bin(arg)[2:-3]
+            if bin_arg.count('0')*2 > bin_arg.count('1')*3:
+                arg = hex(arg)
+            args.append(arg)
         return [decompiler.func(self.name, *args)]
 
     @staticmethod
@@ -107,6 +111,13 @@ class EndCommand(Command):
         if self.value is not False:
             self.value = True
         return [decompiler.end(self.value)]
+
+
+class JumpCommand(Command):
+    def decompile_args(self, decompiler):
+        offset = decompiler.handle.readInt32()
+        decompiler.seek(decompiler.tell()+offset)
+        return []
 
 
 class ScriptDecompiler(Decompiler):
