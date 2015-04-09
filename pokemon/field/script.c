@@ -23,7 +23,8 @@ struct script_state {
     // 0x60
     int command_count;
     // 0x64
-    int vals[0x14]; // unknown length and purpose
+    int vals[0x10]; // unknown length and purpose
+    int u74;
     // 0x78
     int u78;
     int u7c; // pad
