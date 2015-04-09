@@ -28,6 +28,7 @@ class ARM(Decompiler):
     registers = {}
     stack = []
     deferred = False
+    functions = {}
 
     def branch_duplicate(self):
         dup = self.__class__(self.handle, self.level)
@@ -72,6 +73,13 @@ class ARM(Decompiler):
         if not left:
             var.refcount += 1
         return var
+
+    def get_function(self, offset):
+        if offset in self.functions:
+            return self.functions[offset]
+        function = 'funcs.func_{0:x}'.format(offset)
+        self.functions[offset] = function
+        return function
 
     @staticmethod
     def sign(value, bits):

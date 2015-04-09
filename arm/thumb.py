@@ -201,7 +201,7 @@ class Thumb(ARM):
             # return [self.func('funcs.func_{0:x}'.format(ofs), *self.get_args4())]
             args = self.get_args4()
             return [self.assign(self.get_args4(True),
-                                self.func('funcs.func_{0:x}'.format(ofs),
+                                self.func(self.get_function(ofs),
                                           *args, level=0))]
             return [self.func('bl', ofs,
                               *[self.get_var(self.get_reg(idx))
@@ -220,14 +220,16 @@ class Thumb(ARM):
             src_reg = self.get_reg((cmd >> 3) & 7, cmd & (1 << 7))
             dest_reg = self.get_reg(cmd & 7, cmd & (1 << 6))
             src = self.get_var(src_reg)
-            if src_reg != dest_reg:
-                dest = self.get_var(dest_reg, left=True)
-            else:
-                dest = src
             oper = (cmd >> 8) & 0x3
             if oper == 0b00:
-                return [self.assign(dest, self.statement('+', src, val))]
+                src2 = self.get_var(dest_reg)
+                return [self.assign(self.get_var(dest_reg, left=True),
+                                    self.statement('+', src, src2))]
             elif oper == 0b10:
+                if src_reg != dest_reg:
+                    dest = self.get_var(dest_reg, left=True)
+                else:
+                    dest = src
                 return [self.assign(dest, src)]
         elif cmd & 0b1111100000000000 == 0b0100100000000000:
             # ldr dest [pc, #ofs]
