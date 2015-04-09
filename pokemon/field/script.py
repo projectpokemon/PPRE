@@ -127,6 +127,26 @@ class ScriptDecompiler(Decompiler):
 
 
 class Script(object):
+    """Pokemon Script handler
+
+    JSON Commands are loaded (and overwritten) in this order:
+    $PPRE_DIR/data/commands/base.json
+    $PPRE_DIR/data/commands/base_custom.json (optional)
+    $PPRE_DIR/data/commands/$GAME_COMMAND_FILES[0], etc.
+    $GAME_DIR/commands.json (optional)
+
+    Attributes
+    ----------
+    scripts : list of ScriptDecompiler
+        Decompiled scripts
+    commands : dict
+        Command map
+
+    Parameters
+    ----------
+    load(reader)
+        Loads a single script file in and parses its scripts
+    """
     def __init__(self, game):
         self.offsets = []
         self.scripts = []
@@ -134,6 +154,21 @@ class Script(object):
         self.game = game
         self.load_commands(os.path.join(os.path.dirname(__file__), '..', '..',
                                         'data', 'commands', 'base.json'))
+        try:
+            self.load_commands(os.path.join(os.path.dirname(__file__), '..',
+                                            '..', 'data', 'commands',
+                                            'base_custom.json'))
+        except IOError:
+            pass
+        for command_file in game.commands_files:
+            self.load_commands(os.path.join(os.path.dirname(__file__), '..',
+                                            '..', 'data', 'commands',
+                                            command_file))
+        try:
+            self.load_commands(os.path.join(game.files.directory,
+                                            'commands.json'))
+        except IOError:
+            pass
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)

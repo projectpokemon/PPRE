@@ -136,6 +136,7 @@ class Game(Editable, Version):
 
     """
     versions = {'': 0}
+    commands_files = ()
 
     def __init__(self):
         self.files = None
@@ -353,6 +354,7 @@ class DP(Game):
     battle_tower_trainer_pokemon_archive_file = 'battle/b_tower/btdpm.narc'
 
     load_info = 0x2000b68
+    commands_files = ('dp.json', )
 
 
 class Pt(DP):
@@ -361,6 +363,7 @@ class Pt(DP):
     personal_archive_file = 'poketool/personal/pl_personal.narc'
     encounter_archive_file = 'fielddata/encountdata/pl_enc_data.narc'
     item_archive_file = 'itemtool/itemdata/pl_item_data.narc'
+    commands_files = ('dp.json', 'pt.json')
 
 
 class HGSS(Game):
@@ -376,6 +379,7 @@ class HGSS(Game):
         'SoulSilver': 'a/1/3/6'}
 
     load_info = 0x02000ba0
+    commands_files = ('hgss.json', )
 
 
 class BW(Game):
@@ -391,6 +395,8 @@ class BW(Game):
     menu_archive_file = 'a/0/0/2'
     text_archive_file = 'a/0/0/3'
 
+    commands_files = ('bw.json', )
+
 
 class B2W2(BW):
     idx = 2
@@ -398,6 +404,8 @@ class B2W2(BW):
     encounter_archive_file = 'a/1/2/7'
 
     load_info = 0x2004fb0
+
+    commands_files = ('bw.json', 'b2w2.json')
 
 
 class XY(Game):
