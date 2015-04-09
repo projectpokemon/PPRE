@@ -2,8 +2,10 @@
 import array
 import itertools
 import os
+import shutil
 import struct
 
+from ntr.overlay import OverlayTable
 from util.io import BinaryIO
 
 ARM9_BLZ_BEACON = 0xdec00621
@@ -107,3 +109,53 @@ def decompress_arm9(game):
                        game.load_info-ram_offset+0x18):
             buff[i] = 0
         buff.tofile(arm9dec)
+
+
+def decompress_overlays(game):
+    """Creates an overarm9.dec.bin in the Game's workspace and
+    an overlays_dez directory
+    """
+    workspace = game.files.directory
+    try:
+        if os.path.getsize(os.path.join(workspace, 'overarm9.dec.bin')) > 0:
+            return
+    except OSError:
+        pass
+    try:
+        os.mkdir(os.path.join(workspace, 'overlays_dez'))
+    except:
+        pass
+    with open(os.path.join(workspace, 'header.bin')) as header:
+        header.seek(0x54)
+        size, = struct.unpack('I', header.read(4))
+    with open(os.path.join(workspace, 'overarm9.bin')) as overarm:
+        ovt = OverlayTable(size >> 5, reader=overarm)
+
+        for overlay in ovt.overlays:
+            fname = os.path.join(workspace, 'overlays',
+                                 'overlay_{0:04}.bin'.format(overlay.file_id))
+            outname = os.path.join(workspace, 'overlays_dez',
+                                   'overlay_{0:04}.bin'.format(
+                                       overlay.file_id))
+            if overlay.compressed:
+                end = overlay.reserved & 0xFFFFFF
+                with open(fname) as compressed_handle,\
+                        open(outname, 'w') as decompressed_handle:
+                    reader = BinaryIO.reader(compressed_handle)
+                    buff = decompress(reader, end)
+                    buff.tofile(decompressed_handle)
+                overlay.reserved = 0
+            else:
+                shutil.copy2(fname, outname)
+    with open(os.path.join(workspace, 'overarm9.dec.bin'), 'w') as overarm:
+        ovt.save(overarm)
+
+
+if __name__ == '__main__':
+    import sys
+
+    from pokemon.game import Game
+
+    game = Game.from_workspace(sys.argv[1])
+    decompress_arm9(game)
+    decompress_overlays(game)

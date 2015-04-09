@@ -377,6 +377,7 @@ class HGSS(Game):
     encounter_archive_files = {
         'HeartGold': 'a/0/3/7',
         'SoulSilver': 'a/1/3/6'}
+    script_archive_file = 'a/0/1/2'
 
     load_info = 0x02000ba0
     commands_files = ('hgss.json', )

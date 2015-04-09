@@ -13,6 +13,17 @@ class Overlay(Editable):
         self.uint32('file_id')
         self.uint32('reserved')
 
+    @property
+    def compressed(self):
+        return self.reserved & (1 << 24)
+
+    @compressed.setter
+    def compressed(self, value):
+        if value:
+            self.reserved |= 1 << 24
+        else:
+            self.reserved &= ~(1 << 24)
+
 
 class OverlayTable(Editable):
     """For overarm9.bin"""
