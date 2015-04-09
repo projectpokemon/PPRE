@@ -1,15 +1,18 @@
 {
   "0": {
-    "args": []
+    "args": [], 
+    "name": "Nop"
   }, 
   "1": {
-    "args": []
+    "args": [], 
+    "name": "Nop1"
   }, 
   "3": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "Return"
   }, 
   "4": {
     "args": [
@@ -93,7 +96,8 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "If2"
   }, 
   "19": {
     "args": [
@@ -103,10 +107,12 @@
   "20": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Callstd"
   }, 
   "21": {
-    "args": []
+    "args": [], 
+    "name": "Exitstd"
   }, 
   "23": {
     "args": [
@@ -129,38 +135,45 @@
   "30": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Setflag"
   }, 
   "31": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Clearflag"
   }, 
   "32": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Checkflag"
   }, 
   "33": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetValue"
   }, 
   "34": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ClearValue"
   }, 
   "35": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CopyTrainerId"
   }, 
   "36": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetTrainerId"
   }, 
   "37": {
     "args": [
@@ -170,80 +183,96 @@
   "38": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ClearTrainerId"
   }, 
   "39": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CopyValue"
   }, 
   "40": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CopyValue2"
   }, 
   "41": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "Setvar"
   }, 
   "42": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "Copyvar"
   }, 
   "43": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "Copyvar2"
   }, 
   "44": {
     "args": [
       1
-    ]
+    ], 
+    "name": "Message2"
   }, 
   "45": {
     "args": [
       1
-    ]
+    ], 
+    "name": "Message"
   }, 
   "46": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Message3"
   }, 
   "47": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Message4"
   }, 
   "48": {
     "args": [
       1
-    ]
+    ], 
+    "name": "Message5"
   }, 
   "49": {
-    "args": []
+    "args": [], 
+    "name": "PrepareMsgBox?"
   }, 
   "50": {
-    "args": []
+    "args": [], 
+    "name": "WaitButton"
   }, 
   "51": {
     "args": []
   }, 
   "52": {
-    "args": []
+    "args": [], 
+    "name": "CloseBattleMessage?"
   }, 
   "53": {
-    "args": []
+    "args": [], 
+    "name": "CloseMsgOnKeyPress"
   }, 
   "54": {
-    "args": []
+    "args": [], 
+    "name": "FreezeMsgBox"
   }, 
   "55": {
     "args": [
@@ -251,35 +280,42 @@
       1, 
       2, 
       2
-    ]
+    ], 
+    "name": "CallMsgbox"
   }, 
   "56": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "ColorMsgbox"
   }, 
   "57": {
     "args": [
       1
-    ]
+    ], 
+    "name": "TypeMsgbox"
   }, 
   "58": {
-    "args": []
+    "args": [], 
+    "name": "NoMapMsgbox"
   }, 
   "59": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "CallTextMsgbox"
   }, 
   "60": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreMenuStatus"
   }, 
   "61": {
-    "args": []
+    "args": [], 
+    "name": "ShowMenu"
   }, 
   "62": {
     "args": [
@@ -289,33 +325,41 @@
       1, 
       1, 
       1
-    ]
+    ], 
+    "name": "YesNoBox"
   }, 
   "63": {
     "args": [
       2
-    ]
+    ], 
+    "name": "WaitFor"
   }, 
   "64": {
-    "args": []
+    "args": [], 
+    "name": "Multi"
   }, 
   "65": {
-    "args": []
+    "args": [], 
+    "name": "Multi2"
   }, 
   "66": {
     "args": [
       1, 
       1
-    ]
+    ], 
+    "name": "Txtscrpmulti"
   }, 
   "67": {
-    "args": []
+    "args": [], 
+    "name": "CloseMulti"
   }, 
   "68": {
-    "args": []
+    "args": [], 
+    "name": "Multi3"
   }, 
   "69": {
-    "args": []
+    "args": [], 
+    "name": "Txtmsgscrpmulti"
   }, 
   "70": {
     "args": [
@@ -325,41 +369,49 @@
     ]
   }, 
   "71": {
-    "args": []
+    "args": [], 
+    "name": "CloseMulti2"
   }, 
   "72": {
     "args": [
       1
-    ]
+    ], 
+    "name": "Multirow"
   }, 
   "73": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Fanfare"
   }, 
   "74": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Fanfare2"
   }, 
   "75": {
     "args": [
       2
-    ]
+    ], 
+    "name": "WaitFanfare"
   }, 
   "76": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "Cryfr"
   }, 
   "77": {
-    "args": []
+    "args": [], 
+    "name": "Waitcry"
   }, 
   "78": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Soundfr"
   }, 
   "79": {
     "args": []
@@ -367,15 +419,18 @@
   "80": {
     "args": [
       2
-    ]
+    ], 
+    "name": "PlayMusic"
   }, 
   "81": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Stop"
   }, 
   "82": {
-    "args": []
+    "args": [], 
+    "name": "Restart"
   }, 
   "83": {
     "args": [
@@ -386,12 +441,14 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "SwitchMusic"
   }, 
   "85": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StroeSayingLearned"
   }, 
   "86": {
     "args": [
@@ -402,7 +459,8 @@
   "87": {
     "args": [
       2
-    ]
+    ], 
+    "name": "PlayMusic2"
   }, 
   "88": {
     "args": [
@@ -412,75 +470,91 @@
   "89": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckSayingLearned"
   }, 
   "90": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SwitchMusic2"
   }, 
   "91": {
-    "args": []
+    "args": [], 
+    "name": "ActMicrophone"
   }, 
   "92": {
-    "args": []
+    "args": [], 
+    "name": "DeactMicrophone"
   }, 
   "93": {
     "args": []
   }, 
   "95": {
-    "args": []
+    "args": [], 
+    "name": "Waitmovement"
   }, 
   "96": {
-    "args": []
+    "args": [], 
+    "name": "Lockall"
   }, 
   "97": {
-    "args": []
+    "args": [], 
+    "name": "Releaseall"
   }, 
   "98": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Lock"
   }, 
   "99": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Release"
   }, 
   "100": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Addpeople"
   }, 
   "101": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Removepeople"
   }, 
   "102": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "Lockcam"
   }, 
   "103": {
-    "args": []
+    "args": [], 
+    "name": "Zoomcam?"
   }, 
   "104": {
-    "args": []
+    "args": [], 
+    "name": "Faceplayer"
   }, 
   "105": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckHiroPosition"
   }, 
   "106": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckIdSpritePosition"
   }, 
   "107": {
     "args": [
@@ -493,152 +567,179 @@
     "args": [
       2, 
       1
-    ]
+    ], 
+    "name": "Continuefollow(Changemap)"
   }, 
   "109": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "FollowHero"
   }, 
   "110": {
     "args": [
       4
-    ]
+    ], 
+    "name": "GiveMoney"
   }, 
   "111": {
     "args": [
       4
-    ]
+    ], 
+    "name": "TakeMoney"
   }, 
   "112": {
     "args": [
       2, 
       4
-    ]
+    ], 
+    "name": "CheckMoney"
   }, 
   "113": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "ShowMoneyBox"
   }, 
   "114": {
-    "args": []
+    "args": [], 
+    "name": "HideMoneyBox"
   }, 
   "115": {
-    "args": []
+    "args": [], 
+    "name": "UpdateMoneyBox"
   }, 
   "117": {
-    "args": []
+    "args": [], 
+    "name": "HideCoinsBox"
   }, 
   "118": {
     "args": [
       1
-    ]
+    ], 
+    "name": "UpdateCoinsBox"
   }, 
   "119": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckCoins"
   }, 
   "120": {
     "args": [
       2
-    ]
+    ], 
+    "name": "GiveCoins"
   }, 
   "121": {
     "args": [
       2
-    ]
+    ], 
+    "name": "TakeCoins"
   }, 
   "122": {
     "args": [
       2
-    ]
+    ], 
+    "name": "TakeItem"
   }, 
   "123": {
     "args": [
       2
-    ]
+    ], 
+    "name": "GiveItem"
   }, 
   "124": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckItem"
   }, 
   "125": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckStoredItem"
   }, 
   "126": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckItem2"
   }, 
   "127": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckItem3"
   }, 
   "128": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckItem4"
   }, 
   "129": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreItemTaken"
   }, 
   "130": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreItemType"
   }, 
   "131": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreStarter"
   }, 
   "132": {
     "args": [
       1, 
       1
-    ]
+    ], 
+    "name": "DoubleMessage"
   }, 
   "133": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreSealCaseNum"
   }, 
   "134": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreSealStored"
   }, 
   "135": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckSealCaseNum"
   }, 
   "136": {
     "args": [
@@ -654,65 +755,76 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "GivePokeStored"
   }, 
   "138": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "GiveEgg"
   }, 
   "139": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "StorePokeStored"
   }, 
   "140": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckMoveStored"
   }, 
   "141": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPlaceStored"
   }, 
   "142": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPkgrNumber"
   }, 
   "143": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ChsRivalName"
   }, 
   "144": {
     "args": [
       2
-    ]
+    ], 
+    "name": "PokegearFunct?"
   }, 
   "145": {
     "args": [
       1
-    ]
+    ], 
+    "name": "ActPkgrFunction"
   }, 
   "146": {
     "args": [
       2
-    ]
+    ], 
+    "name": "RecPkgrNumber"
   }, 
   "147": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPkgrNumber2"
   }, 
   "148": {
     "args": [
@@ -723,111 +835,135 @@
   "149": {
     "args": [
       1
-    ]
+    ], 
+    "name": "DayCareFunct?"
   }, 
   "150": {
-    "args": []
+    "args": [], 
+    "name": "Callend"
   }, 
   "151": {
     "args": []
   }, 
   "152": {
-    "args": []
+    "args": [], 
+    "name": "OpenWi-fi"
   }, 
   "153": {
     "args": [
       2
-    ]
+    ], 
+    "name": "DressPokemon"
   }, 
   "154": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "DisplayContestPokemon"
   }, 
   "155": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "DysplayDressedPokemon"
   }, 
   "156": {
-    "args": []
+    "args": [], 
+    "name": "OpenBallCapsule"
   }, 
   "157": {
-    "args": []
+    "args": [], 
+    "name": "OpenPkgrMap"
   }, 
   "158": {
     "args": [
       1
-    ]
+    ], 
+    "name": "OpenPcFunction"
   }, 
   "159": {
-    "args": []
+    "args": [], 
+    "name": "DrawUnion"
   }, 
   "160": {
-    "args": []
+    "args": [], 
+    "name": "TrainerCaseUnion"
   }, 
   "161": {
-    "args": []
+    "args": [], 
+    "name": "TradeUnion"
   }, 
   "162": {
-    "args": []
+    "args": [], 
+    "name": "RecordMixingUnion"
   }, 
   "163": {
     "args": [
       2
-    ]
+    ], 
+    "name": "EndGame"
   }, 
   "164": {
-    "args": []
+    "args": [], 
+    "name": "HallFameAnm"
   }, 
   "165": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreWfcStatus"
   }, 
   "166": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StartWfc"
   }, 
   "167": {
-    "args": []
+    "args": [], 
+    "name": "ChooseStarter"
   }, 
   "168": {
     "args": [
       2
-    ]
+    ], 
+    "name": "BattleId"
   }, 
   "169": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "SetvarBattle"
   }, 
   "170": {
     "args": [
       2
-    ]
+    ], 
+    "name": "BattleId2"
   }, 
   "171": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "SetvarBattle2"
   }, 
   "172": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ChoosePlayerName"
   }, 
   "173": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ChoosePokeNick"
   }, 
   "174": {
     "args": [
@@ -835,10 +971,12 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "Fadescreen"
   }, 
   "175": {
-    "args": []
+    "args": [], 
+    "name": "Resetscreen"
   }, 
   "176": {
     "args": [
@@ -847,22 +985,26 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "Warp"
   }, 
   "177": {
     "args": [
       2
-    ]
+    ], 
+    "name": "HallFameData"
   }, 
   "178": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SurfAnimation"
   }, 
   "179": {
     "args": [
       2
-    ]
+    ], 
+    "name": "FlyAnimation"
   }, 
   "180": {
     "args": [
@@ -872,113 +1014,134 @@
     ]
   }, 
   "181": {
-    "args": []
+    "args": [], 
+    "name": "FlashAnimation"
   }, 
   "182": {
     "args": [
       2
-    ]
+    ], 
+    "name": "WaterfallAnimation"
   }, 
   "183": {
     "args": [
       2
-    ]
+    ], 
+    "name": "PrepareHmEffect"
   }, 
   "184": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckPokeSprite"
   }, 
   "185": {
     "args": [
       1
-    ]
+    ], 
+    "name": "CheckBike"
   }, 
   "186": {
     "args": [
       1
-    ]
+    ], 
+    "name": "RideBike"
   }, 
   "187": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckGivePknmStatus"
   }, 
   "188": {
     "args": [
       2
-    ]
+    ], 
+    "name": "GivePkmnHiroAnm"
   }, 
   "189": {
-    "args": []
+    "args": [], 
+    "name": "StopGivePokeHiroAnm"
   }, 
   "190": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetvarHero"
   }, 
   "191": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetvarRival"
   }, 
   "192": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetvarAlter"
   }, 
   "193": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarPoke"
   }, 
   "194": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarItem"
   }, 
   "195": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarItemStored"
   }, 
   "196": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarAtkitem"
   }, 
   "197": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarAtk"
   }, 
   "198": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarNum"
   }, 
   "199": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarPokenick"
   }, 
   "200": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarObj"
   }, 
   "201": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetvarWi-fiSprite"
   }, 
   "202": {
     "args": [
@@ -986,27 +1149,32 @@
       2, 
       2, 
       1
-    ]
+    ], 
+    "name": "SetvarPokeStored"
   }, 
   "203": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetvarStrtHiro"
   }, 
   "204": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetvarStrtAlter"
   }, 
   "205": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetvarStrtRival"
   }, 
   "206": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreStarter2"
   }, 
   "207": {
     "args": [
@@ -1018,30 +1186,35 @@
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarItemStored"
   }, 
   "209": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarItemStored2"
   }, 
   "210": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarSwarmPoke"
   }, 
   "211": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckSwarmPoke"
   }, 
   "212": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StartBattleAnalysis"
   }, 
   "213": {
     "args": [
@@ -1049,56 +1222,66 @@
       2, 
       1, 
       1
-    ]
+    ], 
+    "name": "TrainerBattle"
   }, 
   "214": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "EndTrainerBattle"
   }, 
   "215": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "TrainerBattleStored"
   }, 
   "216": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "TrainerBattleStored2"
   }, 
   "217": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckTrainerStatus"
   }, 
   "218": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreLeagueTrainer"
   }, 
   "219": {
-    "args": []
+    "args": [], 
+    "name": "LostGoPc"
   }, 
   "220": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckTrainerLost"
   }, 
   "221": {
     "args": [
       2, 
       1
-    ]
+    ], 
+    "name": "CheckTrainerStatus2"
   }, 
   "222": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePokePartyDefeated"
   }, 
   "223": {
     "args": []
@@ -1117,7 +1300,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "ChsFriend"
   }, 
   "227": {
     "args": [
@@ -1125,7 +1309,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "WireBattleWait"
   }, 
   "228": {
     "args": [
@@ -1169,7 +1354,8 @@
   "236": {
     "args": [
       2
-    ]
+    ], 
+    "name": "OOEC"
   }, 
   "237": {
     "args": []
@@ -1177,13 +1363,15 @@
   "238": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePokerus"
   }, 
   "239": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StorePokeGender"
   }, 
   "240": {
     "args": [
@@ -1192,12 +1380,14 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "WarpMapElevator"
   }, 
   "241": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckFloor"
   }, 
   "242": {
     "args": [
@@ -1205,43 +1395,51 @@
       1, 
       2, 
       2
-    ]
+    ], 
+    "name": "StartLift"
   }, 
   "243": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreKanPokemonSeen"
   }, 
   "244": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreJhtPokemonSeen"
   }, 
   "245": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreNatPokemonSeen"
   }, 
   "246": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreTotPokemonSeen"
   }, 
   "247": {
-    "args": []
+    "args": [], 
+    "name": "ActWireless"
   }, 
   "248": {
     "args": [
       1, 
       2, 
       2
-    ]
+    ], 
+    "name": "SetvarTextPokedex"
   }, 
   "249": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "WildBattle"
   }, 
   "250": {
     "args": [
@@ -1250,39 +1448,47 @@
     ]
   }, 
   "251": {
-    "args": []
+    "args": [], 
+    "name": "ExplanationBattle"
   }, 
   "252": {
-    "args": []
+    "args": [], 
+    "name": "WriteAutograph"
   }, 
   "253": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreSaveData"
   }, 
   "254": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckSaveData"
   }, 
   "255": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckDress"
   }, 
   "256": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreDressTitle"
   }, 
   "257": {
     "args": [
       2
-    ]
+    ], 
+    "name": "FriendBt"
   }, 
   "258": {
-    "args": []
+    "args": [], 
+    "name": "FriendBt2"
   }, 
   "259": {
     "args": [
@@ -1297,40 +1503,49 @@
   "261": {
     "args": [
       2
-    ]
+    ], 
+    "name": "OpenUnionFunction2?"
   }, 
   "262": {
-    "args": []
+    "args": [], 
+    "name": "StartUnion"
   }, 
   "263": {
-    "args": []
+    "args": [], 
+    "name": "LinkClosed"
   }, 
   "264": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetUnionFunctionId?"
   }, 
   "265": {
-    "args": []
+    "args": [], 
+    "name": "CloseUnionFunction?"
   }, 
   "266": {
-    "args": []
+    "args": [], 
+    "name": "CloseUnionFunction2?"
   }, 
   "267": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "SetvarUnionMessage"
   }, 
   "268": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreYourDecisionUnion"
   }, 
   "269": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreOtherDecisionUnion"
   }, 
   "270": {
     "args": []
@@ -1339,65 +1554,79 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckOtherDecisionUnion"
   }, 
   "272": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreYourDecisionUnion2"
   }, 
   "273": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreOtherDecisionUnion2"
   }, 
   "274": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckOtherDecisionUnion2"
   }, 
   "275": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Pokemart"
   }, 
   "276": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Pokemart1"
   }, 
   "277": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Pokemart2"
   }, 
   "278": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Pokemart3"
   }, 
   "279": {
-    "args": []
+    "args": [], 
+    "name": "Defeatgopc"
   }, 
   "280": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ActBike?"
   }, 
   "281": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckGender"
   }, 
   "282": {
-    "args": []
+    "args": [], 
+    "name": "HealPkmn"
   }, 
   "283": {
-    "args": []
+    "args": [], 
+    "name": "DeactWireless"
   }, 
   "284": {
-    "args": []
+    "args": [], 
+    "name": "DeleteEntry"
   }, 
   "285": {
     "args": [
@@ -1408,18 +1637,21 @@
     "args": []
   }, 
   "287": {
-    "args": []
+    "args": [], 
+    "name": "OpenWi-fiSprite"
   }, 
   "288": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreWi-fiSprite"
   }, 
   "289": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ActWi-fiSprite"
   }, 
   "290": {
     "args": [
@@ -1427,7 +1659,8 @@
     ]
   }, 
   "291": {
-    "args": []
+    "args": [], 
+    "name": "ActPokedex"
   }, 
   "292": {
     "args": [
@@ -1435,23 +1668,27 @@
     ]
   }, 
   "293": {
-    "args": []
+    "args": [], 
+    "name": "GiveRShoes"
   }, 
   "294": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "Checkbadge"
   }, 
   "295": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Setbdgtrue"
   }, 
   "296": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Setbdgfalse"
   }, 
   "297": {
     "args": [
@@ -1498,27 +1735,32 @@
       2, 
       2, 
       1
-    ]
+    ], 
+    "name": "PrpDoorMovement"
   }, 
   "308": {
     "args": [
       1
-    ]
+    ], 
+    "name": "WaitAction"
   }, 
   "309": {
     "args": [
       1
-    ]
+    ], 
+    "name": "MoveDoor"
   }, 
   "310": {
     "args": [
       1
-    ]
+    ], 
+    "name": "OpenDoor"
   }, 
   "311": {
     "args": [
       1
-    ]
+    ], 
+    "name": "CloseDoor"
   }, 
   "312": {
     "args": []
@@ -1529,7 +1771,8 @@
     ]
   }, 
   "314": {
-    "args": []
+    "args": [], 
+    "name": "BlackTornGymStart"
   }, 
   "315": {
     "args": []
@@ -1543,30 +1786,36 @@
     ]
   }, 
   "318": {
-    "args": []
+    "args": [], 
+    "name": "FurioGymAnm1"
   }, 
   "319": {
     "args": [
       2
-    ]
+    ], 
+    "name": "FurioGymAnm2"
   }, 
   "320": {
-    "args": []
+    "args": [], 
+    "name": "StartLtSurgePuzzle"
   }, 
   "321": {
     "args": [
       1, 
       1
-    ]
+    ], 
+    "name": "ChangeBlock"
   }, 
   "322": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "CheckLtSurgeBlock"
   }, 
   "323": {
-    "args": []
+    "args": [], 
+    "name": "RestartLtSurgeBlock"
   }, 
   "324": {
     "args": []
@@ -1580,26 +1829,32 @@
   "327": {
     "args": [
       1
-    ]
+    ], 
+    "name": "AzaleaGymFunct"
   }, 
   "328": {
     "args": [
       1
-    ]
+    ], 
+    "name": "AxaleaGymFunct2"
   }, 
   "329": {
-    "args": []
+    "args": [], 
+    "name": "BlacktornGymFunct"
   }, 
   "330": {
-    "args": []
+    "args": [], 
+    "name": "FuchsiaGymFunct"
   }, 
   "331": {
-    "args": []
+    "args": [], 
+    "name": "ViridianGymFunction"
   }, 
   "332": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckPartyNumber"
   }, 
   "333": {
     "args": [
@@ -1635,7 +1890,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "ChangeOverworldPosition"
   }, 
   "339": {
     "args": [
@@ -1644,45 +1900,53 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "SetOverworldPosition"
   }, 
   "340": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "ChangeOverworldMovement"
   }, 
   "341": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "ReleaseOverworld"
   }, 
   "342": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "SetTilePassable"
   }, 
   "343": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "SetTileLocked"
   }, 
   "344": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "SetOwerworldFollow"
   }, 
   "345": {
-    "args": []
+    "args": [], 
+    "name": "ShowClockSave"
   }, 
   "346": {
-    "args": []
+    "args": [], 
+    "name": "HideClockSave"
   }, 
   "347": {
     "args": [
@@ -1692,115 +1956,137 @@
   "348": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetSaveData"
   }, 
   "349": {
-    "args": []
+    "args": [], 
+    "name": "ChsPokemenu"
   }, 
   "350": {
-    "args": []
+    "args": [], 
+    "name": "ChsPokeMenu2"
   }, 
   "351": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePokeMenu2"
   }, 
   "352": {
     "args": [
       1, 
       2, 
       2
-    ]
+    ], 
+    "name": "ShowPokeInfo"
   }, 
   "353": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "StorePokeMove"
   }, 
   "354": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StorePokeEgg"
   }, 
   "355": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "ComparePokeNick"
   }, 
   "356": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckPokeNumberUnion"
   }, 
   "357": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokePartyHealth"
   }, 
   "358": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckPokePartyNumDaycare"
   }, 
   "359": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckEggUnion"
   }, 
   "360": {
     "args": [
       2
-    ]
+    ], 
+    "name": "TakeMoneyDCare"
   }, 
   "361": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "TakePokemonDCare"
   }, 
   "362": {
     "args": [
       1, 
       1, 
       2
-    ]
+    ], 
+    "name": "TakePokeStored2"
   }, 
   "363": {
     "args": [
       1, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokeStored2"
   }, 
   "364": {
     "args": [
       2
-    ]
+    ], 
+    "name": "GivePokeStored2"
   }, 
   "365": {
-    "args": []
+    "args": [], 
+    "name": "ActEggDayCMan"
   }, 
   "366": {
-    "args": []
+    "args": [], 
+    "name": "DeactEggDayCMan"
   }, 
   "367": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "SetVarPokeAndMoneyDCare"
   }, 
   "368": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckMoneyDCare"
   }, 
   "369": {
-    "args": []
+    "args": [], 
+    "name": "EggAnm"
   }, 
   "370": {
     "args": [
@@ -1811,70 +2097,83 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "SetVarPokeAndLevelDCare"
   }, 
   "372": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetVarPokeChosenDCare"
   }, 
   "373": {
     "args": [
       2
-    ]
+    ], 
+    "name": "GivePokeDCare"
   }, 
   "374": {
     "args": [
       2
-    ]
+    ], 
+    "name": "AddPeople2"
   }, 
   "375": {
     "args": [
       2
-    ]
+    ], 
+    "name": "RemovePeople2"
   }, 
   "376": {
-    "args": []
+    "args": [], 
+    "name": "MailBox"
   }, 
   "377": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckMail"
   }, 
   "378": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "ShowRecordList"
   }, 
   "379": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckTime"
   }, 
   "380": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreIdPlayer"
   }, 
   "381": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "RandomTextStored"
   }, 
   "382": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreHappyPoke"
   }, 
   "383": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreHappyStatus"
   }, 
   "384": {
     "args": [
@@ -1893,12 +2192,14 @@
   "386": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckFacePosition"
   }, 
   "387": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePokeDCareLove"
   }, 
   "388": {
     "args": [
@@ -1909,78 +2210,91 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokeParty"
   }, 
   "390": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CopyPokeHeight"
   }, 
   "391": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetvarPokeHeight"
   }, 
   "392": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "ComparePokeHeight"
   }, 
   "393": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokeHeight"
   }, 
   "394": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePokeDelete"
   }, 
   "395": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreMoveDelete"
   }, 
   "396": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckMoveNumDelete"
   }, 
   "397": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreDeleteMove"
   }, 
   "398": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckDeleteMove"
   }, 
   "399": {
     "args": [
       1, 
       2, 
       2
-    ]
+    ], 
+    "name": "SetvarMoveDelete"
   }, 
   "400": {
     "args": [
       1
-    ]
+    ], 
+    "name": "HmFunctions"
   }, 
   "401": {
     "args": [
       1
-    ]
+    ], 
+    "name": "FlashDuration"
   }, 
   "402": {
     "args": [
@@ -1991,14 +2305,16 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "GiveAccessories"
   }, 
   "404": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckAccessories"
   }, 
   "405": {
     "args": [
@@ -2010,38 +2326,45 @@
   "406": {
     "args": [
       2
-    ]
+    ], 
+    "name": "GiveAccessories2"
   }, 
   "407": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckAccessories2"
   }, 
   "408": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "BattleRmResult"
   }, 
   "409": {
-    "args": []
+    "args": [], 
+    "name": "ActivateBTower"
   }, 
   "410": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreBTowerData"
   }, 
   "411": {
-    "args": []
+    "args": [], 
+    "name": "CloseBTower"
   }, 
   "412": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CallBTowerFunctions"
   }, 
   "413": {
     "args": [
@@ -2049,36 +2372,42 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "RandomTeamBTower"
   }, 
   "414": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePrizeNumBTower"
   }, 
   "415": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePeopleIdBTower"
   }, 
   "416": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CallBTowerWireFunction"
   }, 
   "417": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StorePChosenWireBTower"
   }, 
   "418": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreRankDataWireBTower"
   }, 
   "419": {
     "args": [
@@ -2088,7 +2417,8 @@
   "420": {
     "args": [
       2
-    ]
+    ], 
+    "name": "RandomEvent?"
   }, 
   "421": {
     "args": [
@@ -2108,24 +2438,28 @@
   "423": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckJhotoPokedex"
   }, 
   "424": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckNatPokedex"
   }, 
   "425": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ShowPokedex"
   }, 
   "426": {
     "args": [
       2, 
       2, 
       1
-    ]
+    ], 
+    "name": "CheckPokeItemStored"
   }, 
   "427": {
     "args": [
@@ -2151,52 +2485,61 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckItemChosen"
   }, 
   "433": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CompareItemPokeFossil?"
   }, 
   "434": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokeLevel"
   }, 
   "435": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokemonPoisoned"
   }, 
   "436": {
-    "args": []
+    "args": [], 
+    "name": "PreWfc?"
   }, 
   "437": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreFurniture"
   }, 
   "438": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "PresetMessagePhoto"
   }, 
   "439": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CopyFurniture"
   }, 
   "440": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "PresetMessagePhoto2"
   }, 
   "441": {
     "args": [
@@ -2225,7 +2568,8 @@
       2, 
       2, 
       1
-    ]
+    ], 
+    "name": "BCastleFunctReturn"
   }, 
   "445": {
     "args": [
@@ -2235,13 +2579,15 @@
   "446": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckEffectHm?"
   }, 
   "447": {
     "args": [
       1, 
       1
-    ]
+    ], 
+    "name": "SetSafariStatus"
   }, 
   "448": {
     "args": [
@@ -2250,30 +2596,37 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "BattlePokeColosseum?"
   }, 
   "449": {
-    "args": []
+    "args": [], 
+    "name": "WarpLastElevator"
   }, 
   "450": {
-    "args": []
+    "args": [], 
+    "name": "OpenGeoNet"
   }, 
   "451": {
     "args": [
       2
-    ]
+    ], 
+    "name": "PokeColosseum"
   }, 
   "452": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "PokePic"
   }, 
   "453": {
-    "args": []
+    "args": [], 
+    "name": "HidePic"
   }, 
   "454": {
-    "args": []
+    "args": [], 
+    "name": "StartRebattle?"
   }, 
   "455": {
     "args": []
@@ -2296,33 +2649,39 @@
     ]
   }, 
   "459": {
-    "args": []
+    "args": [], 
+    "name": "LighthouseAnm"
   }, 
   "460": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreReBattleStatus?"
   }, 
   "461": {
     "args": [
       1, 
       2, 
       2
-    ]
+    ], 
+    "name": "SetRebattleTrainer"
   }, 
   "462": {
     "args": [
       2
-    ]
+    ], 
+    "name": "RebattleGymLeaderId"
   }, 
   "463": {
-    "args": []
+    "args": [], 
+    "name": "ActNatPokedex"
   }, 
   "464": {
     "args": [
       1
-    ]
+    ], 
+    "name": "ActSwarmPoke"
   }, 
   "465": {
     "args": [
@@ -2333,28 +2692,33 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckEggPokeRember"
   }, 
   "467": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePokeRemember"
   }, 
   "468": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CopyPokeRemember"
   }, 
   "469": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreMoveRemember"
   }, 
   "470": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetTradeId"
   }, 
   "471": {
     "args": [
@@ -2364,15 +2728,18 @@
   "472": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckPokeTrade"
   }, 
   "473": {
     "args": [
       2
-    ]
+    ], 
+    "name": "TradeChsPoke"
   }, 
   "474": {
-    "args": []
+    "args": [], 
+    "name": "StopTrade"
   }, 
   "475": {
     "args": []
@@ -2384,7 +2751,8 @@
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "CheckWirePoss"
   }, 
   "478": {
     "args": [
@@ -2402,13 +2770,15 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckRibbon"
   }, 
   "481": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "GiveRibbon"
   }, 
   "482": {
     "args": [
@@ -2420,12 +2790,14 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckHappyRibbon"
   }, 
   "484": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckPokemonLeague"
   }, 
   "485": {
     "args": [
@@ -2433,28 +2805,33 @@
     ]
   }, 
   "486": {
-    "args": []
+    "args": [], 
+    "name": "RBattleRecorder"
   }, 
   "487": {
     "args": [
       2
-    ]
+    ], 
+    "name": "HealPcAnm"
   }, 
   "488": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreElevatorDirection"
   }, 
   "489": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreLugiaHoohEvent"
   }, 
   "490": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckKantoBadge?"
   }, 
   "491": {
     "args": [
@@ -2466,25 +2843,29 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "StorePhraseBox"
   }, 
   "493": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "StorePhraseBox2"
   }, 
   "494": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "SetvarPhraseBox"
   }, 
   "495": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreFTimeBellTower"
   }, 
   "496": {
     "args": [
@@ -2496,7 +2877,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokemonType"
   }, 
   "498": {
     "args": [
@@ -2505,7 +2887,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPhraseBox1"
   }, 
   "499": {
     "args": [
@@ -2514,27 +2897,32 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPhraseBox2"
   }, 
   "500": {
     "args": [
       1
-    ]
+    ], 
+    "name": "PreparePcAnm"
   }, 
   "501": {
     "args": [
       1
-    ]
+    ], 
+    "name": "PcOpenAnm"
   }, 
   "502": {
     "args": [
       1
-    ]
+    ], 
+    "name": "PcCloseAnm"
   }, 
   "503": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckLotoNumber"
   }, 
   "504": {
     "args": [
@@ -2542,7 +2930,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CompareLotoNumber"
   }, 
   "505": {
     "args": []
@@ -2551,12 +2940,14 @@
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarIdPokeBoxes"
   }, 
   "507": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckBoxesNumber"
   }, 
   "508": {
     "args": [
@@ -2566,16 +2957,19 @@
   "509": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePokeNumPP"
   }, 
   "510": {
-    "args": []
+    "args": [], 
+    "name": "SendBoxPokeCaughtPP"
   }, 
   "511": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StorePokeCaughtPP"
   }, 
   "512": {
     "args": []
@@ -2591,7 +2985,8 @@
   "515": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ActMainEvent"
   }, 
   "516": {
     "args": [
@@ -2603,12 +2998,14 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "ActDeoxisFormChange"
   }, 
   "518": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ChangeDeoxisForm"
   }, 
   "519": {
     "args": [
@@ -2624,7 +3021,8 @@
   "522": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckDailyEvent"
   }, 
   "523": {
     "args": [
@@ -2633,7 +3031,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "SwitchOw?"
   }, 
   "524": {
     "args": [
@@ -2660,36 +3059,42 @@
   "528": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckRandomAccessory"
   }, 
   "529": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckEventPokemon"
   }, 
   "530": {
     "args": [
       2, 
       1
-    ]
+    ], 
+    "name": "ClearEventTr?"
   }, 
   "531": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarItemType"
   }, 
   "532": {
     "args": [
       2, 
       4
-    ]
+    ], 
+    "name": "CompareCoins2"
   }, 
   "533": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CompareCoins"
   }, 
   "534": {
     "args": [
@@ -2715,7 +3120,8 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreTrendySay"
   }, 
   "539": {
     "args": [
@@ -2725,7 +3131,8 @@
   "540": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckTrendySay"
   }, 
   "541": {
     "args": [
@@ -2733,7 +3140,8 @@
       2, 
       1, 
       1
-    ]
+    ], 
+    "name": "SetvarIdNumber"
   }, 
   "542": {
     "args": [
@@ -2767,7 +3175,8 @@
   "547": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Pokepartypic"
   }, 
   "548": {
     "args": []
@@ -2785,19 +3194,22 @@
   "551": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ChoosePokeDCare"
   }, 
   "552": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StorePokeDCare"
   }, 
   "553": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "StoreRandNumber"
   }, 
   "554": {
     "args": [
@@ -2824,7 +3236,8 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckWi-fiSprite"
   }, 
   "559": {
     "args": [
@@ -2836,7 +3249,8 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "HmEffect"
   }, 
   "561": {
     "args": [
@@ -2844,7 +3258,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CamBmpEffect"
   }, 
   "562": {
     "args": [
@@ -2852,7 +3267,8 @@
       2, 
       2, 
       1
-    ]
+    ], 
+    "name": "DoubleBattle"
   }, 
   "563": {
     "args": [
@@ -2864,15 +3280,18 @@
   "564": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreActHeroFriendCode"
   }, 
   "565": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreActOtherFriendCode"
   }, 
   "566": {
-    "args": []
+    "args": [], 
+    "name": "TradeChosenPoke"
   }, 
   "567": {
     "args": [
@@ -2910,16 +3329,19 @@
   "572": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreSealNum"
   }, 
   "573": {
-    "args": []
+    "args": [], 
+    "name": "ActMisteryGift"
   }, 
   "574": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckFollowBattle?"
   }, 
   "575": {
     "args": [
@@ -2939,13 +3361,15 @@
     "args": []
   }, 
   "579": {
-    "args": []
+    "args": [], 
+    "name": "Special5"
   }, 
   "580": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarSealRandom"
   }, 
   "581": {
     "args": []
@@ -2961,20 +3385,24 @@
     "args": [
       2, 
       1
-    ]
+    ], 
+    "name": "StorePokeNickname"
   }, 
   "584": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePokeNumParty"
   }, 
   "585": {
-    "args": []
+    "args": [], 
+    "name": "CloseMultiUnion"
   }, 
   "586": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckBattleUnion"
   }, 
   "587": {
     "args": []
@@ -2982,19 +3410,22 @@
   "588": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreWildBattle2"
   }, 
   "589": {
     "args": [
       2, 
       2, 
       1
-    ]
+    ], 
+    "name": "WildBattle2"
   }, 
   "590": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreTrainerCardStar"
   }, 
   "591": {
     "args": []
@@ -3005,10 +3436,12 @@
     ]
   }, 
   "593": {
-    "args": []
+    "args": [], 
+    "name": "ShowSaveBox"
   }, 
   "594": {
-    "args": []
+    "args": [], 
+    "name": "HideSaveBox"
   }, 
   "595": {
     "args": [
@@ -3018,7 +3451,8 @@
   "596": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckSpecial"
   }, 
   "597": {
     "args": []
@@ -3032,7 +3466,8 @@
     "args": []
   }, 
   "600": {
-    "args": []
+    "args": [], 
+    "name": "Special"
   }, 
   "601": {
     "args": []
@@ -3040,33 +3475,41 @@
   "602": {
     "args": [
       2
-    ]
+    ], 
+    "name": "PokeFollowAnm"
   }, 
   "603": {
-    "args": []
+    "args": [], 
+    "name": "PokeFollowWait"
   }, 
   "604": {
     "args": [
       2
-    ]
+    ], 
+    "name": "PokeFollowAnm2"
   }, 
   "605": {
     "args": [
       1, 
       1
-    ]
+    ], 
+    "name": "PokeFollowSSpriteAnm"
   }, 
   "606": {
-    "args": []
+    "args": [], 
+    "name": "Special2"
   }, 
   "607": {
-    "args": []
+    "args": [], 
+    "name": "Special3"
   }, 
   "608": {
-    "args": []
+    "args": [], 
+    "name": "StopPokeFollowSSpriteAnm"
   }, 
   "609": {
-    "args": []
+    "args": [], 
+    "name": "MecScript"
   }, 
   "610": {
     "args": [
@@ -3092,17 +3535,20 @@
   "613": {
     "args": [
       2
-    ]
+    ], 
+    "name": "PhotoBattleFunct?"
   }, 
   "614": {
     "args": [
       2
-    ]
+    ], 
+    "name": "PhotoBattleFunct2"
   }, 
   "615": {
     "args": [
       2
-    ]
+    ], 
+    "name": "MakePhoto"
   }, 
   "616": {
     "args": [
@@ -3115,7 +3561,8 @@
   "618": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckPhotoNumber"
   }, 
   "619": {
     "args": [
@@ -3134,7 +3581,8 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckMachokeMovement"
   }, 
   "623": {
     "args": [
@@ -3162,41 +3610,48 @@
   "627": {
     "args": [
       1
-    ]
+    ], 
+    "name": "ShowBTowerSome?"
   }, 
   "628": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "DeleteSavesBFactory"
   }, 
   "629": {
-    "args": []
+    "args": [], 
+    "name": "SpinTradeUnion"
   }, 
   "630": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckVersionGame"
   }, 
   "631": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "ShowBArcadeRecords"
   }, 
   "632": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokeParty2"
   }, 
   "633": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokeCastle"
   }, 
   "634": {
     "args": [
@@ -3208,12 +3663,14 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "ChooseWirePokeBCastle"
   }, 
   "636": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetBCastle"
   }, 
   "637": {
     "args": [
@@ -3247,7 +3704,8 @@
   "642": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckSaveDataNum"
   }, 
   "643": {
     "args": [
@@ -3291,17 +3749,20 @@
     ]
   }, 
   "649": {
-    "args": []
+    "args": [], 
+    "name": "OpenScratchCard"
   }, 
   "650": {
-    "args": []
+    "args": [], 
+    "name": "CloseScratchCard"
   }, 
   "651": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "StoreScratchCardChosen"
   }, 
   "652": {
     "args": [
@@ -3335,7 +3796,8 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckMoveLearnPoss"
   }, 
   "657": {
     "args": [
@@ -3343,7 +3805,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckEggPotential"
   }, 
   "658": {
     "args": [
@@ -3376,7 +3839,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "StoreWfcData?"
   }, 
   "663": {
     "args": [
@@ -3405,22 +3869,26 @@
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarPokeHiddenPower"
   }, 
   "669": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreStarPiece"
   }, 
   "670": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StorePokeHiddenPower"
   }, 
   "671": {
-    "args": []
+    "args": [], 
+    "name": "Special6"
   }, 
   "672": {
     "args": [
@@ -3436,13 +3904,15 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckRotomForm"
   }, 
   "674": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckRotomParty"
   }, 
   "675": {
     "args": [
@@ -3450,13 +3920,15 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "ChangeRotomForm"
   }, 
   "676": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreRotomForm"
   }, 
   "677": {
     "args": [
@@ -3481,17 +3953,20 @@
   "681": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckPhraseBoxGts"
   }, 
   "682": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ContinueAfterPauseBTower"
   }, 
   "683": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreEmbStatus?"
   }, 
   "684": {
     "args": [
@@ -3520,18 +3995,21 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckPokeParty3"
   }, 
   "689": {
     "args": [
       2
-    ]
+    ], 
+    "name": "RegisterFriendCode?"
   }, 
   "690": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreElegiblePokemon"
   }, 
   "691": {
     "args": [
@@ -3542,22 +4020,26 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreManyVictoryBTower"
   }, 
   "693": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreHappyBTower"
   }, 
   "694": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreShardsBTower"
   }, 
   "695": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreStatusFBTower"
   }, 
   "696": {
     "args": [
@@ -3574,19 +4056,22 @@
       1, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckArceusEvent"
   }, 
   "699": {
     "args": []
   }, 
   "700": {
-    "args": []
+    "args": [], 
+    "name": "CheckWildBattle2"
   }, 
   "701": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "Wildbattle2"
   }, 
   "702": {
     "args": []
@@ -3611,24 +4096,29 @@
   "706": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckHallFameData"
   }, 
   "707": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StorePokeColossStatus"
   }, 
   "708": {
     "args": [
       2
-    ]
+    ], 
+    "name": "TeamRocketBattle"
   }, 
   "709": {
-    "args": []
+    "args": [], 
+    "name": "ActTeamRocket"
   }, 
   "710": {
-    "args": []
+    "args": [], 
+    "name": "ActTeamRocket2"
   }, 
   "711": {
     "args": []
@@ -3636,23 +4126,27 @@
   "712": {
     "args": [
       1
-    ]
+    ], 
+    "name": "ShowPokeAthlRecords"
   }, 
   "713": {
     "args": [
       1
-    ]
+    ], 
+    "name": "ShowRuinsPuzzles"
   }, 
   "714": {
     "args": [
       1
-    ]
+    ], 
+    "name": "ShowRuinsPhrases"
   }, 
   "715": {
     "args": []
   }, 
   "716": {
-    "args": []
+    "args": [], 
+    "name": "ActAirMachineZS"
   }, 
   "717": {
     "args": [
@@ -3697,13 +4191,15 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "WarpShip"
   }, 
   "724": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StorePokeAthlF"
   }, 
   "725": {
     "args": [
@@ -3712,12 +4208,14 @@
     ]
   }, 
   "726": {
-    "args": []
+    "args": [], 
+    "name": "ClosePokeAthlF"
   }, 
   "727": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreGiratinaForm"
   }, 
   "728": {
     "args": [
@@ -3728,7 +4226,8 @@
   "729": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckPositionPhoto"
   }, 
   "730": {
     "args": [
@@ -3747,7 +4246,8 @@
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "CheckLeaderPhoto"
   }, 
   "734": {
     "args": [
@@ -3757,29 +4257,35 @@
   "735": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckActApricorn"
   }, 
   "736": {
-    "args": []
+    "args": [], 
+    "name": "DeactApricorn"
   }, 
   "737": {
     "args": [
       2
-    ]
+    ], 
+    "name": "GiveApricornBall"
   }, 
   "738": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckApricorn"
   }, 
   "739": {
-    "args": []
+    "args": [], 
+    "name": "OpenApricorn"
   }, 
   "740": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreApricornJuice"
   }, 
   "741": {
     "args": [
@@ -3787,7 +4293,8 @@
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "CheckApricornJuice"
   }, 
   "742": {
     "args": [
@@ -3802,7 +4309,8 @@
     ]
   }, 
   "744": {
-    "args": []
+    "args": [], 
+    "name": "StartPAthlon?"
   }, 
   "745": {
     "args": [
@@ -3811,31 +4319,38 @@
     ]
   }, 
   "746": {
-    "args": []
+    "args": [], 
+    "name": "OpenLowScreen"
   }, 
   "747": {
-    "args": []
+    "args": [], 
+    "name": "CloseLowScreen"
   }, 
   "748": {
     "args": [
       2
-    ]
+    ], 
+    "name": "OpenLowYesNoBox"
   }, 
   "749": {
-    "args": []
+    "args": [], 
+    "name": "Multi4"
   }, 
   "750": {
-    "args": []
+    "args": [], 
+    "name": "Multi5"
   }, 
   "751": {
     "args": [
       2, 
       2, 
       2
-    ]
+    ], 
+    "name": "Txtscrpmulti4"
   }, 
   "752": {
-    "args": []
+    "args": [], 
+    "name": "CloseMulti4"
   }, 
   "753": {
     "args": [
@@ -3850,18 +4365,21 @@
     ]
   }, 
   "755": {
-    "args": []
+    "args": [], 
+    "name": "PrepEggSuspAnimation"
   }, 
   "756": {
     "args": []
   }, 
   "757": {
-    "args": []
+    "args": [], 
+    "name": "EggSuspAnimation"
   }, 
   "758": {
     "args": [
       2
-    ]
+    ], 
+    "name": "LampSuspAnimation"
   }, 
   "759": {
     "args": []
@@ -3872,7 +4390,8 @@
   "761": {
     "args": [
       2
-    ]
+    ], 
+    "name": "DeleteMapAnimation"
   }, 
   "762": {
     "args": [
@@ -3886,7 +4405,8 @@
     "args": []
   }, 
   "765": {
-    "args": []
+    "args": [], 
+    "name": "BigRainAnimation"
   }, 
   "766": {
     "args": []
@@ -3919,16 +4439,19 @@
   "774": {
     "args": [
       2
-    ]
+    ], 
+    "name": "BellTowerFunct"
   }, 
   "775": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "LakeRageFunct"
   }, 
   "776": {
-    "args": []
+    "args": [], 
+    "name": "ReceiveMEgg"
   }, 
   "777": {
     "args": [
@@ -3937,38 +4460,45 @@
     ]
   }, 
   "778": {
-    "args": []
+    "args": [], 
+    "name": "ReceiveEventPoke"
   }, 
   "779": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckRadioActivate"
   }, 
   "780": {
     "args": [
       1, 
       1
-    ]
+    ], 
+    "name": "OpenCoinGame"
   }, 
   "781": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckMailRoute31"
   }, 
   "782": {
-    "args": []
+    "args": [], 
+    "name": "PhotoActivate?"
   }, 
   "783": {
     "args": [
       1
-    ]
+    ], 
+    "name": "Special4"
   }, 
   "784": {
     "args": [
       1, 
       1
-    ]
+    ], 
+    "name": "Special6"
   }, 
   "785": {
     "args": [
@@ -4003,16 +4533,19 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreNatParkWinner"
   }, 
   "791": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "StoreSafariMinigame"
   }, 
   "792": {
-    "args": []
+    "args": [], 
+    "name": "PayZonaSafari"
   }, 
   "793": {
     "args": [
@@ -4033,7 +4566,8 @@
     ]
   }, 
   "796": {
-    "args": []
+    "args": [], 
+    "name": "CloseMomMoney"
   }, 
   "797": {
     "args": []
@@ -4041,31 +4575,37 @@
   "798": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetvarColossFunctionId"
   }, 
   "799": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetvarColossCup"
   }, 
   "800": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetvarColossPokeCompat"
   }, 
   "801": {
     "args": [
       2
-    ]
+    ], 
+    "name": "ColossFunction"
   }, 
   "802": {
-    "args": []
+    "args": [], 
+    "name": "ColossFunction2"
   }, 
   "803": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreColossPokeCompat"
   }, 
   "804": {
     "args": [
@@ -4076,26 +4616,31 @@
     "args": []
   }, 
   "806": {
-    "args": []
+    "args": [], 
+    "name": "ChangeGiratinaForm"
   }, 
   "807": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "Funct952"
   }, 
   "808": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Funct9522"
   }, 
   "809": {
     "args": [
       2
-    ]
+    ], 
+    "name": "Funcr9523"
   }, 
   "810": {
-    "args": []
+    "args": [], 
+    "name": "TimeTravelCelebiAnm"
   }, 
   "811": {
     "args": [
@@ -4117,26 +4662,32 @@
   "815": {
     "args": [
       2
-    ]
+    ], 
+    "name": "OpenPhraseBox"
   }, 
   "816": {
-    "args": []
+    "args": [], 
+    "name": "SinjohEvent"
   }, 
   "817": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SinjohEvent2"
   }, 
   "818": {
-    "args": []
+    "args": [], 
+    "name": "SinjohEvent3"
   }, 
   "819": {
-    "args": []
+    "args": [], 
+    "name": "SinjohEvent4"
   }, 
   "820": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetSinjohPokeId"
   }, 
   "821": {
     "args": [
@@ -4145,23 +4696,27 @@
     ]
   }, 
   "822": {
-    "args": []
+    "args": [], 
+    "name": "StopWireBattleSafari"
   }, 
   "823": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetvarSafariFriend"
   }, 
   "824": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StoreSafariFriend"
   }, 
   "825": {
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "StoreEventPokemon"
   }, 
   "826": {
     "args": [
@@ -4179,7 +4734,8 @@
       2, 
       1, 
       2
-    ]
+    ], 
+    "name": "SetPokeMassage"
   }, 
   "829": {
     "args": [
@@ -4189,37 +4745,44 @@
   "830": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckFTimeAccLoto"
   }, 
   "831": {
     "args": [
       2
-    ]
+    ], 
+    "name": "SetAccessoriesVar"
   }, 
   "832": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckAccessoriesNum"
   }, 
   "833": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckIdAccessories"
   }, 
   "834": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StorePAthlonActStatus"
   }, 
   "835": {
     "args": [
       2
-    ]
+    ], 
+    "name": "StroePAthlonRecStatus"
   }, 
   "836": {
     "args": [
       2
-    ]
+    ], 
+    "name": "CheckGroudKyogreEvent"
   }, 
   "837": {
     "args": [
@@ -4230,7 +4793,8 @@
     "args": [
       2, 
       2
-    ]
+    ], 
+    "name": "CheckMoneyMumStatus"
   }, 
   "839": {
     "args": [
@@ -4246,7 +4810,8 @@
   "841": {
     "args": [
       1
-    ]
+    ], 
+    "name": "TextVariable"
   }, 
   "842": {
     "args": [
@@ -4257,19 +4822,22 @@
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarItemStored3"
   }, 
   "844": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarItemStored4"
   }, 
   "845": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarItemStored5"
   }, 
   "846": {
     "args": [
@@ -4277,7 +4845,8 @@
       2, 
       2, 
       1
-    ]
+    ], 
+    "name": "SetvarTeamStored"
   }, 
   "847": {
     "args": [
@@ -4294,23 +4863,27 @@
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "CopyvarWi-fiSprite"
   }, 
   "850": {
     "args": [
       1, 
       2
-    ]
+    ], 
+    "name": "SetvarSealStored"
   }, 
   "851": {
     "args": [
       1
-    ]
+    ], 
+    "name": "SetvarWi-fiSprite"
   }, 
   "852": {
     "args": [
       1, 
       1
-    ]
+    ], 
+    "name": "DysplayFloor"
   }
 }
