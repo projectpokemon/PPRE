@@ -507,13 +507,6 @@
   "93": {
     "args": []
   }, 
-  "94": {
-    "args": [
-      2, 
-      4
-    ], 
-    "name": "Applymovement"
-  }, 
   "95": {
     "args": [], 
     "name": "Waitmovement"

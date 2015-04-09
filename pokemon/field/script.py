@@ -144,6 +144,23 @@ class ConditionalJumpCommand(Command):
         return [decompiler.condition(decompiler.cond_state), block]
 
 
+class MovementCommand(Command):
+    def decompile_args(self, decompiler):
+        target = decompiler.handle.readUInt16()
+        offset = decompiler.handle.readInt32()
+        restore = decompiler.tell()
+        offset += restore
+        decompiler.seek(offset)
+        block = decompiler.branch_movement()
+        block.start = offset
+        block.level = decompiler.level+1
+        block.parse()
+        block.lines.pop()  # 0xfe
+        decompiler.seek(restore)
+        return [decompiler.context(decompiler.func('move', target, level=0),
+                                   'movement'), block]
+
+
 class ScriptDecompiler(Decompiler):
     def __init__(self, handle, commands, level=0):
         Decompiler.__init__(self, handle, level)
@@ -166,6 +183,30 @@ class ScriptDecompiler(Decompiler):
         dup.start = self.start
         dup.deferred = True
         return dup
+
+    def branch_movement(self):
+        dup = MovementDecompiler(self.handle, self.commands['movements'],
+                                 self.level)
+        dup.start = self.start
+        dup.deferred = True
+        return dup
+
+
+class MovementDecompiler(Decompiler):
+    def __init__(self, handle, movements, level=0):
+        Decompiler.__init__(self, handle, level)
+        self.movements = movements
+
+    def parse_next(self):
+        cmd = self.read_value(2)
+        # if cmd is None:
+        #     return [self.end()]
+        if cmd == 0xFE:
+            return [self.end()]
+        command = self.movements.get(cmd)
+        if command is None:
+            command = 'mov_{0}'.format(cmd)
+        return [self.func(command, namespace='movement.')]
 
 
 class Script(object):
@@ -192,7 +233,7 @@ class Script(object):
     def __init__(self, game):
         self.offsets = []
         self.scripts = []
-        self.commands = {}
+        self.commands = {'movements': {}}
         self.game = game
         self.load_commands(os.path.join(os.path.dirname(__file__), '..', '..',
                                         'data', 'commands', 'base.json'))
@@ -255,7 +296,11 @@ class Script(object):
             Filename of JSON file
         """
         with open(fname) as handle:
-            items = json.load(handle).items()
-        for cmd, data in items:
+            commands = json.load(handle)
+        movements = commands.pop('movements', {})
+        for cmd, command in movements.items():
+            cmd = int(cmd, 0)
+            self.commands['movements'][cmd] = command
+        for cmd, data in commands.items():
             cmd = int(cmd, 0)
             self.commands[cmd] = Command.from_dict(cmd, data)
