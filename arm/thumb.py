@@ -7,6 +7,8 @@ CMP_OPER = '<=>'
 
 
 class Thumb(ARM):
+    cspr_state = None
+
     @staticmethod
     def sign(value, bits):
         opp = 1 << bits
@@ -49,9 +51,9 @@ class Thumb(ARM):
             oper = (cmd >> 11) & 0x3
             val = (cmd >> 6) & 0x1F
             if oper == 0:
-                oper = '>>'
-            elif oper == 1:
                 oper = '<<'
+            elif oper == 1:
+                oper = '>>'
             src = self.get_var(self.get_reg(cmd & 0x7))
             dest = self.get_var(self.get_reg((cmd >> 3) & 0x7), left=True)
             return [self.assign(dest, self.statement(oper, src, val))]

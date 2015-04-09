@@ -5,7 +5,7 @@
 typedef int (*func_t)(int, int, int, int);
 
 struct script_state {
-    unsigned char u0;
+    unsigned char frame_id;
     // 0x1
     unsigned char ret;
     unsigned char u2, u3;
@@ -13,6 +13,10 @@ struct script_state {
     int *command; // used when ret == 2
     // 0x8
     uint8_t *buf_ptr;
+    /* Keeps a copy of buf_ptr to be restored when current is exhausted.
+     * Next is state->frames[frame_id+1]
+     */
+    uint8_t *frames[20];
     unsigned char u4[0x50];
     // 0x5c
     int *command_table;
@@ -199,14 +203,14 @@ int cmd_0004(script_state *r0) {
 }
 
 int func_38bdc(script_state *r0, int r1) {
-    unsigned char r3 = r0->u0;
+    unsigned char r3 = r0->frame_id;
     int r2 = r3+1;
     if(r2 < 20){
         r2 = r3 << 2;
         r2 = r0+r2;
         *(r2+12) = r1;
-        r1 = r0->u0+1;
-        r0->u0 = r1;
+        r1 = r0->frame_id+1;
+        r0->frame_id = r1;
         return 0;
     }else{
         return 1;
