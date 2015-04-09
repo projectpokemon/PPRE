@@ -9,6 +9,7 @@ import json
 import struct
 
 from pokemon.game import Game
+from pokemon.field.script import Script
 from util.io import BinaryIO
 from arm.thumb import Thumb
 
@@ -42,6 +43,14 @@ if __name__ == '__main__':
     import sys
 
     target_game = Game.from_workspace(sys.argv[1])
+
+    try:
+        os.remove(os.path.join(target_game.files.directory, 'commands.json'))
+    except OSError:
+        pass
+    script = Script(target_game)
+    old_commands = script.commands
+
     with open(os.path.join(target_game.files.directory, 'header.bin'))\
             as header:
         header.seek(0x24)
@@ -83,6 +92,13 @@ if __name__ == '__main__':
                     args.append(1)
                     if '    ' in line:
                         conditional = True
+            try:
+                if old_commands[i].__class__.__name__ != 'Command':
+                    continue
+                if old_commands[i].args == args:
+                    continue
+            except:
+                pass
             commands[i] = {
                 'args': args,
             }
