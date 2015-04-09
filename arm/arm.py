@@ -39,6 +39,13 @@ class ARM(Decompiler):
         dup.registers = self.registers.copy()
         return dup
 
+    def reset(self):
+        Decompiler.reset(self)
+        self.variables = []
+        self.registers = {}
+        self.stack = []
+        self.deferred = False
+
     @staticmethod
     def get_reg(data, high=False):
         if high:
