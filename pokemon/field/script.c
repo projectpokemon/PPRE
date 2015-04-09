@@ -31,10 +31,10 @@ struct script_state {
     int u5;
 };
 
-int script_handler(int r0, int r1, int r2, int r3){
+int script_handler(script_state* r0, int r1, int r2, int r3){
     script_state *r4;
 
-    r4 = (script_state*)r0;
+    r4 = r0;
     r1 = r4->ret;
     if(r1 != 0){
         if(r1 == 0){

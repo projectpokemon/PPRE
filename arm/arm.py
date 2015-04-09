@@ -32,6 +32,7 @@ class ARM(Decompiler):
     def branch_duplicate(self):
         dup = self.__class__(self.handle, self.level)
         dup.start = self.start
+        dup.stop = self.stop
         dup.stack = self.stack[:]
         dup.deferred = True
         dup.variables = self.variables

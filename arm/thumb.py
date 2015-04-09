@@ -211,7 +211,11 @@ class Thumb(ARM):
             reg = self.get_reg((cmd >> 3) & 0x7, cmd & 0x40)
             if reg.slot == Register.SLOT_LR:
                 return [self.end()]
-            return [self.func('bx', reg)]
+            if (cmd >> 7) & 0x1:
+                func = 'blx'
+            else:
+                func = 'bx'
+            return [self.func(func, self.get_var(reg))]
         elif cmd & 0b1111110000000000 == 0b0100010000000000:
             src_reg = self.get_reg((cmd >> 3) & 7, cmd & (1 << 7))
             dest_reg = self.get_reg(cmd & 7, cmd & (1 << 6))
