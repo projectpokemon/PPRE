@@ -98,8 +98,6 @@ if __name__ == '__main__':
                             if top & 0xFF00 != 0xB500:
                                 # Require push {pc}
                                 continue
-                            if decompiler is not None:
-                                conditional = True
                             decompiler = Thumb(overlay_handle)
                             for ofs, name in cmd_info['functions'].items():
                                 ofs -= overlay.address-ram_offset
@@ -107,6 +105,7 @@ if __name__ == '__main__':
                             decompiler.start = offset - overlay.address
                             decompiler.reset()
                             decompiler.parse()
+                            break  # TODO: better contenders?
                 if decompiler is None:
                     skip += 1
                     continue
