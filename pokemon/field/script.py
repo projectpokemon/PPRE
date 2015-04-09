@@ -59,7 +59,8 @@ class Command(object):
         for size in self.args:
             arg = decompiler.read_value(size)
             bin_arg = bin(arg)[2:-3]
-            if bin_arg.count('0')*2 > bin_arg.count('1')*3:
+            if bin_arg.count('0')*2 > bin_arg.count('1')*3 or\
+                    bin_arg.count('1') > bin_arg.count('0')*3:
                 arg = hex(arg)
             args.append(arg)
         return [decompiler.func(self.name, *args)]
