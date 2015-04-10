@@ -32,10 +32,10 @@ class Map(Editable):
             handle.seek(self.game.map_table+map_id*self.size())
             # data = handle.read(self.size())
             self.load(handle)
-        self.script.load(self.game.get_script(self.script_idx))
         if self.encounter_idx != 0xFFFF:
             self.encounter.load(self.game.get_encounter(self.encounter_idx))
         else:
             self.encounter.load('\x00'*self.encounter.size())
         self.text.load(self.game.get_text(self.text_idx))
         self.script.load_text(self.text)
+        self.script.load(self.game.get_script(self.script_idx))

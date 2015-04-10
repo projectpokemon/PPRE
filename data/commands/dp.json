@@ -216,31 +216,36 @@
     "args": [
       1
     ], 
-    "name": "Message2"
+    "name": "Message2",
+    "class": "MessageCommand"
   }, 
   "44": {
     "args": [
       1
     ], 
-    "name": "Message"
+    "name": "Message",
+    "class": "MessageCommand"
   }, 
   "45": {
     "args": [
       2
     ], 
-    "name": "Message3"
+    "name": "Message3",
+    "class": "MessageCommand"
   }, 
   "46": {
     "args": [
       2
     ], 
-    "name": "Message4"
+    "name": "Message4",
+    "class": "MessageCommand"
   }, 
   "47": {
     "args": [
       1
     ], 
-    "name": "Message5"
+    "name": "Message5",
+    "class": "MessageCommand"
   }, 
   "48": {
     "args": []

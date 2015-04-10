@@ -178,6 +178,23 @@ class MovementCommand(Command):
                                    'movement'), block]
 
 
+class MessageCommand(Command):
+    def decompile_args(self, decompiler):
+        exprs = Command.decompile_args(self, decompiler)
+        args = exprs[0].args  # super().get_args
+        try:
+            text_id = int(args[0])
+        except:
+            text_id = int(args[0], 0)
+        try:
+            text_str = decompiler.text[text_id]
+        except IndexError:
+            return exprs
+        exprs[0].args = args+('text="{0}"'.format(
+            text_str.encode('string_escape')), )
+        return exprs
+
+
 class ScriptDecompiler(Decompiler):
     def __init__(self, handle, script_container, level=0):
         Decompiler.__init__(self, handle, level)
