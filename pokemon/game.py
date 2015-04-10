@@ -354,6 +354,7 @@ class DP(Game):
     battle_tower_trainer_pokemon_archive_file = 'battle/b_tower/btdpm.narc'
 
     load_info = 0x2000b68
+    map_table = 0xeedbc
     commands_files = ('dp.json', )
 
 
