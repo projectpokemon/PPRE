@@ -38,3 +38,4 @@ class Map(Editable):
         else:
             self.encounter.load('\x00'*self.encounter.size())
         self.text.load(self.game.get_text(self.text_idx))
+        self.script.load_text(self.text)

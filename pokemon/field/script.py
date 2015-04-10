@@ -179,10 +179,17 @@ class MovementCommand(Command):
 
 
 class ScriptDecompiler(Decompiler):
-    def __init__(self, handle, commands, level=0):
+    def __init__(self, handle, script_container, level=0):
         Decompiler.__init__(self, handle, level)
-        self.commands = commands
+        self.container = script_container
+        self.commands = script_container.commands
         self.cond_state = None
+
+    @property
+    def text(self):
+        if self.container.text is None:
+            return []
+        return self.container.text
 
     def parse_next(self):
         cmd = self.read_value(2)
@@ -196,7 +203,7 @@ class ScriptDecompiler(Decompiler):
         return [self.unknown(cmd & 0xFF, 1), self.unknown(cmd >> 8, 1)]
 
     def branch_duplicate(self):
-        dup = self.__class__(self.handle, self.commands, self.level)
+        dup = self.__class__(self.handle, self.container, self.level)
         dup.start = self.start
         dup.deferred = True
         return dup
@@ -263,6 +270,7 @@ class Script(object):
         self.offsets = []
         self.scripts = []
         self.commands = {'movements': {}}
+        self.text = None
         self.game = game
         self.load_commands(os.path.join(os.path.dirname(__file__), '..', '..',
                                         'data', 'commands', 'base.json'))
@@ -312,7 +320,7 @@ class Script(object):
 
         for scrnum, offset in enumerate(self.offsets):
             with reader.seek(offset):
-                script = ScriptDecompiler(reader, self.commands, 1)
+                script = ScriptDecompiler(reader, self, 1)
                 script.parse()
                 script.lines.insert(0, 'def script_{num}(engine):'
                                     .format(num=scrnum))
@@ -335,3 +343,8 @@ class Script(object):
         for cmd, data in commands.items():
             cmd = int(cmd, 0)
             self.commands[cmd] = Command.from_dict(cmd, data)
+
+    def load_text(self, text):
+        """Load a text archive to be associated with these scripts
+        """
+        self.text = text

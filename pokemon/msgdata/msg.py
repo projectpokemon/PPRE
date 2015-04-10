@@ -132,10 +132,17 @@ class Text(Archive, Editable):
             self.uint32('filesize')
             self.uint32('null')
 
+    def __getitem__(self, idx):
+        try:
+            return self.files[self.ids[idx]]
+        except KeyError as err:
+            raise IndexError(err)
+
     def load(self, reader):
         reader = BinaryIO.reader(reader)
         AtomicStruct.load(self, reader)
         self.files = {}
+        self.ids = {}
         offsets = []
         sizes = []
         if self.version in game.GEN_IV:
@@ -185,6 +192,7 @@ class Text(Archive, Editable):
                     if compressed:
                         name += 'c'
                     self.files[name] = text
+                    self.ids[i] = name
                 else:
                     raise RuntimeError('Did not have a terminating character')
         else:
@@ -247,6 +255,7 @@ class Text(Archive, Editable):
                         name += 'c'
                     name += '[{0:04X}]'.format(seed)
                     self.files[name] = text
+                    self.ids[j] = name
         if commented:
             reader.seek(comment_ofs)
             num = reader.readUInt16()
