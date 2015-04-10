@@ -485,6 +485,24 @@ class AtomicStruct(object):
         TypeError
             If this model is not yet frozen.
         """
+        import warnings
+
+        warnings.warn('Use get_size() to avoid field conflicts',
+                      DeprecationWarning)
+        return ctypes.sizeof(self._data)
+
+    def get_size(self):
+        """Size of the data structure
+
+        Returns
+        -------
+        size : int
+
+        Raises
+        ------
+        TypeError
+            If this model is not yet frozen.
+        """
         return ctypes.sizeof(self._data)
 
     def __len__(self):
@@ -492,9 +510,9 @@ class AtomicStruct(object):
 
         See Also
         --------
-        AtomicStruct.size()
+        AtomicStruct.get_size()
         """
-        return self.size()
+        return self.get_size()
 
     def freeze(self):
         """Lock the model's fields in place and compile the custom type.
