@@ -39,7 +39,7 @@ class Command(object):
     to_dict : dict
     """
     __metaclass__ = CommandMetaRegistry
-    _fields = ('name', 'args', )
+    _fields = ('name', 'args', 'returns', )
 
     def decompile_args(self, decompiler):
         """Generates decompiled command expressions by reading its arguments
@@ -57,11 +57,16 @@ class Command(object):
         """
         args = []
         for size in self.args:
-            arg = decompiler.read_value(size)
-            bin_arg = bin(arg)[2:-3]
-            if bin_arg.count('0')*2 > bin_arg.count('1')*3 or\
-                    bin_arg.count('1') > bin_arg.count('0')*3:
-                arg = hex(arg)
+            if size == 'var':
+                arg = decompiler.get_var(decompiler.read_value(2))
+            elif size == 'flag':
+                arg = decompiler.get_flag(decompiler.read_value(2))
+            else:
+                arg = decompiler.read_value(size)
+                bin_arg = bin(arg)[2:-3]
+                if bin_arg.count('0')*2 > bin_arg.count('1')*3 or\
+                        bin_arg.count('1') > bin_arg.count('0')*3:
+                    arg = hex(arg)
             args.append(arg)
         return [decompiler.func(self.name, *args)]
 
@@ -86,6 +91,8 @@ class Command(object):
             data['name'] = 'cmd_{0}'.format(cmd)
         if 'args' not in data:
             data['args'] = []
+        if 'returns' not in data:
+            data['returns'] = []
         command = cls()
         for field in cls._fields:
             setattr(command, field, data.get(field))
@@ -191,6 +198,18 @@ class ScriptDecompiler(Decompiler):
         dup.start = self.start
         dup.deferred = True
         return dup
+
+    def get_var(self, id):
+        var = Variable(id)
+        var.name = 'var_{0:x}'.format(id)
+        var.persist = True
+        return var
+
+    def get_flag(self, id):
+        var = Variable(id)
+        var.name = 'flag_{0:x}'.format(id)
+        var.persist = True
+        return var
 
 
 class MovementDecompiler(Decompiler):

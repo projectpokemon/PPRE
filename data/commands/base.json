@@ -5,7 +5,7 @@
   }, 
   "17": {
     "args": [
-      2,
+      "var",
       2
     ],
     "class": "SetConditionCommand",
