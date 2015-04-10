@@ -56,7 +56,8 @@ class Command(object):
             List of expressions generated. This is typically just one function.
         """
         args = []
-        for size in self.args:
+        rets = []
+        for idx, size in enumerate(self.args):
             if size == 'var':
                 arg = decompiler.get_var(decompiler.read_value(2))
             elif size == 'flag':
@@ -67,7 +68,15 @@ class Command(object):
                 if bin_arg.count('0')*2 > bin_arg.count('1')*3 or\
                         bin_arg.count('1') > bin_arg.count('0')*3:
                     arg = hex(arg)
-            args.append(arg)
+            if idx in self.returns:
+                rets.append(arg)
+            else:
+                args.append(arg)
+        if rets:
+            if len(rets) == 1:
+                rets = rets[0]
+            return [decompiler.assign(rets, decompiler.func(
+                self.name, *args, level=0))]
         return [decompiler.func(self.name, *args)]
 
     @staticmethod

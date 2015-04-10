@@ -4328,8 +4328,11 @@
   }, 
   "748": {
     "args": [
-      2
+      "var"
     ], 
+    "returns": [
+      0
+    ],
     "name": "OpenLowYesNoBox"
   }, 
   "749": {
