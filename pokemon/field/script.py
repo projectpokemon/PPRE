@@ -163,8 +163,8 @@ class ConditionalJumpCommand(Command):
         # block.level = decompiler.level+1
         block.parse()
         decompiler.seek(restore)"""
-        block = decompiler.get_func(offset)
-        block.target_attrs['indent'] = 1
+        block = ExpressionBlock()
+        block.lines.append(decompiler.get_func(offset))
         condition_expr = decompiler.condition(decompiler.cond_state)
         if len(condition_expr.conditional.args) == 1:
             if not oper:
@@ -241,8 +241,8 @@ class ScriptDecompiler(Decompiler):
         cmd = self.read_value(2)
         if cmd is None:
             return [self.end()]
-        if cmd > 750:
-            return [self.unknown(cmd, 2)]
+        # if cmd > max(self.commands):
+        #    return [self.unknown(cmd, 2)]
         command = self.commands.get(cmd, None)
         if command is not None:
             return command.decompile_args(self)
@@ -285,8 +285,8 @@ class MovementDecompiler(Decompiler):
 
     def parse_next(self):
         cmd = self.read_value(2)
-        # if cmd is None:
-        #     return [self.end()]
+        if cmd is None:
+            return [self.end()]
         if cmd == 0xFE:
             return [self.end()]
         command = self.movements.get(cmd)

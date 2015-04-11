@@ -382,7 +382,7 @@ class HGSS(Game):
     text_archive_file = 'a/0/2/7'
 
     load_info = 0x02000ba0
-    map_table = 0xf6bb0
+    map_table = 0xf6be0
     commands_files = ('hgss.json', )
 
 
