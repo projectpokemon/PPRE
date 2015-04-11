@@ -146,7 +146,7 @@ class Text(Archive, Editable):
         offsets = []
         sizes = []
         if self.version in game.GEN_IV:
-            commented = (self.seed & 0x1FF) == 0x1FF
+            commented = False  # (self.seed & 0x1FF) == 0x1FF
             for i in xrange(1, self.num+1):
                 state = (((self.seed*0x2FD) & 0xFFFF)*i) & 0xFFFF
                 key = state | state << 16
