@@ -163,6 +163,7 @@
     "args": [
       2
     ], 
+    "class": "SetConditionCommand",
     "name": "ClearTrainerId"
   }, 
   "38": {
