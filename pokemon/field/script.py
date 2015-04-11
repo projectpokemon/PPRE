@@ -388,6 +388,8 @@ class Script(object):
         embedded_functions = []
         for (offset, (func, count, func_id)) in self.func_map.items():
             if count > 1:
+                func.header_lines.append('def func_{num}(engine):'
+                                         .format(num=cur_id))
                 self.functions.append(func)
                 self.func_map[offset][2] = cur_id
                 cur_id += 1
@@ -433,3 +435,8 @@ class Script(object):
         """Load a text archive to be associated with these scripts
         """
         self.text = text
+
+    def export(self, handle):
+        for script in itertools.chain(self.scripts, self.functions):
+            handle.write(str(script))
+            handle.write('\n\n')
