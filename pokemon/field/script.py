@@ -271,7 +271,7 @@ class ScriptDecompiler(Decompiler):
             self.container.func_map[offset][1] += 1
         except:
             self.container.func_map[offset] = [None, 1, None]
-        return self.wrapper(self.func('jump', offset))
+        return self.wrapper(self.end(self.func('jump', offset)))
 
 
 class MovementDecompiler(Decompiler):
@@ -400,18 +400,19 @@ class Script(object):
                                       embedded_functions):
             for expr in script:
                 try:
-                    if expr.target.name != 'jump':
+                    if expr.target.args[0].name != 'jump':
                         continue
                 except:
                     continue
-                offset, = expr.target.args
+                offset = expr.target.args[0].args[0]
                 func, count, func_id = self.func_map[offset]
                 if func_id is None:
+                    func.indent = 0
                     expr.target = func
                 else:
-                    expr.target = script.func(
+                    expr.target = script.end(script.func(
                         'call', 'func_{0}'.format(func_id),
-                        namespace='engine.')
+                        namespace='engine.'))
 
     def load_commands(self, fname):
         """Load commands from JSON file
