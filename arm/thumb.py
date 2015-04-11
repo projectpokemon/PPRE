@@ -170,7 +170,6 @@ class Thumb(ARM):
             if ofs > restore:
                 self.seek(ofs)
                 block = self.branch_duplicate()
-                block.level = self.level+1
                 block.start = ofs
                 block.cspr_state = self.cspr_state
                 block.parse()
@@ -182,7 +181,6 @@ class Thumb(ARM):
                 self.seek(ofs)
                 block = self.branch_duplicate()
                 block.stop = restore-2
-                block.level = self.level+1
                 block.start = ofs
                 block.cspr_state = self.cspr_state
                 block.parse()
