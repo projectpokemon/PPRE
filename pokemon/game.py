@@ -379,8 +379,10 @@ class HGSS(Game):
         'HeartGold': 'a/0/3/7',
         'SoulSilver': 'a/1/3/6'}
     script_archive_file = 'a/0/1/2'
+    text_archive_file = 'a/0/2/7'
 
     load_info = 0x02000ba0
+    map_table = 0xf6bb0
     commands_files = ('hgss.json', )
 
 

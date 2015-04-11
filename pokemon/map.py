@@ -32,7 +32,7 @@ class Map(Editable):
             handle.seek(self.game.map_table+map_id*self.size())
             # data = handle.read(self.size())
             self.load(handle)
-        if self.encounter_idx != 0xFFFF:
+        if 0 and self.encounter_idx != 0xFFFF:
             self.encounter.load(self.game.get_encounter(self.encounter_idx))
         else:
             self.encounter.load('\x00'*self.encounter.size())
