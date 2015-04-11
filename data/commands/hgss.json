@@ -171,6 +171,7 @@
     "args": [
       2
     ], 
+    "class": "SetConditionCommand",
     "name": "ClearTrainerId"
   }, 
   "39": {
@@ -615,9 +616,7 @@
   }, 
   "119": {
     "args": [
-      2, 
-      2, 
-      2
+      "var"
     ], 
     "name": "CheckCoins"
   }, 

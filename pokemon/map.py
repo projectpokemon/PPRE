@@ -4,13 +4,14 @@ import os
 from generic.editable import XEditable as Editable
 from pokemon.field.script import Script
 from pokemon.field.encounters import Encounters
+from pokemon.game import Game
 from pokemon.msgdata.msg import Text
 
 
 class Map(Editable):
     def define(self, game):
         self.game = game
-        if game < game.from_string('HeartGold'):
+        if game < Game.from_string('HeartGold'):
             self.uint16('u0')
             self.uint16('u2')
             self.uint16('script_idx')

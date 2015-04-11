@@ -245,7 +245,10 @@ class ScriptDecompiler(Decompiler):
         #    return [self.unknown(cmd, 2)]
         command = self.commands.get(cmd, None)
         if command is not None:
-            return command.decompile_args(self)
+            exprs = command.decompile_args(self)
+            # for expr in exprs:
+            #     print(expr)
+            return exprs
         return [self.unknown(cmd & 0xFF, 1), self.unknown(cmd >> 8, 1)]
 
     def branch_duplicate(self):
