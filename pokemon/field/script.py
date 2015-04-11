@@ -1,4 +1,5 @@
 
+import itertools
 import json
 import os
 
@@ -134,6 +135,7 @@ class JumpCommand(Command):
     def decompile_args(self, decompiler):
         offset = decompiler.handle.readInt32()
         ofs2 = decompiler.tell()+offset
+        return [decompiler.get_func(ofs2)]
         if offset > 0:
             decompiler.seek(decompiler.tell()+offset)
         # return [decompiler.func(self.name, offset, ofs2)]
@@ -264,6 +266,13 @@ class ScriptDecompiler(Decompiler):
         var.persist = True
         return var
 
+    def get_func(self, offset):
+        try:
+            self.container.func_map[offset][1] += 1
+        except:
+            self.container.func_map[offset] = [None, 1, None]
+        return self.wrapper(self.func('jump', offset))
+
 
 class MovementDecompiler(Decompiler):
     def __init__(self, handle, movements):
@@ -330,6 +339,8 @@ class Script(object):
     def load(self, reader):
         self.offsets = []
         self.scripts = []
+        self.functions = []
+        self.func_map = {}  # {offset: [func, count]}
         reader = BinaryIO.reader(reader)
         start = reader.tell()
 
@@ -362,6 +373,43 @@ class Script(object):
                 script.header_lines.append('def script_{num}(engine):'
                                            .format(num=scrnum))
                 self.scripts.append(script)
+
+        changed = True
+        while changed:
+            changed = False
+            for offset, (func, count, func_id) in self.func_map.items():
+                if func is None:
+                    changed = True
+                    with reader.seek(offset):
+                        script = ScriptDecompiler(reader, self)
+                        script.parse()
+                        self.func_map[offset][0] = script
+        cur_id = 0
+        embedded_functions = []
+        for (offset, (func, count, func_id)) in self.func_map.items():
+            if count > 1:
+                self.functions.append(func)
+                self.func_map[offset][2] = cur_id
+                cur_id += 1
+            else:
+                embedded_functions.append(func)
+
+        for script in itertools.chain(self.scripts, self.functions,
+                                      embedded_functions):
+            for expr in script:
+                try:
+                    if expr.target.name != 'jump':
+                        continue
+                except:
+                    continue
+                offset, = expr.target.args
+                func, count, func_id = self.func_map[offset]
+                if func_id is None:
+                    expr.target = func
+                else:
+                    expr.target = script.func(
+                        'call', 'func_{0}'.format(func_id),
+                        namespace='engine.')
 
     def load_commands(self, fname):
         """Load commands from JSON file
