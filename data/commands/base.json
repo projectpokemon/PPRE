@@ -11,6 +11,14 @@
     "class": "SetConditionCommand",
     "name": "If"
   },
+  "18": {
+    "args": [
+      "var",
+      "var"
+    ],
+    "class": "SetConditionCommand",
+    "name": "If2"
+  },
   "22": {
     "class": "JumpCommand",
     "name": "Jump"
@@ -39,6 +47,13 @@
     ],
     "class": "ConditionalJumpCommand",
     "name": "CheckLR1"
+  },
+  "32": {
+    "args": [
+      "flag"
+    ],
+    "class": "SetConditionCommand",
+    "name": "Checkflag"
   },
   "94": {
     "args": [
