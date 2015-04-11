@@ -2,7 +2,7 @@
 import json
 import os
 
-from compileengine import Decompiler, Variable
+from compileengine import Decompiler, Variable, ExpressionBlock
 
 from util.io import BinaryIO
 
@@ -133,15 +133,17 @@ class EndCommand(Command):
 class JumpCommand(Command):
     def decompile_args(self, decompiler):
         offset = decompiler.handle.readInt32()
-        decompiler.seek(decompiler.tell()+offset)
-        return []
+        ofs2 = decompiler.tell()+offset
+        if offset > 0:
+            decompiler.seek(decompiler.tell()+offset)
+        return [decompiler.func(self.name, offset, ofs2)]
 
 
 class SetConditionCommand(Command):
     def decompile_args(self, decompiler):
         exprs = Command.decompile_args(self, decompiler)
         args = exprs[0].args  # super().get_args
-        decompiler.cond_state = decompiler.statement('==', *args)
+        decompiler.cond_state = decompiler.statement('<=>', *args)
         # return exprs
         return []
 
@@ -155,10 +157,29 @@ class ConditionalJumpCommand(Command):
         decompiler.seek(offset)
         block = decompiler.branch_duplicate()
         block.start = offset
-        block.level = decompiler.level+1
+        # block.level = decompiler.level+1
         block.parse()
         decompiler.seek(restore)
-        return [decompiler.condition(decompiler.cond_state), block]
+        condition_expr = decompiler.condition(decompiler.cond_state)
+        if len(condition_expr.conditional.args) == 1:
+            if not oper:
+                condition_expr.conditional = decompiler.func(
+                    'not ', condition_expr.conditional.args[0],
+                    level=0, namespace='')
+        else:
+            if oper == 0:
+                condition_expr.conditional.operator = '<'
+            elif oper == 1:
+                condition_expr.conditional.operator = '=='
+            elif oper == 2:
+                condition_expr.conditional.operator = '>'
+            elif oper == 4:
+                condition_expr.conditional.operator = '>='
+            elif oper == 5:
+                condition_expr.conditional.operator = '!='
+            else:
+                raise NotImplementedError('Unknown operator: (<= ?)')
+        return [condition_expr, block]
 
 
 class MovementCommand(Command):
@@ -170,7 +191,7 @@ class MovementCommand(Command):
         decompiler.seek(offset)
         block = decompiler.branch_movement()
         block.start = offset
-        block.level = decompiler.level+1
+        # block.level = decompiler.level+1
         block.parse()
         block.lines.pop()  # 0xfe
         decompiler.seek(restore)
@@ -196,8 +217,8 @@ class MessageCommand(Command):
 
 
 class ScriptDecompiler(Decompiler):
-    def __init__(self, handle, script_container, level=0):
-        Decompiler.__init__(self, handle, level)
+    def __init__(self, handle, script_container):
+        Decompiler.__init__(self, handle)
         self.container = script_container
         self.commands = script_container.commands
         self.cond_state = None
@@ -209,6 +230,7 @@ class ScriptDecompiler(Decompiler):
         return self.container.text
 
     def parse_next(self):
+        here = self.tell()
         cmd = self.read_value(2)
         if cmd is None:
             return [self.end()]
@@ -216,20 +238,17 @@ class ScriptDecompiler(Decompiler):
             return [self.unknown(cmd, 2)]
         command = self.commands.get(cmd, None)
         if command is not None:
-            return command.decompile_args(self)
+            return [self.func('tell', here)]+command.decompile_args(self)
         return [self.unknown(cmd & 0xFF, 1), self.unknown(cmd >> 8, 1)]
 
     def branch_duplicate(self):
-        dup = self.__class__(self.handle, self.container, self.level)
+        dup = self.__class__(self.handle, self.container)
         dup.start = self.start
-        dup.deferred = True
         return dup
 
     def branch_movement(self):
-        dup = MovementDecompiler(self.handle, self.commands['movements'],
-                                 self.level)
+        dup = MovementDecompiler(self.handle, self.commands['movements'])
         dup.start = self.start
-        dup.deferred = True
         return dup
 
     def get_var(self, id):
@@ -246,8 +265,8 @@ class ScriptDecompiler(Decompiler):
 
 
 class MovementDecompiler(Decompiler):
-    def __init__(self, handle, movements, level=0):
-        Decompiler.__init__(self, handle, level)
+    def __init__(self, handle, movements):
+        Decompiler.__init__(self, handle)
         self.movements = movements
 
     def parse_next(self):
@@ -337,10 +356,10 @@ class Script(object):
 
         for scrnum, offset in enumerate(self.offsets):
             with reader.seek(offset):
-                script = ScriptDecompiler(reader, self, 1)
+                script = ScriptDecompiler(reader, self)
                 script.parse()
-                script.lines.insert(0, 'def script_{num}(engine):'
-                                    .format(num=scrnum))
+                script.header_lines.append('def script_{num}(engine):'
+                                           .format(num=scrnum))
                 self.scripts.append(script)
 
     def load_commands(self, fname):
