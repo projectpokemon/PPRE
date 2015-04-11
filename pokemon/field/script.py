@@ -157,12 +157,14 @@ class ConditionalJumpCommand(Command):
         offset = decompiler.handle.readInt32()
         restore = decompiler.tell()
         offset += restore
-        decompiler.seek(offset)
+        """decompiler.seek(offset)
         block = decompiler.branch_duplicate()
         block.start = offset
         # block.level = decompiler.level+1
         block.parse()
-        decompiler.seek(restore)
+        decompiler.seek(restore)"""
+        block = decompiler.get_func(offset)
+        block.target_attrs['indent'] = 1
         condition_expr = decompiler.condition(decompiler.cond_state)
         if len(condition_expr.conditional.args) == 1:
             if not oper:
@@ -176,12 +178,14 @@ class ConditionalJumpCommand(Command):
                 condition_expr.conditional.operator = '=='
             elif oper == 2:
                 condition_expr.conditional.operator = '>'
+            elif oper == 3:
+                condition_expr.conditional.operator = '<='
             elif oper == 4:
                 condition_expr.conditional.operator = '>='
             elif oper == 5:
                 condition_expr.conditional.operator = '!='
             else:
-                raise NotImplementedError('Unknown operator: (<= ?)')
+                raise NotImplementedError('Unknown operator: {0}'.format(oper))
         return [condition_expr, block]
 
 
@@ -408,11 +412,11 @@ class Script(object):
                 func, count, func_id = self.func_map[offset]
                 if func_id is None:
                     func.indent = 0
-                    expr.target = func
+                    expr.set_target(func)
                 else:
-                    expr.target = script.end(script.func(
+                    expr.set_target(script.end(script.func(
                         'call', 'func_{0}'.format(func_id),
-                        namespace='engine.'))
+                        namespace='engine.')))
 
     def load_commands(self, fname):
         """Load commands from JSON file
