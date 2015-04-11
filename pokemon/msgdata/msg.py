@@ -23,13 +23,14 @@ def load_table():
     if table:
         return
     fname = 'Table.tbl'
-    max_levels = 6
+    """max_levels = 6
     while not os.path.exists(fname):
         max_levels -= 1
         if not max_levels:
             raise IOError('Could not find Table.tbl. Please place it in'
                           ' the PPRE directory')
-        fname = os.path.join('../', fname)
+        fname = os.path.join('../', fname)"""
+    fname = os.path.join(os.path.dirname(__file__), '..', '..', fname)
     with codecs.open(fname, encoding='utf-16') as handle:
         for line in handle:
             key, value = line.strip('\r\n').encode('unicode_escape')\
