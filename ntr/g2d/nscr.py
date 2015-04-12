@@ -1,5 +1,6 @@
 
 import array
+import colorsys
 import itertools
 
 from PIL import Image
@@ -69,6 +70,35 @@ class NSCR(Editable):
                         pix[(scr_x+sub_x, scr_y+sub_y)] = palette[val]
                     else:
                         pix[(scr_x+sub_x, scr_y+sub_y)] = (0, 0, 0, 0)
+            scr_x += 8
+            if scr_x >= self.scrn.width:
+                scr_x = 0
+                scr_y += 8
+                if scr_y >= self.scrn.height:
+                    break
+        return img
+
+    def get_target_image(self):
+        img = Image.new('RGBA', (self.scrn.width, self.scrn.height))
+        pix = img.load()
+        scr_x = scr_y = 0
+        for tiledata in self.scrn.data:
+            tile_id = tiledata & 0x3FF
+            if (tiledata >> 10) & 1:
+                flip_y_factor = -1
+            else:
+                flip_y_factor = 1
+            if (tiledata >> 11) & 1:
+                flip_x_factor = -1
+            else:
+                flip_x_factor = 1
+            color = colorsys.hsv_to_rgb(((tiledata >> 12) & 0xF)/16.0, 1, 0.5)
+            color = (int(color[0]*255), int(color[1]*255),
+                     int(color[2]*255), 255)
+            if tile_id:
+                for sub_y in range(8)[::flip_y_factor]:
+                    for sub_x in range(8)[::flip_x_factor]:
+                        pix[(scr_x+sub_x, scr_y+sub_y)] = color
             scr_x += 8
             if scr_x >= self.scrn.width:
                 scr_x = 0
