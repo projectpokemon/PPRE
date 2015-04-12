@@ -81,8 +81,10 @@ class PLTT(Editable):
         elif self.format == self.FORMAT_256BIT:
             num = 256
         start = pal_id*num*2
-        for i in range(num):
-            r, g, b = palette[i*3:i*3+3]
+        for i, color in enumerate(palette):
+            if i > num:
+                break
+            r, g, b = color[:3]
             self.data[start+i] = ((r >> 3) |
                                   (g >> 3 << 5) |
                                   (b >> 3 << 10))

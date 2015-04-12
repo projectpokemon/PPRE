@@ -170,7 +170,7 @@ class NSCR(Editable):
                     if scr_y >= self.scrn.height:
                         break
             for pal_id in changes_pal_ids:
-                clr.set_palette(pal_id, palette[pal_id])
+                clr.set_palette(pal_id, palettes[pal_id])
             cgr.set_tiles(tiles)
         else:
             raise NotImplementedError('Cannot yet modify screen')
