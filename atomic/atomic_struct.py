@@ -286,7 +286,7 @@ class AtomicStruct(object):
             self.remove(name)
         return ctx
 
-    def offset(self, name, relative=None):
+    def get_offset(self, name, relative=None):
         """Get the offset (in bytes) of a field
 
         Parameters
@@ -315,8 +315,15 @@ class AtomicStruct(object):
         if relative is None:
             base = 0
         else:
-            base = self.offset(name)
+            base = self.get_offset(name)
         return getattr(self._type, name).offset - base
+
+    def offset(self, name, relative=None):
+        import warnings
+
+        warnings.warn('Use get_offset() to avoid field conflicts',
+                      DeprecationWarning)
+        return self.get_offset(name, relative)
 
     def uint8(self, name, **kwargs):
         return self._add(name, ctypes.c_uint8, **kwargs)
