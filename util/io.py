@@ -183,6 +183,7 @@ class BinaryIO(StringIO):
             return BinaryIO()
         else:
             return BinaryIO(target)
+    writer = reader
 
 
 class BinaryIOAdapter(BinaryIO):
