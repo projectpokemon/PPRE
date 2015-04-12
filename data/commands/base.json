@@ -55,6 +55,14 @@
     "class": "SetConditionCommand",
     "name": "Checkflag"
   },
+  "66": {
+    "args": [
+      1,
+      1
+    ],
+    "name": "MultiMessage",
+    "class": "MessageCommand"
+  },
   "94": {
     "args": [
       2,

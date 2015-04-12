@@ -41,12 +41,14 @@ class Map(Editable):
         self.encounter = Encounters(game)
         self.text = Text(game)
 
-    def load_id(self, map_id):
+    def load_id(self, map_id, shallow=False):
         with open(os.path.join(self.game.files.directory, 'arm9.dec.bin'))\
                 as handle:
             handle.seek(self.game.map_table+map_id*self.size())
             # data = handle.read(self.size())
             self.load(handle)
+        if shallow:
+            return
         if 0 and self.encounter_idx != 0xFFFF:
             self.encounter.load(self.game.get_encounter(self.encounter_idx))
         else:

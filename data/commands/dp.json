@@ -339,13 +339,6 @@
     ], 
     "name": "Multi2"
   }, 
-  "66": {
-    "args": [
-      1, 
-      1
-    ], 
-    "name": "Txtscrpmulti"
-  }, 
   "67": {
     "args": [], 
     "name": "CloseMulti"
