@@ -1,5 +1,6 @@
 
 import array
+import itertools
 
 from PIL import Image
 
@@ -71,3 +72,43 @@ class NSCR(Editable):
                 if scr_y >= self.scrn.height:
                     break
         return img
+
+    def set_image(self, img, cgr, clr, modify_screen=False, modify_tiles=True,
+                  modify_palette=True):
+        img = img.convert('P', palette=Image.ADAPTIVE, colors=16, dither=None)
+        pix = img.load()
+        # TODO: not modify_palette
+        pal_str = img.palette.tostring()
+        clr.set_palette(0, img.getpalette())
+        tiles = []
+        if not modify_screen:
+            scr_x = scr_y = 0
+            for tiledata in self.scrn.data:
+                tile_id = tiledata & 0x3FF
+                try:
+                    tile = tiles[tile_id]
+                except IndexError:
+                    while tile_id+1 > len(tiles):
+                        tile = []
+                        for i in range(8):
+                            tile.append([0]*8)
+                        tiles.append(tile)
+                if (tiledata >> 10) & 1:
+                    flip_y_factor = -1
+                else:
+                    flip_y_factor = 1
+                if (tiledata >> 11) & 1:
+                    flip_x_factor = -1
+                else:
+                    flip_x_factor = 1
+                # TODO: palette
+                for sub_y in range(8)[::flip_y_factor]:
+                    for sub_x in range(8)[::flip_x_factor]:
+                        tile[sub_y][sub_x] = pix[(scr_x+sub_x, scr_y+sub_y)]
+                scr_x += 8
+                if scr_x >= self.scrn.width:
+                    scr_x = 0
+                    scr_y += 8
+                    if scr_y >= self.scrn.height:
+                        break
+            cgr.set_tiles(tiles)

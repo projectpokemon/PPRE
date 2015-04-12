@@ -74,10 +74,10 @@ class PLTT(Editable):
             num = 256
         start = pal_id*num*2
         for i in range(num):
-            r, g, b, a = palette[i]
-            self.data[start+i] = ((ord(r) >> 3) |
-                                  (ord(g) >> 3 << 5) |
-                                  (ord(b) >> 3 << 10))
+            r, g, b = palette[i*3:i*3+3]
+            self.data[start+i] = ((r >> 3) |
+                                  (g >> 3 << 5) |
+                                  (b >> 3 << 10))
 
 
 class NCLR(Editable):

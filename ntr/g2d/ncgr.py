@@ -51,6 +51,25 @@ class CHAR(Editable):
             tiles.append(tile)
         return tiles
 
+    def set_tiles(self, tiles):
+        self.data = ''
+        if self.format == self.FORMAT_16BIT:
+            subwidth = 4
+        elif self.format == self.FORMAT_256BIT:
+            subwidth = 8
+        for tile in tiles:
+            for tile_y in range(8):
+                for tile_x in range(subwidth):
+                    if self.format == self.FORMAT_16BIT:
+                        val = tile[tile_y][tile_x*2]
+                        val |= tile[tile_y][tile_x*2+1] << 4
+                    elif self.format == self.FORMAT_256BIT:
+                        val = tile[tile_y][tile_x]
+                    self.data += chr(val)
+        old_datasize = self.datasize
+        self.datasize = len(self.data)
+        self.size_ += self.datasize-old_datasize
+
     def get_pixels(self, width=None, height=None):
         """pixels = [[[]]]
         subx = suby = 0
@@ -149,3 +168,6 @@ class NCGR(Editable):
 
     def get_tiles(self):
         return self.char.get_tiles()
+
+    def set_tiles(self, tiles):
+        self.char.set_tiles(tiles)
