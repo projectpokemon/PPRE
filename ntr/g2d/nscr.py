@@ -99,6 +99,7 @@ class NSCR(Editable):
                 the last color if more than one match)
         """
         # img = img.convert('P', palette=Image.ADAPTIVE, colors=16)
+        img = img.convert('RGBA')
         if modify_tiles is not self.EDIT_ANY:
             if modify_screen is not self.EDIT_ANY:
                 # Not yet implemented though

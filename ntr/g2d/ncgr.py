@@ -30,6 +30,14 @@ class CHAR(Editable):
         Editable.load(self, reader)
         self.data = reader.read(self.datasize)
 
+    def save(self, writer):
+        old_datasize = self.datasize
+        self.datasize = len(self.data)
+        self.size_ += self.datasize-old_datasize
+        writer = Editable.save(self, writer)
+        writer.write(self.data)
+        return writer
+
     def get_tiles(self):
         tiles = []
         if self.format == self.FORMAT_16BIT:
@@ -151,6 +159,15 @@ class NCGR(Editable):
         self.char.load(reader)
         if self.numblocks > 1:
             self.cpos.load(reader)
+        else:
+            self.cpos.loaded = False
+
+    def save(self, writer=None):
+        writer = Editable.save(self, writer)
+        writer = self.char.save(writer)
+        if self.cpos.loaded:
+            writer = self.cpos.save(writer)
+        return writer
 
     def get_image(self, width=None, height=None):
         data = ''
