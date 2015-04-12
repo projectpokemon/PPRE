@@ -151,7 +151,7 @@ class Game(Editable, Version):
         self.config = {}
 
     @classmethod
-    def from_workspace(cls, workspace):
+    def from_workspace(cls, workspace, init=False):
         files = Files(workspace)
         try:
             # NTR
@@ -184,9 +184,12 @@ class Game(Editable, Version):
         game.color = GAME_COLORS[game_name]
         game.header = header
         game.load_config()
-        if game < GEN_VI:
-            blz.decompress_arm9(game)
+        if init:
+            game.init()
         return game
+
+    def init(self):
+        pass
 
     @staticmethod
     def from_file(filename, workspace, **kwargs):
@@ -205,7 +208,7 @@ class Game(Editable, Version):
             ndstool.dump(filename, workspace)
         else:
             raise ValueError('Not able to detect file type')
-        game = Game.from_workspace(workspace)
+        game = Game.from_workspace(workspace, True)
         game.write_config()
         return game
 
@@ -385,6 +388,20 @@ class HGSS(Game):
     map_table = 0xf6be0
     commands_files = ('hgss.json', )
 
+    def init(self):
+        blz.decompress_arm9(self)
+        blz.decompress_overlays(self)
+
+        with open(os.path.join(self.files.directory, 'arm9.dec.bin'), 'r+')\
+                as handle:
+            """Breaks the while(AUXSPICNT != 80){} loop"""
+            handle.seek(0xde21c)
+            handle.write(chr(0)*4)
+            handle.seek(0xd3fa8)
+            handle.write(chr(0)*4)
+            handle.seek(0x1a570)
+            handle.write(chr(0)*2)
+
 
 class BW(Game):
     idx = 0
@@ -400,6 +417,10 @@ class BW(Game):
     text_archive_file = 'a/0/0/3'
 
     commands_files = ('bw.json', )
+
+    def init(self):
+        blz.decompress_arm9(self)
+        blz.decompress_overlays(self)
 
 
 class B2W2(BW):
