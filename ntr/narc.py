@@ -181,7 +181,7 @@ class NARC(ArchiveList, Editable):
         self.string('magic', length=4, default='NARC')
         self.uint16('endian', default=0xFFFE)
         self.uint16('version', default=0x102)
-        self.uint32('size')
+        self.uint32('size_')
         self.uint16('headersize')
         self.uint16('numblocks', default=3)
         self.fatb = FATB(self)
@@ -202,8 +202,18 @@ class NARC(ArchiveList, Editable):
         self.fntb.load(reader)
         self.fimg.load(reader)
 
-    def save(self):
-        pass
+    def save(self, writer=None):
+        writer = BinaryIO.writer(writer)
+        start = writer.tell()
+        writer = Editable.save(self, writer)
+        writer = self.fatb.save(writer)
+        writer = self.fntb.save(writer)
+        writer = self.fimg.save(writer)
+        writer.writeAlign(4)
+        size = writer.tell()-start
+        with writer.seek(start+self.offset('size_')):
+            writer.writeUInt32(size)
+        return writer
 
 
 class FATB(Editable):
@@ -212,7 +222,7 @@ class FATB(Editable):
         self.narc = narc
         self.entries_ = []
         self.string('magic', length=4, default='BTAF')
-        self.uint32('size')
+        self.uint32('size_')
         self.uint16('num')
         self.uint16('u0')
         self.freeze()
@@ -240,6 +250,18 @@ class FATB(Editable):
             self.entries_.append(slice(reader.readUInt32(),
                                        reader.readUInt32()))
 
+    def save(self, writer):
+        start = writer.tell()
+        writer = Editable.save(self, writer)
+        for entry in self.entries:
+            writer.writeUInt32(entry.start)
+            writer.writeUInt32(entry.stop)
+        writer.writeAlign(4)
+        size = writer.tell()-start
+        with writer.seek(start+self.offset('size_')):
+            writer.writeUInt32(size)
+        return writer
+
 
 class LazyFiles(list):
     def __init__(self, handle, entries):
@@ -252,13 +274,26 @@ class FIMG(Editable):
         AtomicStruct.__init__(self)
         self.narc = narc
         self.files = []
-        self.string('magic', length=4, default='BTAF')
-        self.uint32('size')
+        self.string('magic', length=4, default='GMIF')
+        self.uint32('size_')
         self.freeze()
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
         AtomicStruct.load(self, reader)
-        data = reader.read(self._data.size-8)
+        data = reader.read(self.size_-8)
         self.files.extend([data[entry]
                            for entry in self.narc.fatb.entries_])
+
+    def save(self, writer):
+        start = writer.tell()
+        writer = Editable.save(self, writer)
+        rel = writer.tell()
+        for file_id, entry in enumerate(self.narc.fatb.entries):
+            writer.writePadding(entry.start+rel)
+            writer.write(self.files[file_id])
+        writer.writeAlign(4)
+        size = writer.tell()-start
+        with writer.seek(start+self.offset('size_')):
+            writer.writeUInt32(size)
+        return writer
