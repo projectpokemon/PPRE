@@ -29,6 +29,7 @@ class NSCR(Editable):
     EDIT_NONE = 0
     EDIT_ANY = 1
     ADD_ONLY = 2
+    compressable = True
 
     def define(self):
         self.string('magic', length=4, default='RSCN')
