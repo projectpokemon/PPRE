@@ -130,6 +130,22 @@ class BinaryIO(StringIO):
         data = char*((offset-position)/len(char)+1)
         self.write(data[:offset-position])
 
+    def readString(self):
+        """Read a null terminated string
+
+        Returns
+        -------
+        chars : string
+            String with no nul character
+        """
+        chars = ''
+        while True:
+            char = reader.read(1)
+            if char == NUL:
+                break
+            chars += char
+        return chars
+
     def writeString(self, chars):
         """Write a null terminated string. If the input has a null byte in
         it, it will not write past that byte. Null bytes will be added if
