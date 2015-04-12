@@ -68,6 +68,14 @@ class PLTT(Editable):
         return palette
 
     def set_palette(self, pal_id, palette):
+        """
+
+        Parameters
+        ----------
+        pal_id : int
+        palette : list of tuple
+            List of 4-/3-int-tuple colors
+        """
         if self.format == self.FORMAT_16BIT:
             num = 16
         elif self.format == self.FORMAT_256BIT:
