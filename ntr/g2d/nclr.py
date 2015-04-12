@@ -30,6 +30,25 @@ class PLTT(Editable):
         writer.write(self.data.tostring())
         return writer
 
+    def get_palettes(self):
+        palettes = []
+        if self.format == self.FORMAT_16BIT:
+            num = 16
+        elif self.format == self.FORMAT_256BIT:
+            num = 256
+        start = 0
+        for pal_id in range(len(self.data)/num):
+            palette = []
+            for i in range(num):
+                val = self.data[start+i]
+                palette.append((((val >> 0) & 0x1f) << 3,
+                               ((val >> 5) & 0x1f) << 3,
+                               ((val >> 10) & 0x1f) << 3,
+                               255))
+            start += num
+            palettes.append(palette)
+        return palettes
+
     def get_palette(self, pal_id, transparent=True):
         palette = []
         if self.format == self.FORMAT_16BIT:
@@ -84,6 +103,9 @@ class NCLR(Editable):
 
     def get_palette(self, pal_id=0, transparent=True):
         return self.pltt.get_palette(pal_id, transparent)
+
+    def get_palettes(self):
+        return self.pltt.get_palettes()
 
     def set_palette(self, pal_id, palette):
         return self.pltt.set_palette(pal_id, palette)

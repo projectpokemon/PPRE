@@ -30,6 +30,27 @@ class CHAR(Editable):
         Editable.load(self, reader)
         self.data = reader.read(self.datasize)
 
+    def get_tiles(self):
+        tiles = []
+        if self.format == self.FORMAT_16BIT:
+            subwidth = 4
+        elif self.format == self.FORMAT_256BIT:
+            subwidth = 8
+        for tile_id in range(self.datasize/subwidth/8):
+            tile = []
+            for tile_y in range(8):
+                tile.append([])
+                for tile_x in range(subwidth):
+                    val = ord(self.data[tile_id*8*subwidth+
+                                        tile_y*subwidth+tile_x])
+                    if self.format == self.FORMAT_16BIT:
+                        tile[tile_y].append(val & 0xF)
+                        tile[tile_y].append(val >> 0x4)
+                    elif self.format == self.FORMAT_256BIT:
+                        tile[tile_y].append(val)
+            tiles.append(tile)
+        return tiles
+
     def get_pixels(self, width=None, height=None):
         """pixels = [[[]]]
         subx = suby = 0
@@ -125,3 +146,6 @@ class NCGR(Editable):
         for pix in self.char.get_pixels(width, height):
             data += self.palette[pix]
         return Image.frombytes('RGBA', (width*8, height*8), data)
+
+    def get_tiles(self):
+        return self.char.get_tiles()
