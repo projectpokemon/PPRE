@@ -1,6 +1,12 @@
 
 from generic.editable import XEditable as Editable
 
+from PIL import Image
+
+
+def default_palette():
+    return [chr(c)*3+chr(255) for c in range(256)]
+
 
 class CHAR(Editable):
     """Character information"""
@@ -11,8 +17,8 @@ class CHAR(Editable):
         self.cgr = cgr
         self.string('magic', length=4, default='RAHC')
         self.uint32('size_')
-        self.uint16('width')
         self.uint16('height')
+        self.uint16('width')
         self.uint32('format')
         self.uint32('depth')
         self.uint32('type')
@@ -23,6 +29,55 @@ class CHAR(Editable):
     def load(self, reader):
         Editable.load(self, reader)
         self.data = reader.read(self.datasize)
+
+    def get_pixels(self, width=None, height=None):
+        """pixels = [[[]]]
+        subx = suby = 0
+        blockx = blocky = 0
+        for c in self.data:
+            val = ord(c)
+            if self.format == self.FORMAT_16BIT:
+                pixels[blocky][blockx][suby].append(val & 0xF)
+                pixels[blocky][blockx][suby].append(val >> 0x4)
+                subx += 2
+            elif self.format == self.FORMAT_256BIT:
+                pixels[blocky][blockx][suby].append(val)
+                subx += 1
+            if subx == 8:
+                subx = 0
+                suby += 1
+                if suby == 8:
+                    blockx += 1
+                    if blockx == 8:
+                        blockx = 0
+                        blocky += 1
+                        pixels.append([[[]]])
+                    else:
+                        pixels[blocky].append([[]])
+                else:
+                    pixels[blocky][blockx].append([])"""
+        if width is None:
+            width = self.width
+        if height is None:
+            height = self.height
+        pixels = []
+        if self.format == self.FORMAT_16BIT:
+            subwidth = 4
+        elif self.format == self.FORMAT_256BIT:
+            subwidth = 8
+        for blocky in range(height):
+            for suby in range(8):
+                for blockx in range(width):
+                    for subx in range(subwidth):
+                        val = ord(self.data[(blocky*width*8*subwidth)+
+                                            (blockx*8*subwidth)+
+                                            (suby*subwidth)+subx])
+                        if self.format == self.FORMAT_16BIT:
+                            pixels.append(val & 0xF)
+                            pixels.append(val >> 0x4)
+                        elif self.format == self.FORMAT_256BIT:
+                            pixels.append(val)
+        return pixels
 
 
 class CPOS(Editable):
@@ -49,8 +104,24 @@ class NCGR(Editable):
         self.uint16('numblocks', default=2)
         self.char = CHAR(self)
         self.cpos = CPOS(self)
+        self.palette = default_palette()
 
     def load(self, reader):
         Editable.load(self, reader)
         self.char.load(reader)
-        self.cpos.load(reader)
+        if self.numblocks > 1:
+            self.cpos.load(reader)
+
+    def get_image(self, width=None, height=None):
+        data = ''
+        if width is None:
+            width = self.char.width
+        else:
+            width >>= 3
+        if height is None:
+            height = self.char.height
+        else:
+            height >>= 3
+        for pix in self.char.get_pixels(width, height):
+            data += self.palette[pix]
+        return Image.frombytes('RGBA', (width*8, height*8), data)
