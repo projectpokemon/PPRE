@@ -20,35 +20,22 @@ class CellAttributes(Editable):
     SHAPE_VERTICAL = 2
 
     def define(self):
-        self.uint16('attr0')
-        self.uint16('attr1')
-        self.uint16('attr2')
-
-    @property
-    def y(self):
-        value = self.attr0 & 0xFF
-        if value > 0x80:
-            value -= 0x100
-        return value
-
-    @y.setter
-    def y(self, value):
-        if value < 0:
-            value += 0x100
-        self.attr0 = (self.attr0 & ~0xFF) | value
-
-    @property
-    def x(self):
-        value = self.attr1 & 0x1FF
-        if value > 0x100:
-            value -= 0x200
-        return value
-
-    @x.setter
-    def x(self, value):
-        if value < 0:
-            value += 0x200
-        self.attr1 = (self.attr1 & ~0x1FF) | value
+        # attr0
+        self.int16('y', width=8)
+        self.uint16('is_rotscale', width=1)
+        self.uint16('is_scalevis', width=1)
+        self.uint16('mode', width=2)
+        self.uint16('mosaic', width=1)
+        self.uint16('palformat', width=1)
+        self.uint16('shape', width=2)
+        # attr1
+        self.int16('x', width=9)
+        self.uint16('rotparam', width=5)
+        self.uint16('size_', width=2)
+        # attr2
+        self.uint16('tileofs', width=10)
+        self.uint16('z_index', width=2)
+        self.uint16('pal_id', width=3)
 
     @property
     def width(self):
@@ -65,62 +52,20 @@ class CellAttributes(Editable):
                 }.get(self.shape)[self.size]
 
     @property
-    def tile_id(self):
-        return self.attr2 & 0x3FF
-
-    @property
-    def palette(self):
-        return (self.attr2 >> 12) & 0x7
-
-    @property
-    def rotscale(self):
-        return (self.attr0 >> 8) & 0x1 == 0x1
+    def disabled(self):
+        return not self.is_rotscale and self.is_scalevis
 
     @property
     def scale(self):
-        if (self.attr0 >> 8) & 0x3 == 0x3:
-            return 2
-        return 1
-
-    @property
-    def disabled(self):
-        if (self.attr0 >> 8) & 0x3 == 0x2:
-            return True
-        return False
-
-    @property
-    def mode(self):
-        return (self.attr0 >> 10) & 0x3
-
-    @property
-    def mosaic(self):
-        return (self.attr0 >> 12) & 0x1 == 0x1
-
-    @property
-    def palformat(self):
-        return (self.attr0 >> 13) & 0x1
-
-    @property
-    def shape(self):
-        return (self.attr0 >> 14) & 0x3
-
-    # TODO: rotscale params
+        return 2 if self.is_rotscale and self.is_scalevis else 1
 
     @property
     def horizontal_flip(self):
-        return self.rotscale and (self.attr1 >> 12) & 0x1 == 0x1
+        return self.is_rotscale and (self.rotparam & 0x8)
 
     @property
     def vertical_flip(self):
-        return self.rotscale and (self.attr1 >> 13) & 0x1 == 0x1
-
-    @property
-    def size(self):
-        return (self.attr1 >> 14) & 0x3
-
-    @property
-    def z_index(self):
-        return (self.attr2 >> 10) & 0x3
+        return self.is_rotscale and (self.rotparam & 0x10)
 
 
 class Cell(Editable):
