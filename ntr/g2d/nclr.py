@@ -27,7 +27,9 @@ class PLTT(Editable):
 
     def save(self, writer):
         writer = Editable.save(self, writer)
+        ofs = writer.tell()
         writer.write(self.data.tostring())
+        writer.writePadding(ofs+self.datasize)
         return writer
 
     def get_palettes(self):

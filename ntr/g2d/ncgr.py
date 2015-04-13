@@ -1,7 +1,8 @@
 
-from generic.editable import XEditable as Editable
-
 from PIL import Image
+
+from generic.editable import XEditable as Editable
+from util.io import BinaryIO
 
 
 def default_palette():
@@ -149,7 +150,7 @@ class NCGR(Editable):
         self.string('magic', length=4, default='RGCN')
         self.uint16('endian', default=0xFFFE)
         self.uint16('version', default=0x101)
-        self.uint32('size')
+        self.uint32('size_')
         self.uint16('headersize', default=0x10)
         self.uint16('numblocks', default=2)
         self.char = CHAR(self)
@@ -166,10 +167,15 @@ class NCGR(Editable):
             self.cpos.loaded = False
 
     def save(self, writer=None):
+        writer = BinaryIO.writer(writer)
+        start = writer.tell()
         writer = Editable.save(self, writer)
         writer = self.char.save(writer)
         if self.cpos.loaded:
             writer = self.cpos.save(writer)
+        size = writer.tell()-start
+        with writer.seek(start+self.get_offset('size_')):
+            writer.writeUInt32(size)
         return writer
 
     def get_image(self, width=None, height=None):

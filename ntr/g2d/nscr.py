@@ -6,6 +6,7 @@ import itertools
 from PIL import Image
 
 from generic.editable import XEditable as Editable
+from util import BinaryIO
 
 
 class SCRN(Editable):
@@ -26,7 +27,7 @@ class SCRN(Editable):
 
     def save(self, writer):
         old_datasize = self.datasize
-        self.datasize = len(self.data)
+        self.datasize = len(self.data)*2
         self.size_ += self.datasize-old_datasize
         writer = Editable.save(self, writer)
         writer.write(self.data.tostring())
@@ -53,8 +54,13 @@ class NSCR(Editable):
         self.scrn.load(reader)
 
     def save(self, writer=None):
+        writer = BinaryIO.writer(writer)
+        start = writer.tell()
         writer = Editable.save(self, writer)
         writer = self.scrn.save(writer)
+        size = writer.tell()-start
+        with writer.seek(start+self.get_offset('size_')):
+            writer.writeUInt32(size)
         return writer
 
     def get_image(self, cgr=None, clr=None):
@@ -272,8 +278,9 @@ class NSCR(Editable):
                         tile_id = len(tiles)-1
                     tiledata = tile_id | (pal_id << 12)
                     data.append(tiledata)
-            self.scrn.width = scr_x
-            self.scrn.height = scr_y
+            self.scrn.width = scr_x+8
+            self.scrn.height = scr_y+8
+            self.scrn.data = data
         for pal_id in changes_pal_ids:
             clr.set_palette(pal_id, palettes[pal_id])
         if modify_tiles is not self.EDIT_NONE:
