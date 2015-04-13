@@ -7,6 +7,7 @@ from PIL import Image
 
 from generic.archive import Archive
 from generic.editable import XEditable as Editable
+from util import BinaryIO
 
 
 class CellAttributes(Editable):
@@ -103,6 +104,20 @@ class CEBK(Editable):
         for cell in self.cells:
             cell.attrs.append(CellAttributes(reader=reader))
 
+    def save(self, writer):
+        start = writer.tell()
+        self.num = len(self.cells)
+        writer = Editable.save(writer)
+        for cell in self.cells:
+            writer = cell.save(writer)
+        for cell in self.cells:
+            for attr in cell.attrs:
+                writer = attr.save(writer)
+        size = writer.tell()-start
+        with writer.seek(start+self.get_offset('size_')):
+            writer.writeUInt32(size)
+        return writer
+
 
 class LABL(Editable):
     def define(self, scr):
@@ -125,6 +140,23 @@ class LABL(Editable):
             with reader.seek(start+offset):
                 self.names.append(reader.readString())
 
+    def save(self, writer):
+        start = writer.tell()
+        writer = Editable.save(writer)
+        namewriter = BinaryIO()
+        offsets = []
+        for name in self.names:
+            offsets.append(namewriter.tell())
+            namewriter.write(name)
+            namewriter.write(chr(0))
+        for offset in offsets:
+            writer.writeUInt32(offset)
+        writer.write(namewriter.getvalue())
+        size = writer.tell()-start
+        with writer.seek(start+self.get_offset('size_')):
+            writer.writeUInt32(size)
+        return writer
+
 
 class NCER(Editable, Archive):
     extension = '.png'
@@ -133,11 +165,13 @@ class NCER(Editable, Archive):
         self.string('magic', length=4, default='RECN')
         self.uint16('endian', default=0xFFFE)
         self.uint16('version', default=0x100)
-        self.uint32('size')
+        self.uint32('size_')
         self.uint16('headersize', default=0x10)
         self.uint16('numblocks', default=2)
         self.cebk = CEBK(self)
+        self.restrict('cebk')
         self.labl = LABL(self)
+        self.restrict('labl')
         self._files = {}
 
     def load(self, reader):
@@ -147,8 +181,14 @@ class NCER(Editable, Archive):
         self.labl.load(reader)
 
     def save(self, writer=None):
+        writer = BinaryIO.writer(writer)
+        start = writer.tell()
         writer = Editable.save(self, writer)
         writer = self.cebk.save(writer)
+        writer = self.labl.save(writer)
+        size = writer.tell()-start
+        with writer.seek(start+self.get_offset('size_')):
+            writer.writeUInt32(size)
         return writer
 
     def get_image(self, id, cgr, clr):
