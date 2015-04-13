@@ -24,6 +24,14 @@ class SCRN(Editable):
         Editable.load(self, reader)
         self.data = array.array('H', reader.read(self.datasize))
 
+    def save(self, writer):
+        old_datasize = self.datasize
+        self.datasize = len(self.data)
+        self.size_ += self.datasize-old_datasize
+        writer = Editable.save(self, writer)
+        writer.write(self.data.tostring())
+        return writer
+
 
 class NSCR(Editable):
     EDIT_NONE = 0
@@ -35,7 +43,7 @@ class NSCR(Editable):
         self.string('magic', length=4, default='RSCN')
         self.uint16('endian', default=0xFFFE)
         self.uint16('version', default=0x100)
-        self.uint32('size')
+        self.uint32('size_')
         self.uint16('headersize', default=0x10)
         self.uint16('numblocks', default=1)
         self.scrn = SCRN(self)
@@ -43,6 +51,11 @@ class NSCR(Editable):
     def load(self, reader):
         Editable.load(self, reader)
         self.scrn.load(reader)
+
+    def save(self, writer=None):
+        writer = Editable.save(self, writer)
+        writer = self.scrn.save(writer)
+        return writer
 
     def get_image(self, cgr=None, clr=None):
         img = Image.new('RGBA', (self.scrn.width, self.scrn.height))
@@ -200,8 +213,68 @@ class NSCR(Editable):
                     scr_y += 8
                     if scr_y >= self.scrn.height:
                         break
-            for pal_id in changes_pal_ids:
-                clr.set_palette(pal_id, palettes[pal_id])
-            cgr.set_tiles(tiles)
         else:
-            raise NotImplementedError('Cannot yet modify screen')
+            """minx, miny, maxx, maxy = img.getbbox()
+            minx -= minx % 8
+            miny -= miny % 8
+            # Max do not need to be exact because of the loop condition
+            maxx += 8
+            maxy += 8"""
+            if modify_tiles is self.ADD_ONLY:
+                tiles = cgr.get_tiles()
+            else:
+                tiles = []
+                tile = []
+                for i in range(8):
+                    tile.append([0]*8)
+                tiles.append(tile)
+            data = array.array('H')
+            width, height = img.size
+            for scr_y in range(0, height, 8):
+                for scr_x in range(0, width, 8):
+                    tiledata = 0
+                    pal_id = 0  # Potentially allow this to be different
+                    try:
+                        palette = palettes[pal_id]
+                    except:
+                        while pal_id+1 > len(palettes):
+                            palette = [(0xF8, 0xF8, 0xF8, 0)]
+                            palettes.append(palette)
+                    tile = []
+                    for sub_y in range(8):
+                        tile.append([0]*8)
+                        for sub_x in range(8):
+                            pix = pixels[(scr_x+sub_x, scr_y+sub_y)]
+                            if pix[3] < 0x80:
+                                tile[sub_y][sub_x] = 0
+                                continue
+                            color = (pix[0] & 0xF8, pix[1] & 0xF8,
+                                     pix[2] & 0xF8, 255)
+                            try:
+                                index = palette.index(color, 1)
+                            except:
+                                if modify_palette is self.EDIT_NONE:
+                                    raise ValueError('Some colors do not exist'
+                                                     ' in current palette')
+                                index = len(palette)
+                                if index >= 16:
+                                    raise ValueError(
+                                        'Cannot have more than 16 colors for'
+                                        'image')
+                                changes_pal_ids.add(pal_id)
+                                palette.append(color)
+                            tile[sub_y][sub_x] = index
+                    for tile_id, ref_tile in enumerate(tiles):
+                        if ref_tile == tile:
+                            break
+                    else:
+                        tiles.append(tile)
+                        tile_id = len(tiles)-1
+                    tiledata = tile_id | (pal_id << 12)
+                    data.append(tiledata)
+            self.scrn.width = scr_x
+            self.scrn.height = scr_y
+        for pal_id in changes_pal_ids:
+            clr.set_palette(pal_id, palettes[pal_id])
+        if modify_tiles is not self.EDIT_NONE:
+            cgr.set_tiles(tiles)

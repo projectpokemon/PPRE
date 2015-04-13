@@ -143,6 +143,8 @@ class CPOS(Editable):
 class NCGR(Editable):
     """2D Character Graphics
     """
+    compressable = True
+
     def define(self):
         self.string('magic', length=4, default='RGCN')
         self.uint16('endian', default=0xFFFE)
@@ -159,6 +161,7 @@ class NCGR(Editable):
         self.char.load(reader)
         if self.numblocks > 1:
             self.cpos.load(reader)
+            self.cpos.loaded = True
         else:
             self.cpos.loaded = False
 
