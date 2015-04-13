@@ -6,7 +6,7 @@ from util.io import BinaryIO
 
 
 def default_palette():
-    return [chr(c)*3+chr(255) for c in range(256)]
+    return [(c, c, c, 255) for c in range(16)*16]
 
 
 class CHAR(Editable):
@@ -187,7 +187,7 @@ class NCGR(Editable):
         else:
             height >>= 3
         for pix in self.char.get_pixels(width, height):
-            data += self.palette[pix]
+            data += ''.join(map(chr, self.palette[pix]))
         return Image.frombytes('RGBA', (width*8, height*8), data)
 
     def get_tiles(self):
