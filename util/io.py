@@ -140,7 +140,7 @@ class BinaryIO(StringIO):
         """
         chars = ''
         while True:
-            char = reader.read(1)
+            char = self.read(1)
             if char == NUL:
                 break
             chars += char
