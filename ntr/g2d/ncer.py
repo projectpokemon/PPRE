@@ -23,7 +23,7 @@ class CellAttributes(Editable):
         # attr0
         self.int16('y', width=8)
         self.uint16('is_rotscale', width=1)
-        self.uint16('is_scalevis', width=1)
+        self.uint16('is_scalevis', width=1)  # self.disabled, self.scale
         self.uint16('mode', width=2)
         self.uint16('mosaic', width=1)
         self.uint16('palformat', width=1)
@@ -35,21 +35,21 @@ class CellAttributes(Editable):
         # attr2
         self.uint16('tileofs', width=10)
         self.uint16('z_index', width=2)
-        self.uint16('pal_id', width=3)
+        self.uint16('pal_id', width=4)
 
     @property
     def width(self):
         return {self.SHAPE_SQUARE: [8, 16, 32, 64],
                 self.SHAPE_HORIZONTAL: [16, 32, 32, 64],
                 self.SHAPE_VERTICAL: [8, 8, 16, 32]
-                }.get(self.shape)[self.size]
+                }.get(self.shape)[self.size_] * self.scale
 
     @property
     def height(self):
         return {self.SHAPE_SQUARE: [8, 16, 32, 64],
                 self.SHAPE_HORIZONTAL: [8, 8, 16, 32],
                 self.SHAPE_VERTICAL: [16, 32, 32, 64]
-                }.get(self.shape)[self.size]
+                }.get(self.shape)[self.size_] * self.scale
 
     @property
     def disabled(self):
@@ -145,3 +145,42 @@ class NCER(Editable):
         writer = Editable.save(self, writer)
         writer = self.cebk.save(writer)
         return writer
+
+    def get_image(self, cgr, clr):
+        maxX = min(cell.maxX for cell in self.cebk.cells)
+        maxY = min(cell.maxY for cell in self.cebk.cells)
+        minX = min(cell.minX for cell in self.cebk.cells)
+        minY = min(cell.minY for cell in self.cebk.cells)
+        img = Image.new('RGBA', (maxX-minX+1, maxY-minY+1))
+        tiles = cgr.get_tiles()
+        palettes = clr.get_palettes()
+        pix = img.load()
+
+        for cell in self.cebk.cells:
+            for attr in cell.attrs:
+                tile_id = attr.tileofs
+                # apply flip outside too?
+                for scr_y in range(attr.y-minY, attr.y-minY+attr.height, 8):
+                    for scr_x in range(attr.x-minX, attr.x-minX+attr.width, 8):
+                        tile = tiles[tile_id]
+                        if attr.vertical_flip:
+                            flip_y_factor = -1
+                        else:
+                            flip_y_factor = 1
+                        if attr.horizontal_flip:
+                            flip_x_factor = -1
+                        else:
+                            flip_x_factor = 1
+                        palette = palettes[attr.pal_id]
+                        for sub_y in range(8)[::flip_y_factor]:
+                            for sub_x in range(8)[::flip_x_factor]:
+                                val = tile[sub_y][sub_x]
+                                try:
+                                    if val:
+                                        pix[(scr_x+sub_x, scr_y+sub_y)] = palette[val]
+                                    else:
+                                        pix[(scr_x+sub_x, scr_y+sub_y)] = (0, 0, 0, 0)
+                                except IndexError:
+                                    continue
+                        tile_id += 1
+        return img
