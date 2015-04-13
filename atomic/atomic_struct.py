@@ -55,7 +55,6 @@ class AtomicStruct(object):
     writer.
     """
     alignment = 32  # : Bit alignment
-    compressable = False
 
     @classmethod
     def instance(cls, *args):
@@ -606,13 +605,6 @@ class AtomicStruct(object):
         reader : BinaryIO, string, file, other readable
         """
         reader = BinaryIO.reader(reader)
-        if self.compressable:
-            compressed = False
-            with reader.seek(reader.tell()):
-                if LZ.is_lz(reader.read(1)):
-                    compressed = True
-            if compressed:
-                reader = LZ(reader).handle
         amount = ctypes.sizeof(self._data)
         data = reader.read(amount)
         self._data = self._type.from_buffer_copy(data)

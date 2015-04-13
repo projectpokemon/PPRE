@@ -144,8 +144,6 @@ class CPOS(Editable):
 class NCGR(Editable):
     """2D Character Graphics
     """
-    compressable = True
-
     def define(self):
         self.string('magic', length=4, default='RGCN')
         self.uint16('endian', default=0xFFFE)
