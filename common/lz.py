@@ -1,13 +1,21 @@
-from struct import unpack
+
+import array
+from struct import unpack, pack
 from collections import namedtuple
+
 from util.io import BinaryIO
+
+COMPRESSION_LZ77 = 0x10
+COMPRESSION_LZSS = 0x11
+
+
+LZHeader = namedtuple('LZHeader', 'flag size')
 
 
 class LZ(object):
     def __init__(self, reader):
         handle = BinaryIO.reader(reader)
         start = handle.tell()
-        LZHeader = namedtuple('LZHeader', 'flag size')
         raw_header = unpack('I', handle.read(4))[0]
         self.header = LZHeader._make([raw_header&0xFF, raw_header>>8])
         if self.header.flag == 0x11:
@@ -56,6 +64,27 @@ class LZ(object):
     @staticmethod
     def is_lz(data):
         return ord(data[0]) in (0x10, 0x11)
+
+
+class LZCompress(object):
+    """Level -1 grade compression.
+
+    TODO: actually decompress
+    """
+    def __init__(self, reader, compression=COMPRESSION_LZ77):
+        handle = BinaryIO.reader(reader)
+        start = handle.tell()
+        data = handle.read()
+        out = array.array('B')
+        self.header = LZHeader._make([compression, len(data)])
+        handle.seek(start)
+        handle.write(pack('I', self.header.flag | (self.header.size << 8)))
+        NUL = chr(0)
+        for pos in range(0, len(data)+8, 8):
+            handle.write(NUL)
+            handle.write(data[pos:pos+8])
+        handle.seek(start)
+        self.handle = handle
 
 
 if __name__ == "__main__":
