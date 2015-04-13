@@ -1,9 +1,11 @@
 
 import array
+from cStringIO import StringIO
 import itertools
 
 from PIL import Image
 
+from generic.archive import Archive
 from generic.editable import XEditable as Editable
 
 
@@ -124,7 +126,9 @@ class LABL(Editable):
                 self.names.append(reader.readString())
 
 
-class NCER(Editable):
+class NCER(Editable, Archive):
+    extension = '.png'
+
     def define(self):
         self.string('magic', length=4, default='RECN')
         self.uint16('endian', default=0xFFFE)
@@ -134,6 +138,7 @@ class NCER(Editable):
         self.uint16('numblocks', default=2)
         self.cebk = CEBK(self)
         self.labl = LABL(self)
+        self._files = {}
 
     def load(self, reader):
         Editable.load(self, reader)
@@ -184,3 +189,27 @@ class NCER(Editable):
                                 continue
                     tile_id += 1
         return img
+
+    @property
+    def files(self):
+        if self._files:
+            return self._files
+        try:
+            cgr = self._cgr
+            clr = self._clr
+        except AttributeError:
+            raise ValueError('No dependencies set.'
+                             'Call update_dependencies(cgr, clr)')
+        for idx, (name, cell) in enumerate(zip(self.labl.names,
+                                               self.cebk.cells)):
+            image = self.get_image(idx, cgr, clr)
+            buffer = StringIO()
+            image.save(buffer, format='PNG')
+            self._files[name] = buffer.getvalue()
+            buffer.close()
+        return self._files
+
+    def update_dependencies(self, cgr, clr):
+        self._cgr = cgr
+        self._clr = clr
+        self._files = {}
