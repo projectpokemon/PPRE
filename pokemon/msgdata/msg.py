@@ -366,7 +366,7 @@ class Text(Archive, Editable):
                             string.append(0x25BC)
                         elif char == '\f':
                             string.append(0x25BD)
-                        elif char == 'V' and text[cidx:cidx+3] == 'VAR':
+                        elif char == 'V' and text[cidx:cidx+3] == 'AR(':
                             eov = text.find(')', cidx+3)
                             if eov == -1:
                                 raise RuntimeError('Could not find end of VAR()')

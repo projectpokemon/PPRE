@@ -289,6 +289,9 @@ class Game(Editable, Version):
         from pokemon.msgdata.msg import Text
         return Text(self).load(self.get_text(file_id))
 
+    def locale_text_id(self, key):
+        return self.text_contents[REGION_CODES[self.region_code]][key]
+
     @cached_property
     def personal_archive(self):
         return self.archive(self.personal_archive_file)
@@ -361,6 +364,20 @@ class DP(Game):
     map_table = 0xeedbc
     commands_files = ('dp.json', )
 
+    text_contents = {
+        'US': {
+            'map_names': 382,
+            'type_names': 565,
+            'ability_names': 552,
+            'item_names': 344,
+            'move_names': 588,
+            'pokemon_names': 362,
+            'species_names': 621,
+            'trainer_class_names': 560,
+            'trainer_names': 559
+        },
+    }
+
 
 class Pt(DP):
     idx = 3
@@ -369,6 +386,11 @@ class Pt(DP):
     encounter_archive_file = 'fielddata/encountdata/pl_enc_data.narc'
     item_archive_file = 'itemtool/itemdata/pl_item_data.narc'
     commands_files = ('dp.json', 'pt.json')
+
+    text_contents = {
+        'US': {
+        }
+    }
 
 
 class HGSS(Game):
@@ -389,9 +411,24 @@ class HGSS(Game):
     map_table = 0xf6be0
     commands_files = ('hgss.json', )
 
+    text_contents = {
+        'US': {
+            'map_names': 279,
+            'type_names': 735,
+            'ability_names': 720,
+            'item_names': 222,
+            'move_names': 750,
+            'pokemon_names': 237,
+            'species_names': 823,
+            'trainer_class_names': 730,
+            'trainer_names': 729
+        },
+    }
+
     def init(self):
         blz.decompress_arm9(self)
         blz.decompress_overlays(self)
+        return
 
         with open(os.path.join(self.files.directory, 'arm9.dec.bin'), 'r+')\
                 as handle:
