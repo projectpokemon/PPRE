@@ -178,6 +178,14 @@ class Text(Archive, Editable):
                     char = string.pop(0)
                     if char == 0xFFFF:
                         break
+                    elif char == 0xFFFE:
+                        text += 'VAR('
+                        args = [string.pop(0)]
+                        count = string.pop(0)
+                        args += string[:count]
+                        string = string[count:]
+                        text += ', '.join(map(str, args))
+                        text += ')'
                     elif char == 0xE000:
                         text += '\\n'
                     elif char == 0x25bc:
