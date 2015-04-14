@@ -1,5 +1,6 @@
 
 import os
+import re
 
 from generic.editable import XEditable as Editable
 from pokemon.field.script import Script
@@ -40,6 +41,32 @@ class Map(Editable):
         self.script = Script(game)
         self.encounter = Encounters(game)
         self.text = Text(game)
+        self.names = self.get_names()
+
+    def get_names(self):
+        names = []
+        self.location_text = self.game.text(self.game.locale_text_id('map_names'))
+        with self.game.open('fs', self.game.mapname_file) as handle:
+            while True:
+                try:
+                    code = handle.read(16).strip(chr(0))
+                    if not code:
+                        break
+                except:
+                    break
+                match = re.match(
+                    '([CTDLRWP])([0-9]{2})(PC|FS|GYM|R)?'
+                    '([0-9]{2})?([0-9]{2})?', code)
+                if match is None:
+                    names.append(code)
+                    continue
+                names.append('{type} {loc_id}: {subtype} {sub_id}-{sub_id2}'
+                             .format(type=match.group(1),
+                                     loc_id=match.group(2),
+                                     subtype=match.group(3),
+                                     sub_id=match.group(4),
+                                     sub_id2=match.group(5)))
+        return names
 
     def load_id(self, map_id, shallow=False):
         with open(os.path.join(self.game.files.directory, 'arm9.dec.bin'))\

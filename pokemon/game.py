@@ -404,6 +404,7 @@ class HGSS(Game):
     encounter_archive_files = {
         'HeartGold': 'a/0/3/7',
         'SoulSilver': 'a/1/3/6'}
+    mapname_file = 'fielddata/maptable/mapname.bin'
     script_archive_file = 'a/0/1/2'
     text_archive_file = 'a/0/2/7'
 
