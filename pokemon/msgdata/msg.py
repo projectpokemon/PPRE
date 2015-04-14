@@ -360,6 +360,12 @@ class Text(Archive, Editable):
                             else:
                                 n = 1
                             string.append(n)
+                        elif char == '\n':
+                            string.append(0xE000)
+                        elif char == '\r':
+                            string.append(0x25BC)
+                        elif char == '\f':
+                            string.append(0x25BD)
                         elif char == 'V' and text[cidx:cidx+3] == 'VAR':
                             eov = text.find(')', cidx+3)
                             if eov == -1:
@@ -437,6 +443,16 @@ class Text(Archive, Editable):
                             else:
                                 n = 1
                             string.append(n)
+                        elif char == '\n':
+                            string.append(0xFFFE)
+                        elif char == '\r':
+                            string.append(0xF000)
+                            string.append(0xBE01)
+                            string.append(0)
+                        elif char == '\f':
+                            string.append(0xF000)
+                            string.append(0xBE00)
+                            string.append(0)
                         elif char == 'V' and text[cidx:cidx+3] == 'AR(':
                             eov = text.find(')', cidx+3)
                             if eov == -1:

@@ -280,7 +280,6 @@ class Game(Editable, Version):
             def set_wrapper(fileid, data):
                 archive = getattr(self, name[4:]+'_archive')
                 archive.files[fileid] = data
-                print(getattr(self, name[4:]+'_archive_file'))
                 self.save_archive(archive,
                                   getattr(self, name[4:]+'_archive_file'))
             return set_wrapper
