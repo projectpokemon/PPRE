@@ -196,7 +196,7 @@ class Text(Archive, Editable):
                         try:
                             text += table[char]
                         except KeyError:
-                            text += '\\u{0:04x}'.format(char)
+                            text += '\\?{0:04x}'.format(char)
                     name = '0_{0:05}'.format(i)
                     if compressed:
                         name += 'c'
@@ -238,7 +238,7 @@ class Text(Archive, Editable):
                         elif char == 0xFFFE:
                             text += '\\n'
                         elif char < 20 or char > 0xF000:
-                            text += '\\x{0:04X}'.format(char)
+                            text += '\\?{0:04X}'.format(char)
                         elif char == 0xF000:
                             kind = string.pop(0)
                             count = string.pop(0)
@@ -342,8 +342,9 @@ class Text(Archive, Editable):
                             char = text[cidx]
                             cidx += 1
                             if char == 'x':
-                                n = int(text[cidx:cidx+4], 16)
-                                cidx += 4
+                                # n = int(text[cidx:cidx+2], 16)
+                                n = rtable['\\x'+text[cidx:cidx+2]]
+                                cidx += 2
                             elif char == 'n':
                                 n = 0xE000
                             elif char == 'r':
@@ -352,6 +353,9 @@ class Text(Archive, Editable):
                                 n = 0x25BD
                             elif char == 'u':
                                 n = rtable['\\u'+text[cidx:cidx+4]]
+                                cidx += 4
+                            elif char == '?':
+                                n = int(text[cidx:cidx+4], 16)
                                 cidx += 4
                             else:
                                 n = 1
@@ -412,7 +416,10 @@ class Text(Archive, Editable):
                         if char == '\\':
                             char = text[cidx]
                             cidx += 1
-                            if char == 'x' or char == 'u':
+                            if char == 'x':
+                                n = int(text[cidx:cidx+2], 16)
+                                cidx += 2
+                            elif char == 'u' or char == '?':
                                 n = int(text[cidx:cidx+4], 16)
                                 cidx += 4
                             elif char == 'n':
