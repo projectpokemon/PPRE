@@ -39,19 +39,19 @@ class Overworld(Editable):
 
 class Warp(Editable):
     def define(self):
-        self.uint16('u0')
-        self.uint16('u2')
-        self.uint16('u4')
-        self.uint16('u6')
-        self.uint16('u8')
-        self.uint16('ua')
+        self.uint16('x')
+        self.uint16('y')
+        self.uint16('map')
+        self.uint16('anchor')
+        self.uint16('pad8', default=0)
+        self.uint16('pada', default=0)
 
 
 class Trigger(Editable):
     def define(self):
-        self.uint16('u0')
-        self.uint16('u2')
-        self.uint16('u4')
+        self.uint16('script')
+        self.uint16('x')
+        self.uint16('y')
         self.uint16('u6')
         self.uint16('u8')
         self.uint16('ua')

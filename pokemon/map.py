@@ -5,6 +5,7 @@ import re
 from generic.editable import XEditable as Editable
 from pokemon.field.script import Script
 from pokemon.field.encounters import Encounters
+from pokemon.field.zone_events import ZoneEvents
 from pokemon.game import Game
 from pokemon.msgdata.msg import Text
 
@@ -58,6 +59,7 @@ class Map(Editable):
         self.name = ''
         self.script = Script(game)
         self.encounter = Encounters(game)
+        self.events = ZoneEvents(game)
         self.text = Text(game)
         self.names = self.game.text(self.game.locale_text_id('map_names'))
         self.code_names = self.get_code_names()
@@ -103,3 +105,4 @@ class Map(Editable):
         self.text.load(self.game.get_text(self.text_idx))
         self.script.load_text(self.text)
         self.script.load(self.game.get_script(self.script_idx))
+        self.events.load(self.game.get_event(self.event_idx))
