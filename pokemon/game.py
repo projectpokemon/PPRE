@@ -292,6 +292,12 @@ class Game(Editable, Version):
     def locale_text_id(self, key):
         return self.text_contents[REGION_CODES[self.region_code]][key]
 
+    def map(self, map_id):
+        from pokemon.map import Map
+        m = Map(self)
+        m.load_id(map_id)
+        return m
+
     @cached_property
     def personal_archive(self):
         return self.archive(self.personal_archive_file)

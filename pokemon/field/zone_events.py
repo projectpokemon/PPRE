@@ -4,12 +4,14 @@ from util import BinaryIO
 
 
 class Furniture(Editable):
+    """Furniture is like a spriteless overworld. The objects usually exist
+    with the models placed on the map"""
     def define(self):
         self.uint16('script')
         self.uint16('u2')
-        self.uint16('u4')  # x
-        self.uint16('u6')
-        self.uint16('u8')  # y
+        self.uint16('x')  # x
+        self.uint16('pad_6', default=0)
+        self.uint16('y')  # y
         self.uint16('ua')
         self.uint16('uc')
         self.uint16('ue')
@@ -18,6 +20,7 @@ class Furniture(Editable):
 
 
 class Overworld(Editable):
+    """Interactable sprite present on a map"""
     def define(self):
         self.uint16('id')
         self.uint16('sprite')
@@ -43,20 +46,20 @@ class Warp(Editable):
         self.uint16('y')
         self.uint16('map')
         self.uint16('anchor')
-        self.uint16('pad8', default=0)
-        self.uint16('pada', default=0)
+        self.uint16('pad_8', default=0)
+        self.uint16('pad_a', default=0)
 
 
 class Trigger(Editable):
     def define(self):
         self.uint16('script')
-        self.uint16('x')
-        self.uint16('y')
-        self.uint16('u6')
-        self.uint16('u8')
-        self.uint16('ua')
+        self.uint16('x')  # topmost
+        self.uint16('y')  # leftmost
+        self.uint16('width', default=1)
+        self.uint16('height', default=1)
+        self.uint16('pad_a', default=0)
         self.uint16('uc')
-        self.uint16('ue')
+        self.uint16('flag')
 
 
 class ZoneEvents(Editable):
