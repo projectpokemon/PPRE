@@ -29,7 +29,7 @@ class Overworld(Editable):
         self.uint16('flag')
         self.uint16('script')
         self.uint16('uc')
-        self.uint16('ue')
+        self.uint16('distance')  # activation dist. from front of sprite
         self.uint16('u10')
         self.uint16('u12')
         self.uint16('u14')
