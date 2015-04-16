@@ -83,6 +83,15 @@ class Cell(Editable):
             self.int16('minY')
         self.attrs = []
 
+    @property
+    def chunks(self):
+        """Meta information for exported images
+
+        When saving an image, use im.save(..., pnginfo=cell)
+
+        """
+        return [('tEXt', 'Comment\0'+self.to_json())]
+
 
 class CEBK(Editable):
     def define(self, scr):
@@ -239,6 +248,11 @@ class NCER(Editable, ArchiveList):
                     tile_id += 1
         return img
 
+    def add(self, ref=None, data=''):
+        image = Image.open(StringIO(data))
+        image = image.convert('RGBA')
+        self._files.append(image)
+
     @property
     def files(self):
         if self._files:
@@ -252,7 +266,7 @@ class NCER(Editable, ArchiveList):
         for idx, cell in enumerate(self.cebk.cells):
             image = self.get_image(idx, cgr, clr)
             buffer = StringIO()
-            image.save(buffer, format='PNG')
+            image.save(buffer, format='PNG', pnginfo=cell)
             self._files.append(buffer.getvalue())
             buffer.close()
         return self._files
@@ -261,3 +275,6 @@ class NCER(Editable, ArchiveList):
         self._cgr = cgr
         self._clr = clr
         self._files = []
+
+    def flush(self):
+        images = self._files
