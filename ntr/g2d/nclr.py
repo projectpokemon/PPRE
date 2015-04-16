@@ -82,7 +82,7 @@ class PLTT(Editable):
             num = 16
         elif self.format == self.FORMAT_256BIT:
             num = 256
-        start = pal_id*num*2
+        start = pal_id*num
         for i, color in enumerate(palette):
             if i > num:
                 break

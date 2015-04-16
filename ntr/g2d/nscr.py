@@ -127,7 +127,8 @@ class NSCR(Editable):
         return img
 
     def set_image(self, img, cgr, clr, modify_screen=EDIT_NONE,
-                  modify_tiles=EDIT_ANY, modify_palette=ADD_ONLY):
+                  modify_tiles=EDIT_ANY, modify_palette=ADD_ONLY,
+                  screen_pal_id=0):
         """
 
         Parameters
@@ -146,6 +147,8 @@ class NSCR(Editable):
             If EDIT_ANY, freely change this palette
             If ADD_ONLY, modify any unused colors at the end (matches
                 the last color if more than one match)
+        screen_pal_id : int
+            If modify_screen is EDIT_ANY, this will be the palette used
         """
         # img = img.convert('P', palette=Image.ADAPTIVE, colors=16)
         img = img.convert('RGBA')
@@ -205,9 +208,17 @@ class NSCR(Editable):
                                                  ' in current palette')
                             index = len(palette)
                             if index >= 16:
-                                raise ValueError(
-                                    'Cannot have more than 16 colors for'
-                                    'image')
+                                if modify_palette is self.ADD_ONLY:
+                                    last = palette[-1]
+                                    index = palette.index(last, 1)
+                                    if last == len(palette)-1:
+                                        raise ValueError(
+                                            'Cannot have more '
+                                            'than 16 colors for image')
+                                else:
+                                    raise ValueError(
+                                        'Cannot have more '
+                                        'than 16 colors for image')
                             changes_pal_ids.add(pal_id)
                             palette.append(color)
                         tile[sub_y][sub_x] = index
@@ -238,7 +249,7 @@ class NSCR(Editable):
             for scr_y in range(0, height, 8):
                 for scr_x in range(0, width, 8):
                     tiledata = 0
-                    pal_id = 0  # Potentially allow this to be different
+                    pal_id = screen_pal_id
                     try:
                         palette = palettes[pal_id]
                     except:
@@ -263,11 +274,22 @@ class NSCR(Editable):
                                                      ' in current palette')
                                 index = len(palette)
                                 if index >= 16:
-                                    raise ValueError(
-                                        'Cannot have more than 16 colors for'
-                                        'image')
-                                changes_pal_ids.add(pal_id)
-                                palette.append(color)
+                                    if modify_palette is self.ADD_ONLY:
+                                        last = palette[-1]
+                                        index = palette.index(last, 1)
+                                        if last == len(palette)-1:
+                                            raise ValueError(
+                                                'Cannot have more '
+                                                'than 16 colors for image')
+                                        palette[index] = color
+                                        changes_pal_ids.add(pal_id)
+                                    else:
+                                        raise ValueError(
+                                            'Cannot have more '
+                                            'than 16 colors for image')
+                                else:
+                                    changes_pal_ids.add(pal_id)
+                                    palette.append(color)
                             tile[sub_y][sub_x] = index
                     for tile_id, ref_tile in enumerate(tiles):
                         if ref_tile == tile:
