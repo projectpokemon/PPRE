@@ -918,7 +918,8 @@ class XEditable(Emitter, AtomicStruct):
                     self.fire('set', (name, value))
 
     def __getattr__(self, name):
-        if name not in self.__dict__ and self._data is not None:
+        if name not in self.__dict__ and name not in self.__class__.__dict__\
+                and self._data is not None:
             return getattr(self._data, name)
         return object.__getattribute__(self, name)
         # super(XEditable, self).__getattr__(name)
