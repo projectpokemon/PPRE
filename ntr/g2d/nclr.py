@@ -99,7 +99,7 @@ class NCLR(Editable):
         self.string('magic', length=4, default='RLCN')
         self.uint16('endian', default=0xFFFE)
         self.uint16('version', default=0x101)
-        self.uint32('size')
+        self.uint32('size_')
         self.uint16('headersize', default=0x10)
         self.uint16('numblocks', default=1)
         self.pltt = PLTT(self)

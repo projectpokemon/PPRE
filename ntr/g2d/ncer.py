@@ -2,6 +2,7 @@
 import array
 from cStringIO import StringIO
 import itertools
+import json
 
 from PIL import Image
 
@@ -21,6 +22,11 @@ class CellAttributes(Editable):
     SHAPE_SQUARE = 0
     SHAPE_HORIZONTAL = 1
     SHAPE_VERTICAL = 2
+    """ DIM_SHAPES = {
+        0: ((8, 8), (16, 16), (32, 32), (64, 64)),
+        1: ((16, 8), (32, 8), (32, 16), (64, 32)),
+        2: ((8, 16), (8, 32), (16, 32), (32, 64)),
+    }"""
 
     def define(self):
         # attr0
@@ -185,7 +191,7 @@ class NCER(Editable, ArchiveList):
         self.restrict('cebk')
         self.labl = LABL(self)
         self.restrict('labl')
-        self._files = []
+        self._files = None
 
     def load(self, reader):
         Editable.load(self, reader)
@@ -248,20 +254,18 @@ class NCER(Editable, ArchiveList):
                     tile_id += 1
         return img
 
-    def add(self, ref=None, data=''):
-        image = Image.open(StringIO(data))
-        image = image.convert('RGBA')
-        self._files.append(image)
-
     @property
     def files(self):
-        if self._files:
+        if self._files is not None:
             return self._files
+        self._files = []
+        clr = self._clr
+        cgr = self._cgr
         try:
             cgr = self._cgr
             clr = self._clr
         except AttributeError:
-            raise ValueError('No dependencies set.'
+            raise ValueError('No dependencies set. '
                              'Call update_dependencies(cgr, clr)')
         for idx, cell in enumerate(self.cebk.cells):
             image = self.get_image(idx, cgr, clr)
@@ -274,7 +278,118 @@ class NCER(Editable, ArchiveList):
     def update_dependencies(self, cgr, clr):
         self._cgr = cgr
         self._clr = clr
-        self._files = []
+        self._files = None
+
+    def reset(self):
+        # TODO: zero out self
+        self.cebk.cells = []
+        self._files = None
+        try:
+            self._cgr
+            self._clr
+        except AttributeError:
+            raise ValueError('No dependencies set.'
+                             'Call update_dependencies(cgr, clr)')
 
     def flush(self):
-        images = self._files
+        """Build after an import_
+        """
+        try:
+            cgr = self._cgr
+            clr = self._clr
+        except AttributeError:
+            raise ValueError('No dependencies set.'
+                             'Call update_dependencies(cgr, clr)')
+        self.cebk.attrs = 1
+        palettes = clr.get_palettes()
+        changes_pal_ids = set()
+        tiles = []
+        for idx, data in enumerate(self._files):
+            img = Image.open(StringIO(data))
+            comment = img.info.get('Comment')
+            img = img.convert('RGBA')
+            pal_id = 0
+            try:
+                cell = self.cebk.cells[idx]
+            except IndexError:
+                cell = Cell(1)
+                self.cebk.cells.append(cell)
+                try:
+                    info = json.loads(comment)
+                    pal_id = info['pal_id']
+                    cell.from_dict(json.loads(comment))
+                except:
+                    pass
+
+            if pal_id not in changes_pal_ids:
+                palettes[pal_id] = [(0xF8, 0xF8, 0xF8, 0)]
+            palette = palettes[pal_id]
+            pixels = img.load()
+
+            # build some new attrs
+            cell.attrs = []
+            width, height = img.size
+            scr_x = cell.minX
+            scr_y = cell.minY
+            while width > 0 or height > 0:
+                # HACK: Currently using only 64x64 blocks
+                attr = CellAttributes()
+                attr.x = scr_x
+                attr.y = scr_y
+                attr.shape = 0
+                attr.size_ = 3
+                cell.attrs.append(attr)
+                scr_x += 64
+                scr_y += 64
+                width -= 64
+                height -= 64
+            cell.maxX = scr_x
+            cell.maxY = scr_y
+
+            for attr in cell.attrs:
+                tilestrip = []
+                for img_y in range(attr.y-cell.minY,
+                                   attr.y-cell.minY+attr.height, 8):
+                    for img_x in range(attr.x-cell.minX,
+                                       attr.x-cell.minX+attr.width, 8):
+                        tile = []
+                        for i in range(8):
+                            tile.append([0]*8)
+                        for sub_y in range(8):
+                            for sub_x in range(8):
+                                try:
+                                    pix = pixels[img_x+sub_x, img_y+sub_y]
+                                    if pix[3] < 0x80:
+                                        tile[sub_y][sub_x] = 0
+                                        continue
+                                    color = (pix[0] & 0xF8, pix[1] & 0xF8,
+                                             pix[2] & 0xF8, 255)
+                                except:
+                                    tile[sub_y][sub_x] = 0
+                                    continue
+                                try:
+                                    index = palette.index(color, 1)
+                                except:
+                                    index = len(palette)
+                                    if index >= 16:
+                                        tile[sub_y][sub_x] = 0
+                                        continue
+                                        raise ValueError(
+                                            'Cannot have more '
+                                            'than 16 colors for image')
+                                    changes_pal_ids.add(pal_id)
+                                    palette.append(color)
+                                tile[sub_y][sub_x] = index
+                        tilestrip.append(tile)
+                strip_len = len(tilestrip)
+                # duplicate region check
+                for tile_id in range(0, len(tiles)-strip_len):
+                    if tiles[tile_id:tile_id+strip_len] == tilestrip:
+                        attr.tileofs = tile_id
+                        break
+                else:
+                    attr.tileofs = len(tiles)
+                    tiles.extend(tilestrip)
+        for pal_id in changes_pal_ids:
+            clr.set_palette(pal_id, palettes[pal_id])
+        cgr.set_tiles(tiles)
