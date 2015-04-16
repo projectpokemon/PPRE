@@ -1,7 +1,7 @@
 
 from PIL import Image
 
-from generic.editable import XEditable as Editable
+from generic import Editable
 from util.io import BinaryIO
 
 

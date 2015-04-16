@@ -139,15 +139,15 @@ class CEBK(Editable):
 
 
 class LABL(Editable):
-    def define(self, scr):
-        self.scr = scr
+    def define(self, parent):
+        self.parent = parent
         self.string('magic', length=4, default='LBAL')
         self.uint32('size_')
         self.names = []
 
     def load(self, reader):
         Editable.load(self, reader)
-        assert self.magic == 'LBAL'
+        assert self.magic == 'LBAL', 'Expected LBAL got '.format(self.magic)
         offsets = []
         while True:
             offset = reader.readUInt32()
