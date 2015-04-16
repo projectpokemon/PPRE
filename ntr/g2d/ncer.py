@@ -5,7 +5,7 @@ import itertools
 
 from PIL import Image
 
-from generic.archive import Archive
+from generic.archive import ArchiveList
 from generic.editable import XEditable as Editable
 from util import BinaryIO
 
@@ -162,7 +162,7 @@ class LABL(Editable):
         return writer
 
 
-class NCER(Editable, Archive):
+class NCER(Editable, ArchiveList):
     extension = '.png'
 
     def define(self):
@@ -176,7 +176,7 @@ class NCER(Editable, Archive):
         self.restrict('cebk')
         self.labl = LABL(self)
         self.restrict('labl')
-        self._files = {}
+        self._files = []
 
     def load(self, reader):
         Editable.load(self, reader)
@@ -249,16 +249,15 @@ class NCER(Editable, Archive):
         except AttributeError:
             raise ValueError('No dependencies set.'
                              'Call update_dependencies(cgr, clr)')
-        for idx, (name, cell) in enumerate(zip(self.labl.names,
-                                               self.cebk.cells)):
+        for idx, cell in enumerate(self.cebk.cells):
             image = self.get_image(idx, cgr, clr)
             buffer = StringIO()
             image.save(buffer, format='PNG')
-            self._files[name] = buffer.getvalue()
+            self._files.append(buffer.getvalue())
             buffer.close()
         return self._files
 
     def update_dependencies(self, cgr, clr):
         self._cgr = cgr
         self._clr = clr
-        self._files = {}
+        self._files = []
