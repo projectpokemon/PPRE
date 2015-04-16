@@ -1,5 +1,6 @@
 
 import abc
+import time
 import zipfile
 
 from util.io import BinaryIO
@@ -55,7 +56,12 @@ class Archive(object):
             except AttributeError:
                 names = xrange(len(self.files))
             for name in names:
-                archive.writestr(str(name)+self.extension, self.files[name])
+                zipinfo = zipfile.ZipInfo(
+                    str(name)+self.extension,
+                    date_time=time.localtime(time.time())[:6])
+                zipinfo.compress_type = archive.compression
+                zipinfo.external_attr = 33152 << 16
+                archive.writestr(zipinfo, self.files[name])
         return handle
 
     def import_(self, handle, mode='r'):
