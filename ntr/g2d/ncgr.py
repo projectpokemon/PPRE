@@ -20,7 +20,7 @@ class CHAR(Editable):
         self.uint32('size_')
         self.uint16('height')
         self.uint16('width')
-        self.uint32('format')
+        self.uint32('format', default=self.FORMAT_16BIT)
         self.uint32('depth')
         self.uint32('type')
         self.uint32('datasize')
