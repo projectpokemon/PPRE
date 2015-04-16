@@ -126,7 +126,7 @@ class CEBK(Editable):
     def save(self, writer):
         start = writer.tell()
         self.num = len(self.cells)
-        writer = Editable.save(writer)
+        writer = Editable.save(self, writer)
         for cell in self.cells:
             writer = cell.save(writer)
         for cell in self.cells:
@@ -161,7 +161,7 @@ class LABL(Editable):
 
     def save(self, writer):
         start = writer.tell()
-        writer = Editable.save(writer)
+        writer = Editable.save(self, writer)
         namewriter = BinaryIO()
         offsets = []
         for name in self.names:
