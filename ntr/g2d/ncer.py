@@ -258,15 +258,13 @@ class NCER(Editable, ArchiveList):
     def files(self):
         if self._files is not None:
             return self._files
-        self._files = []
-        clr = self._clr
-        cgr = self._cgr
         try:
             cgr = self._cgr
             clr = self._clr
         except AttributeError:
             raise ValueError('No dependencies set. '
                              'Call update_dependencies(cgr, clr)')
+        self._files = []
         for idx, cell in enumerate(self.cebk.cells):
             image = self.get_image(idx, cgr, clr)
             buffer = StringIO()
