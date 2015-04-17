@@ -3,6 +3,11 @@ from generic import Editable
 from ntr.g2d.ncer import LABL
 
 
+class AnimationElement(Editable):
+    def define(self, type):
+        pass
+
+
 class AnimationFrame(Editable):
     def define(self):
         self.uint32('data_offset')
@@ -32,6 +37,11 @@ class ABNK(Editable):
         self.uint32('u18')
         self.uint32('u1c')
 
+    def load(self, reader):
+        start = reader.tell()
+        Editable.load(self, reader)
+        reader.seek(start+self.size_)
+
 
 class NANR(Editable):
     """2d Animations
@@ -49,5 +59,5 @@ class NANR(Editable):
     def load(self, reader):
         Editable.load(self, reader)
         self.abnk.load(reader)
-        # self.labl.load(reader)
+        self.labl.load(reader)
 
