@@ -194,7 +194,11 @@ class NSCR(Editable):
                         palettes.append(palette)
                 for sub_y in range(8)[::flip_y_factor]:
                     for sub_x in range(8)[::flip_x_factor]:
-                        pix = pixels[(scr_x+sub_x, scr_y+sub_y)]
+                        try:
+                            pix = pixels[(scr_x+sub_x, scr_y+sub_y)]
+                        except IndexError:
+                            tile[sub_y][sub_x] = 0
+                            continue
                         if pix[3] < 0x80:
                             tile[sub_y][sub_x] = 0
                             continue
