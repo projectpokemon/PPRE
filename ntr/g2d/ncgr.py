@@ -174,6 +174,7 @@ class NCGR(Editable):
 
     def load(self, reader):
         Editable.load(self, reader)
+        assert self.magic == 'RGCN', 'Expected RGCN got '.format(self.magic)
         self.char.load(reader)
         if self.numblocks > 1:
             self.cpos.load(reader)

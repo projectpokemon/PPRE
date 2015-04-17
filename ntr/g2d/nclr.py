@@ -106,6 +106,7 @@ class NCLR(Editable):
 
     def load(self, reader):
         Editable.load(self, reader)
+        assert self.magic == 'RLCN', 'Expected RLCN got '.format(self.magic)
         self.pltt.load(reader)
 
     def save(self, writer=None):
