@@ -2,8 +2,10 @@
 import itertools
 import json
 import os
+import warnings
 
 from compileengine import Decompiler, Variable, ExpressionBlock
+from compileengine.engine import Engine, Function, VariableCollection
 
 from util.io import BinaryIO
 
@@ -21,7 +23,7 @@ class CommandMetaRegistry(type):
         return new_cls
 
 
-class Command(object):
+class Command(Function):
     """General Command class
 
     Subclasses are recorded into the meta registry and can be created via
@@ -41,6 +43,36 @@ class Command(object):
     """
     __metaclass__ = CommandMetaRegistry
     _fields = ('name', 'args', 'returns', )
+
+    def __call__(self, *args, **kwargs):
+        if self.engine.state != self.engine.STATE_COMPILING:
+            return
+        self.engine.write_value(self.cmd_id, 2)
+        # TODO: returns
+        if len(args) != len(self.args):
+            raise TypeError(
+                '{name}() takes exactly {expect} args. ({got} given)'
+                .format(name=self.name,
+                        expect=len(self.args),
+                        got=len(args)))
+        for idx, size in enumerate(self.args):
+            value = args[idx]
+            if size in ('var', 'flag'):
+                try:
+                    self.engine.write_value(value.var_id, 2)
+                except AttributeError:
+                    warnings.warn('{name}() expected a variable for arg {idx}'
+                                  ' but got {var}. Casting to integer instead.'
+                                  .format(name=self.name, idx=idx, var=value))
+                    self.engine.write_value(int(value), 2)
+            else:
+                if (value >= 8 << size) or value < 0:
+                    warnings.warn('{name}() expected arg {idx} to be in '
+                                  'the range of [0, {max}) but got {var}.'
+                                  ' Truncating bits.'
+                                  .format(name=self.name, idx=idx,
+                                          max=8 << size, var=value))
+                self.engine.write_value(value, size)
 
     def decompile_args(self, decompiler):
         """Generates decompiled command expressions by reading its arguments
@@ -104,6 +136,7 @@ class Command(object):
         if 'returns' not in data:
             data['returns'] = []
         command = cls()
+        command.cmd_id = cmd
         for field in cls._fields:
             setattr(command, field, data.get(field))
         return command
@@ -120,6 +153,24 @@ class Command(object):
         if self.__class__.__name__ != 'Command':
             command_dict['class'] = self.__class__.__name__
         return command_dict
+
+
+class ScriptVariableCollection(VariableCollection):
+    def _create(self, name):
+        var = VariableCollection._create(self, name)
+        try:
+            # Variable id is assigned in named key map
+            var.id = self.engine.variables[name]
+        except KeyError:
+            if name[:4] == 'var_':
+                var.id = int(name[4:], 16)
+                # TODO check bounds
+            elif name[:5] == 'flag_':
+                var.id = int(name[5:], 16)
+            else:
+                raise NameError('{name} is not a valid variable name'
+                                .format(name))
+        return var
 
 
 class EndCommand(Command):
@@ -298,6 +349,11 @@ class MovementDecompiler(Decompiler):
         return [self.func(command, namespace='movement.')]
 
 
+class ScriptEngine(Engine):
+    function_class = Command
+    variable_collection_class = ScriptVariableCollection
+
+
 class Script(object):
     """Pokemon Script handler
 
@@ -323,6 +379,7 @@ class Script(object):
         self.offsets = []
         self.scripts = []
         self.commands = {'movements': {}}
+        self.variables = {}
         self.text = None
         self.game = game
         self.load_commands(os.path.join(os.path.dirname(__file__), '..', '..',
