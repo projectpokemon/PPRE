@@ -1,4 +1,5 @@
 
+import imp
 import itertools
 import json
 import os
@@ -6,6 +7,7 @@ import warnings
 
 from compileengine import Decompiler, Variable, ExpressionBlock
 from compileengine.engine import Engine, Function, VariableCollection
+import six
 
 from util.io import BinaryIO
 
@@ -434,6 +436,7 @@ class Script(object):
     def __init__(self, game):
         self.offsets = []
         self.scripts = []
+        self.compiled_scripts = []
         self.commands = {'movements': {}}
         self.variables = {}
         self.text = None
@@ -564,3 +567,33 @@ class Script(object):
         for script in itertools.chain(self.scripts, self.functions):
             handle.write(str(script))
             handle.write('\n\n')
+
+    def import_(self, handle):
+        """Import and compile scripts from a module.
+
+        This does cause execution of arbitrary code (no different
+        from any plugin loader though).
+        """
+        dynamic_script = imp.new_module('dynamic_script_')
+        code = handle.read()
+        six.exec_(code, dynamic_script.__dict__)
+        script_funcs = {}
+        for name, func in dynamic_script.__dict__.items():
+            if name[:7] == 'script_':
+                script_funcs[int(name[7:])] = func
+        scr_idx = 0
+        self.compiled_scripts = []
+
+        def script_stub(engine):
+            return True
+
+        for scr_num, func in sorted(script_funcs.items()):
+            while scr_idx < scr_num:
+                warnings.warn('Missing script_{0}. Generating stub'
+                              .format(scr_idx))
+                self.engine.compile(script_stub)
+                self.compiled_scripts.append(self.engine.current_block)
+                scr_idx += 1
+            self.engine.compile(func)
+            self.compiled_scripts.append(self.engine.current_block)
+            scr_idx += 1
