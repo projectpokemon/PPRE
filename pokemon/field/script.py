@@ -501,7 +501,7 @@ class ScriptEngine(Engine):
             else:
                 # TODO: handle (not flag)
                 self.funcs.Checkflag(condition)
-                self.funcs.CheckLR(condition.operator, 0)
+                self.funcs.CheckLR(1, 0)
         else:
             self.funcs.Goto(0)
         return self.tell()-4
