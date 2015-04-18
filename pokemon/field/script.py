@@ -538,6 +538,32 @@ class Script(object):
                         'call', 'func_{0}'.format(func_id),
                         namespace='engine.')))
 
+    def save(self, writer=None):
+        writer = BinaryIO(writer)
+        start = writer.tell()
+        blocks = set(self.engine.blocks)
+        for block in self.compiled_scripts:
+            writer.writeUInt32(0)
+        writer.writeUInt32(0xFD13)
+        for block in blocks:
+            block.offset = writer.tell()-start
+            writer.write(block.buff)
+            writer.writeAlign(4)
+        for block in blocks:
+            for ofs, dest in block.jumps.items():
+                with writer.seek(start+block.offset+ofs):
+                    writer.writeInt32(block.offset+ofs-dest.offset-4)
+        with writer.seek(start):
+            for block in self.compiled_scripts:
+                # there is a chance that a block in the scripts got removed
+                # use the actual written blocks for the relevant offsets
+                for used_block in blocks:
+                    if used_block == block:
+                        writer.writeInt32(start+used_block.offset
+                                          - writer.tell()-4)
+                        break
+        return writer
+
     def load_commands(self, fname):
         """Load commands from JSON file
 
