@@ -339,6 +339,20 @@ class MovementCommand(Command):
 
 
 class MessageCommand(Command):
+    def __call__(self, *args, **kwargs):
+        if self.engine.state != self.engine.STATE_COMPILING:
+            return
+        text_str = kwargs.pop('text', None)
+        text_id = args[0]
+        if text_str:
+            try:
+                self.engine.text[text_id] = text_str
+            except TypeError:
+                warnings.warn('Text is not loaded. No text will be replaced')
+            except IndexError:
+                warnings.warn('Text is not defined for {idx}'.format(text_id))
+        Command.__call__(self, *args, **kwargs)
+
     def decompile_args(self, decompiler):
         exprs = Command.decompile_args(self, decompiler)
         args = exprs[0].args  # super().get_args
@@ -434,6 +448,7 @@ class ScriptEngine(Engine):
     function_class = Command
     variable_class = ScriptVariable
     variable_collection_class = ScriptVariableCollection
+    text = ()
 
     def __init__(self):
         Engine.__init__(self)
@@ -644,6 +659,7 @@ class Script(object):
         """Load a text archive to be associated with these scripts
         """
         self.text = text
+        self.engine.text = text
 
     def export(self, handle):
         for script in itertools.chain(self.scripts, self.functions):
