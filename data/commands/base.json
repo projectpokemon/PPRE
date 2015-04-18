@@ -75,7 +75,7 @@
       4
     ],
     "class": "MovementCommand",
-    "name": "ApplyMovement"
+    "name": "move"
   },
   "movements": {
     "0": "SeeUp",

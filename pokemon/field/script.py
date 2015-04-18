@@ -6,7 +6,7 @@ import os
 import warnings
 
 from compileengine import Decompiler, Variable, ExpressionBlock
-from compileengine.engine import Engine, Function, VariableCollection
+from compileengine.engine import Engine, Function, VariableCollection, FunctionCollection
 import six
 
 from util.io import BinaryIO
@@ -254,6 +254,11 @@ class ScriptVariableCollection(VariableCollection):
                 value.command.write(*value.args)
 
 
+class StrictFunctionCollection(FunctionCollection):
+    def _create(self, name):
+        raise NameError('{name} is not a known function'.format(name=name))
+
+
 class EndCommand(Command):
     _fields = Command._fields+('value', )
 
@@ -322,6 +327,12 @@ class ConditionalJumpCommand(Command):
 
 
 class MovementCommand(Command):
+    def __call__(self, overworld_id):
+        if self.engine.state == self.engine.STATE_COMPILING:
+            self.engine.write_value(self.cmd_id, 2)
+            self.engine.write_value(overworld_id, 2)
+        return self
+
     def decompile_args(self, decompiler):
         target = decompiler.handle.readUInt16()
         offset = decompiler.handle.readInt32()
@@ -336,6 +347,20 @@ class MovementCommand(Command):
         decompiler.seek(restore)
         return [decompiler.context(decompiler.func('move', target, level=0),
                                    'movement'), block]
+
+    def __enter__(self):
+        if self.engine.state == self.engine.STATE_COMPILING:
+            block = self.engine.current_block
+            ofs = self.engine.tell()
+            self.engine.write_value(0, 4)
+            self.engine.push()
+            block.jumps[ofs] = self.engine.current_block
+        return self.engine.movements
+
+    def __exit__(self, type_, value, traceback):
+        if self.engine.state == self.engine.STATE_COMPILING:
+            self.engine.write_value(0xfe, 2)
+            self.engine.pop()
 
 
 class MessageCommand(Command):
@@ -448,11 +473,13 @@ class ScriptEngine(Engine):
     function_class = Command
     variable_class = ScriptVariable
     variable_collection_class = ScriptVariableCollection
+    function_collection_class = StrictFunctionCollection
     text = ()
 
     def __init__(self):
         Engine.__init__(self)
         self.variables = {}
+        self.movements = StrictFunctionCollection(self, Command)
 
     def write_end(self, value):
         if value is True:
@@ -649,6 +676,11 @@ class Script(object):
         for cmd, command in movements.items():
             cmd = int(cmd, 0)
             self.commands['movements'][cmd] = command
+            self.engine.movements._cache[command] = Command.from_dict(cmd, {
+                'args': [],
+                'name': command
+            })
+            self.engine.movements._cache[command].engine = self.engine
         for cmd, data in commands.items():
             cmd = int(cmd, 0)
             command = self.commands[cmd] = Command.from_dict(cmd, data)
