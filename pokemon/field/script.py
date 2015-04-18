@@ -23,6 +23,23 @@ class CommandMetaRegistry(type):
         return new_cls
 
 
+class CommandRet(object):
+    def __init__(self, command):
+        self.command = command
+        self.args = []
+        self.current_arg = self.command.returns[0]
+        self.final = True
+
+    def __iter__(self):
+        self.final = False
+        for ret_idx in self.command.returns[:-1]:
+            self.current_arg = ret_idx
+            yield self
+        self.current_arg = self.command.returns[-1]
+        self.final = True
+        yield self
+
+
 class Command(Function):
     """General Command class
 
@@ -47,24 +64,47 @@ class Command(Function):
     def __call__(self, *args, **kwargs):
         if self.engine.state != self.engine.STATE_COMPILING:
             return
+        if not self.returns:
+            self.write(*args)
+        else:
+            ret = CommandRet(self)
+            try:
+                for idx in range(len(self.args)):
+                    if idx in self.returns:
+                        ret.args.append(0)
+                    else:
+                        ret.args.append(args.pop())
+                if args:
+                    raise IndexError
+            except IndexError:
+                raise TypeError(
+                    '{name}() takes exactly {expect} args. ({got} given)'
+                    .format(name=self.name,
+                            expect=len(self.args)-len(self.returns),
+                            got=len(args)))
+            return ret
+
+    def write(self, *args):
         self.engine.write_value(self.cmd_id, 2)
-        # TODO: returns
-        if len(args) != len(self.args):
+        expects = len(self.args)
+        if len(args) != expects:
             raise TypeError(
                 '{name}() takes exactly {expect} args. ({got} given)'
                 .format(name=self.name,
-                        expect=len(self.args),
+                        expect=expects,
                         got=len(args)))
         for idx, size in enumerate(self.args):
             value = args[idx]
             if size in ('var', 'flag'):
                 try:
-                    self.engine.write_value(value.var_id, 2)
+                    size = 2
+                    value = value.id
                 except AttributeError:
+                    # TODO: fix idx in message if self.returns
                     warnings.warn('{name}() expected a variable for arg {idx}'
                                   ' but got {var}. Casting to integer instead.'
                                   .format(name=self.name, idx=idx, var=value))
-                    self.engine.write_value(int(value), 2)
+                    value = int(value)
             else:
                 if (value >= 8 << size) or value < 0:
                     warnings.warn('{name}() expected arg {idx} to be in '
@@ -72,7 +112,7 @@ class Command(Function):
                                   ' Truncating bits.'
                                   .format(name=self.name, idx=idx,
                                           max=8 << size, var=value))
-                self.engine.write_value(value, size)
+            self.engine.write_value(value, size)
 
     def decompile_args(self, decompiler):
         """Generates decompiled command expressions by reading its arguments
@@ -171,6 +211,18 @@ class ScriptVariableCollection(VariableCollection):
                 raise NameError('{name} is not a valid variable name'
                                 .format(name))
         return var
+
+    def __setattr__(self, name, value):
+        if self.engine.state != self.engine.STATE_COMPILING:
+            return
+        var = getattr(self, name)
+        try:
+            value.args[value.current_arg] = var
+        except AttributeError:
+            pass
+        else:
+            if value.final:
+                value.command.write(*value.args)
 
 
 class EndCommand(Command):
@@ -353,6 +405,10 @@ class ScriptEngine(Engine):
     function_class = Command
     variable_collection_class = ScriptVariableCollection
 
+    def __init__(self):
+        Engine.__init__(self)
+        self.variables = {}
+
 
 class Script(object):
     """Pokemon Script handler
@@ -382,6 +438,7 @@ class Script(object):
         self.variables = {}
         self.text = None
         self.game = game
+        self.engine = ScriptEngine()
         self.load_commands(os.path.join(os.path.dirname(__file__), '..', '..',
                                         'data', 'commands', 'base.json'))
         try:
@@ -494,7 +551,9 @@ class Script(object):
             self.commands['movements'][cmd] = command
         for cmd, data in commands.items():
             cmd = int(cmd, 0)
-            self.commands[cmd] = Command.from_dict(cmd, data)
+            command = self.commands[cmd] = Command.from_dict(cmd, data)
+            command.engine = self.engine
+            self.engine.funcs._cache[command.name] = command
 
     def load_text(self, text):
         """Load a text archive to be associated with these scripts
