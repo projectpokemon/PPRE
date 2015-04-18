@@ -701,7 +701,8 @@
       1, 
       1
     ], 
-    "name": "DoubleMessage"
+    "name": "DoubleMessage",
+    "class": "MessageCommand"
   }, 
   "133": {
     "args": [
