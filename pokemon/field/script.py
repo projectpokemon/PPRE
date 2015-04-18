@@ -108,12 +108,12 @@ class Command(Function):
                                   .format(name=self.name, idx=idx, var=value))
                     value = int(value)
             else:
-                if (value >= 8 << size) or value < 0:
+                if (value >= 1 << (size*8)) or value < 0:
                     warnings.warn('{name}() expected arg {idx} to be in '
                                   'the range of [0, {max}) but got {var}.'
                                   ' Truncating bits.'
                                   .format(name=self.name, idx=idx,
-                                          max=8 << size, var=value))
+                                          max=1 << (size*8), var=value))
             self.engine.write_value(value, size)
 
     def decompile_args(self, decompiler):
@@ -195,6 +195,33 @@ class Command(Function):
         if self.__class__.__name__ != 'Command':
             command_dict['class'] = self.__class__.__name__
         return command_dict
+
+
+class VariableCompare(object):
+    def __init__(self, arg1, arg2, operator):
+        self.arg1 = arg1
+        self.arg2 = arg2
+        self.operator = operator
+
+
+class ScriptVariable(Variable):
+    def __lt__(self, other):
+        return VariableCompare(self, other, 0)
+
+    def __eq__(self, other):
+        return VariableCompare(self, other, 1)
+
+    def __gt__(self, other):
+        return VariableCompare(self, other, 2)
+
+    def __le__(self, other):
+        return VariableCompare(self, other, 3)
+
+    def __ge__(self, other):
+        return VariableCompare(self, other, 4)
+
+    def __ne__(self, other):
+        return VariableCompare(self, other, 5)
 
 
 class ScriptVariableCollection(VariableCollection):
@@ -405,6 +432,7 @@ class MovementDecompiler(Decompiler):
 
 class ScriptEngine(Engine):
     function_class = Command
+    variable_class = ScriptVariable
     variable_collection_class = ScriptVariableCollection
 
     def __init__(self):
@@ -419,6 +447,22 @@ class ScriptEngine(Engine):
         else:
             warnings.warn('Returns should only be True/False. Assuming True')
             self.funcs.End()
+
+    def write_branch(self, branch_state, condition):
+        if branch_state is True:
+            if isinstance(condition, VariableCompare):
+                if isinstance(condition.arg2, Variable):
+                    self.funcs.If2(condition.arg1, condition.arg2)
+                else:
+                    self.funcs.If(condition.arg1, condition.arg2)
+                self.funcs.CheckLR(condition.operator, 0)
+            else:
+                # TODO: handle (not flag)
+                self.funcs.Checkflag(condition)
+                self.funcs.CheckLR(condition.operator, 0)
+        else:
+            self.funcs.Goto(0)
+        return self.tell()-4
 
 
 class Script(object):
@@ -563,7 +607,7 @@ class Script(object):
         for block in blocks:
             for ofs, dest in block.jumps.items():
                 with writer.seek(start+block.offset+ofs):
-                    writer.writeInt32(block.offset+ofs-dest.offset-4)
+                    writer.writeInt32(dest.offset-block.offset-ofs-4)
 
         with writer.seek(start):
             for block in self.compiled_scripts:

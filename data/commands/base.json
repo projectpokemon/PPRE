@@ -20,10 +20,16 @@
     "name": "If2"
   },
   "22": {
+    "args": [
+      4
+    ],
     "class": "JumpCommand",
     "name": "Jump"
   },
   "26": {
+    "args": [
+      4
+    ],
     "class": "JumpCommand",
     "name": "Goto"
   },
