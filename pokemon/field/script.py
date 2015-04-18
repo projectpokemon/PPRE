@@ -506,6 +506,10 @@ class ScriptEngine(Engine):
             self.funcs.Goto(0)
         return self.tell()-4
 
+    def write_jump(self):
+        self.funcs.Goto(0)
+        return self.tell()-4
+
 
 class Script(object):
     """Pokemon Script handler
