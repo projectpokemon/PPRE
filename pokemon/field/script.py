@@ -411,6 +411,15 @@ class ScriptEngine(Engine):
         Engine.__init__(self)
         self.variables = {}
 
+    def write_end(self, value):
+        if value is True:
+            self.funcs.End()
+        elif value is False:
+            self.funcs.KillScript()
+        else:
+            warnings.warn('Returns should only be True/False. Assuming True')
+            self.funcs.End()
+
 
 class Script(object):
     """Pokemon Script handler
@@ -545,14 +554,17 @@ class Script(object):
         for block in self.compiled_scripts:
             writer.writeUInt32(0)
         writer.writeUInt32(0xFD13)
+
         for block in blocks:
             block.offset = writer.tell()-start
             writer.write(block.buff)
             writer.writeAlign(4)
+
         for block in blocks:
             for ofs, dest in block.jumps.items():
                 with writer.seek(start+block.offset+ofs):
                     writer.writeInt32(block.offset+ofs-dest.offset-4)
+
         with writer.seek(start):
             for block in self.compiled_scripts:
                 # there is a chance that a block in the scripts got removed
@@ -617,9 +629,7 @@ class Script(object):
             while scr_idx < scr_num:
                 warnings.warn('Missing script_{0}. Generating stub'
                               .format(scr_idx))
-                self.engine.compile(script_stub)
-                self.compiled_scripts.append(self.engine.current_block)
+                self.compiled_scripts.append(self.engine.compile(script_stub))
                 scr_idx += 1
-            self.engine.compile(func)
-            self.compiled_scripts.append(self.engine.current_block)
+            self.compiled_scripts.append(self.engine.compile(func))
             scr_idx += 1
