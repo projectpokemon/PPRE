@@ -139,6 +139,12 @@ class Text(Archive, Editable):
         except KeyError as err:
             raise IndexError(err)
 
+    def __setitem__(self, idx, value):
+        try:
+            self.files[self.ids[idx]] = value
+        except KeyError as err:
+            raise IndexError(err)
+
     def load(self, reader):
         reader = BinaryIO.reader(reader)
         AtomicStruct.load(self, reader)
