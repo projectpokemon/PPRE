@@ -658,6 +658,9 @@ class Script(object):
 
         for block in blocks:
             for ofs, dest in block.jumps.items():
+                for used_block in blocks:
+                    if used_block == dest:
+                        dest = used_block
                 with writer.seek(start+block.offset+ofs):
                     writer.writeInt32(dest.offset-block.offset-ofs-4)
 
