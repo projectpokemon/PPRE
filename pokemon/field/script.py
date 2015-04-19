@@ -640,7 +640,13 @@ class Script(object):
     def save(self, writer=None):
         writer = BinaryIO(writer)
         start = writer.tell()
-        blocks = set(self.engine.blocks)
+        blocks = []  # set(self.engine.blocks)
+        for block in self.engine.blocks:
+            for used_block in blocks:
+                if block == used_block:
+                    break
+            else:
+                blocks.append(block)
         for block in self.compiled_scripts:
             writer.writeUInt32(0)
         writer.writeUInt32(0xFD13)
