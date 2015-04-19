@@ -216,10 +216,16 @@ class NCER(Editable, ArchiveList):
         # maxY = min(cell.maxY for cell in self.cebk.cells)
         # minX = min(cell.minX for cell in self.cebk.cells)
         # minY = min(cell.minY for cell in self.cebk.cells)
-        maxX = cell.maxX
-        maxY = cell.maxY
-        minX = cell.minX
-        minY = cell.minY
+        try:
+            maxX = cell.maxX
+            maxY = cell.maxY
+            minX = cell.minX
+            minY = cell.minY
+        except AttributeError:
+            maxX = max(attr.x+attr.width for attr in cell.attrs)
+            maxY = max(attr.y+attr.height for attr in cell.attrs)
+            minX = min(attr.x for attr in cell.attrs)
+            minY = min(attr.y for attr in cell.attrs)
 
         img = Image.new('RGBA', (maxX-minX+1, maxY-minY+1))
         tiles = cgr.get_tiles()
