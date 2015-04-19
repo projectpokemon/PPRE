@@ -33,7 +33,7 @@ class Map(Editable):
             self.uint16('u2_0', width=4)
             self.uint16('u2_1', width=6)
             self.uint16('u2_2', width=6)
-            self.uint16('u4')
+            self.uint16('matrix_idx')
             self.uint16('script_idx')
             self.uint16('u8')
             self.uint16('text_idx')
