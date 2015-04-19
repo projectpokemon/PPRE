@@ -437,17 +437,16 @@ class HGSS(Game):
     def init(self):
         blz.decompress_arm9(self)
         blz.decompress_overlays(self)
-        return
 
         with open(os.path.join(self.files.directory, 'arm9.dec.bin'), 'r+')\
                 as handle:
             """Breaks the while(AUXSPICNT != 80){} loop"""
-            handle.seek(0xde21c)
+            handle.seek(0xde16c)
             handle.write(chr(0)*4)
             handle.seek(0xd3fa8)
             handle.write(chr(0)*4)
-            handle.seek(0x1a570)
-            handle.write(chr(0)*2)
+            # handle.seek(0x1a570)
+            # handle.write(chr(0)*2)
 
 
 class BW(Game):
