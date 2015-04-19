@@ -67,23 +67,60 @@ class LZ(object):
 
 
 class LZCompress(object):
-    """Level -1 grade compression.
-
-    TODO: actually decompress
+    """LZ77 Compression. Basic sliding window implementation
     """
     def __init__(self, reader, compression=COMPRESSION_LZ77):
         handle = BinaryIO.reader(reader)
         start = handle.tell()
-        data = handle.read()
-        out = array.array('B')
+        data = array.array('B', handle.read())
         self.header = LZHeader._make([compression, len(data)])
+        handle.truncate(start)
         handle.seek(start)
         handle.write(pack('I', self.header.flag | (self.header.size << 8)))
-        NUL = chr(0)
-        for pos in range(0, len(data)+8, 8):
-            handle.write(NUL)
-            handle.write(data[pos:pos+8])
-        handle.seek(start)
+
+        out = array.array('B')
+        out.append(0)
+        out.extend(data[:4])
+        pos = 4
+        endpos = len(data)
+        search_start = 0
+        max_len = 0x12
+        control_bit = 4
+        flag = 0
+        flag_pos = 0
+        while pos < endpos:
+            best_pos = None
+            best_len = 0
+            for check in xrange(search_start, pos):
+                for idx in xrange(0, min(max_len+1, pos-check, endpos-pos)):
+                    if data[check+idx] != data[pos+idx]:
+                        break
+                if idx >= best_len:
+                    best_len = idx
+                    best_pos = check
+                    if idx >= max_len:
+                        break
+            control_bit -= 1
+            if best_len < 3:
+                out.append(data[pos])
+                pos += 1
+            else:
+                flag |= 1 << control_bit
+                head = (best_len-3) << 0xC
+                head |= pos-best_pos-1
+                out.append(head >> 8)
+                out.append(head & 0xFF)
+                pos += best_len
+            if control_bit <= 0:
+                if pos >= 0x400:
+                    search_start = pos-0x400
+                control_bit = 8
+                out[flag_pos] = flag
+                flag_pos = len(out)
+                flag = 0
+                out.append(0)
+        out[flag_pos] = flag
+        handle.write(out.tostring())
         self.handle = handle
 
 
