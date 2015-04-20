@@ -11,6 +11,15 @@ from pokemon.msgdata.msg import Text
 
 
 class Map(Editable):
+    WEATHER_NONE = 0
+    WEATHER_RAIN = 1  # 1-3
+    WEATHER_SNOW_LIGHT = 4
+    WEATHER_SNOW = 5  # 4-8
+    WEATHER_DIAMOND_SNOW = 8
+    WEATHER_FOG = 9
+    WEATHER_DARK = 11
+    WEATHER_DIM = 13
+
     def define(self, game):
         self.game = game
         if game <= Game.from_string('Platinum'):
@@ -29,7 +38,7 @@ class Map(Editable):
         elif game <= Game.from_string('SoulSilver'):
             # chunks derived from 0203b290
             self.uint16('encounter_idx', width=8)
-            self.uint16('u1', width=8)
+            self.uint16('land_data_texture_idx', width=8)
             self.uint16('u2_0', width=4)
             self.uint16('u2_1', width=6)
             self.uint16('u2_2', width=6)
@@ -37,22 +46,22 @@ class Map(Editable):
             self.uint16('script_idx')
             self.uint16('u8')
             self.uint16('text_idx')
-            self.uint16('uc')
-            self.uint16('ue')
+            self.uint16('music_orig_idx')
+            self.uint16('music_copy_idx')
             self.uint32('event_idx', width=16)  # u32 needed to pack 0x10-0x13
             self.uint32('map_name', width=8)
-            self.uint32('u12_1', width=4)
+            self.uint32('map_sign_background', width=4)
             self.uint32('u12_2', width=4)
-            self.uint32('u14_0', width=1)  # 0
-            self.uint32('u14_1', width=7)  # 1-7
-            self.uint32('u14_2', width=4)  # 8-11
-            self.uint32('u14_3', width=6)  # 12-17
-            self.uint32('u14_4', width=2)  # 18-19
-            self.uint32('u14_5', width=5)  # 20-24
-            self.uint32('u14_6', width=1)  # 25
+            self.uint32('region', width=1)  # 0
+            self.uint32('weather', width=7)  # 1-7
+            self.uint32('map_sign_control', width=4)  # 8-11
+            self.uint32('map_view_angle', width=6)  # 12-17
+            self.uint32('following_allowed', width=2)  # 18-19, 1 = small, 2 = any
+            self.uint32('battle_background', width=5)  # 20-24, ??
+            self.uint32('can_bike', width=1)  # 25
             self.uint32('u14_7', width=1)  # where is 26 used?
-            self.uint32('u14_8', width=1)  # 27
-            self.uint32('u14_9', width=1)  # 28
+            self.uint32('can_escape_rope', width=1)  # 27
+            self.uint32('can_fly', width=1)  # 28
             self.uint32('u14_10', width=1)  # 29
             self.uint32('u14_11', width=1)  # 30
             self.uint32('u14_12', width=1)  # 31
@@ -63,6 +72,16 @@ class Map(Editable):
         self.text = Text(game)
         self.names = self.game.text(self.game.locale_text_id('map_names'))
         self.code_names = self.get_code_names()
+
+    @property
+    def music_idx(self):
+        return self.music_orig_idx
+
+    @music_idx.setter
+    def music_idx(self, value):
+        # There are absolutely no instances where these differ
+        self.music_orig_idx = value
+        self.music_copy_idx = value
 
     def get_code_names(self):
         names = []

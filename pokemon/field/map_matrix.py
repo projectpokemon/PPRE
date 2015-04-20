@@ -23,6 +23,13 @@ class MapMatrix(Editable):
         land_data_block.freeze()
         self.land_data_maps = land_data_block.load(reader)
 
+    def save(self, writer=None):
+        self.namelen = len(self.name)
+        writer = Editable.save(self, writer)
+        writer.write(self.name)
+        writer = self.land_data_maps.save(writer)
+        return writer
+
     def __getitem__(self, key):
         try:
             idx = key[1]*self.width+key[0]
