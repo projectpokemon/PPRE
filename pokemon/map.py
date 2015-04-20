@@ -37,7 +37,7 @@ class Map(Editable):
             self.uint16('u16')
         elif game <= Game.from_string('SoulSilver'):
             # chunks derived from 0203b290
-            self.uint16('encounter_idx', width=8)
+            self.uint16('encounter_idx', default=0xFF, width=8)
             self.uint16('land_data_texture_idx', width=8)
             self.uint16('u2_0', width=4)
             self.uint16('u2_1', width=6)
@@ -45,7 +45,7 @@ class Map(Editable):
             self.uint16('matrix_idx')
             self.uint16('script_idx')
             self.uint16('u8')
-            self.uint16('text_idx')
+            self.uint16('text_idx', default=3)
             self.uint16('music_orig_idx')
             self.uint16('music_copy_idx')
             self.uint32('event_idx', width=16)  # u32 needed to pack 0x10-0x13
@@ -125,3 +125,20 @@ class Map(Editable):
         self.script.load_text(self.text)
         self.script.load(self.game.get_script(self.script_idx))
         self.events.load(self.game.get_event(self.event_idx))
+
+    def commit(self, map_id, shallow=False):
+        with open(os.path.join(self.game.files.directory, 'arm9.dec.bin',
+                               mode='r+')) as handle:
+            handle.seek(self.game.map_table+map_id*self.size())
+            self.save(handle)
+        if shallow:
+            return
+        if self.name != self.names[self.map_name]:
+            self.names[self.map_name] = self.name
+            self.game.set_text(self.game.locale_text_id('map_names'),
+                               self.names)
+        # TODO: codename?
+        self.game.set_text(self.text_idx, self.text)
+        self.game.set_script(self.script_idx, self.script)
+        self.game.set_event(self.event_idx, self.events)
+        # TODO: encounters
