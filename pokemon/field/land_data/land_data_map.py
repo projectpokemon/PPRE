@@ -77,3 +77,34 @@ class LandDataMap(Editable):
         self.bmd = reader.read(self.bmd_size)  # TODO later
         self.bdhc = BDHC(self.game)
         self.bdhc.load(reader)
+
+    def get_perm_image(self):
+        res = 8
+        image = Image.new('RGBA', (0x20*res, 0x20*res))
+        pix = image.load()
+        idx = 0
+        colors = {}
+        gen = color_gen()
+        for y in range(0x20):
+            for x in range(0x20):
+                entry = self.permissions.entries[idx]
+                perm = entry.perm
+                try:
+                    color = colors[perm]
+                except KeyError:
+                    color = next(gen)
+                    colors[perm] = color
+                if entry.flags & 0x80:
+                    color = tuple(c/4 for c in color[:3])+(255,)
+                for sub_y in range(res):
+                    for sub_x in range(res):
+                        pix[x*res+sub_x, y*res+sub_y] = color
+                idx += 1
+        for obj in self.objects.entries:
+            color = (255, 255, 255, 255)
+            x = obj.x + 0x10
+            y = obj.y + 0x10
+            for i in range(res-2):
+                pix[x*res+i+2, y*res+res-1] = color
+                pix[x*res+res-1, y*res+i+2] = color
+        return image
