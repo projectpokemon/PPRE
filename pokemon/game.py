@@ -411,6 +411,7 @@ class HGSS(Game):
         'HeartGold': 'a/0/3/7',
         'SoulSilver': 'a/1/3/6'}
     event_archive_file = 'a/0/3/2'
+    land_data_archive_file = 'a/0/6/5'
     map_matrix_archive_file = 'a/0/4/1'
     mapname_file = 'fielddata/maptable/mapname.bin'
     script_archive_file = 'a/0/1/2'
