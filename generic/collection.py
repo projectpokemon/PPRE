@@ -1,7 +1,7 @@
 
 from __future__ import absolute_import
 
-from editable import Editable
+from generic import Editable
 
 
 class Collection2d(Editable):
