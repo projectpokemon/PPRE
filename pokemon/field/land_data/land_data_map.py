@@ -50,7 +50,7 @@ class BDHC(Editable):
 class LandDataMap(Editable):
     def define(self, game):
         self.game = game
-        self.uint32('permission_size')
+        self.uint32('permission_size', default=0x800)
         self.uint32('objects_size')
         self.uint32('bmd_size')
         self.uint32('bdhc_size')
@@ -79,8 +79,25 @@ class LandDataMap(Editable):
                                        self.objects_size)
         self.objects.load(reader)
         self.bmd = reader.read(self.bmd_size)  # TODO later
-        self.bdhc = BDHC(self.game)
-        self.bdhc.load(reader)
+        self.bdhc = reader.read(self.bdhc_size)
+
+    def save(self, writer=None):
+        writer = BinaryIO.writer(writer)
+        start = writer.tell()
+        writer = Editable.save(self, writer)
+        writer.write(self.block1)
+        self.ublock1_size = len(self.block1)
+        writer = self.permissions.save(writer)
+        self.permission_size = self.permissions.get_size()
+        writer = self.objects.save(writer)
+        self.objects_size = self.objects.get_size()
+        writer.write(self.bmd)
+        self.bmd_size = len(self.bmd)
+        writer.write(self.bdhc)
+        self.bdhc_size = len(self.bdhc)
+        with writer.seek(start):
+            Editable.save(self, writer)
+        return writer
 
     def get_perm_image(self):
         res = 8
