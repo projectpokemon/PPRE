@@ -8,7 +8,7 @@ class Collection2d(Editable):
     def define(self, entry, width, height):
         self.width = width
         self.height = height
-        self.array('entries', entry.base_struct, length=width*height)
+        self.array('entries', entry, length=width*height)
 
     def __getitem__(self, key):
         try:
