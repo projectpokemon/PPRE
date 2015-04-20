@@ -46,20 +46,10 @@ class MapMatrix(Editable):
         self.namelen = len(self.name)
         writer = Editable.save(self, writer)
         writer.write(self.name)
+        if self.has_map_definition_ids:
+            writer = self.map_definitions.save(writer)
+        if self.has_mystery_zone:
+            writer = self.mystery_details.save(writer)
         writer = self.land_data_maps.save(writer)
         return writer
-
-    def __getitem__(self, key):
-        try:
-            idx = key[1]*self.width+key[0]
-        except (IndexError, TypeError):
-            raise KeyError('MapMatrix expects a two-tuple index')
-        return self.land_data_maps.entries[idx]
-
-    def __setitem__(self, key, value):
-        try:
-            idx = key[1]*self.width+key[0]
-        except (IndexError, TypeError):
-            raise KeyError('MapMatrix expects a two-tuple index')
-        self.land_data_maps.entries[idx] = value
 World = MapMatrix
