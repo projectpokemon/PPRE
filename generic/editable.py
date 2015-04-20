@@ -840,7 +840,7 @@ class XEditable(Emitter, AtomicStruct):
         params = {'default': 0, 'min_value': -0x80000000, 'max_value': 0x7FFFFFFF,
                   'type': int}
         params.update(kwargs)
-        field = AtomicStruct.int16(self, name, **kwargs)
+        field = AtomicStruct.int32(self, name, **kwargs)
         self.restrict(name, **params)
         return field
 
