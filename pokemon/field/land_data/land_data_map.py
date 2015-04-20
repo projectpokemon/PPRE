@@ -17,10 +17,13 @@ class MapObject(Editable):
     def define(self, game):
         self.game = game
         self.uint32('object_id')
-        self.uint16('u4')
+        """
+        # x, y, z may be fixed point with 0x10000 as a denominator
+        self.uint16('u4')  # 0 when two wide
         self.int16('x')
-        self.uint32('u8')
-        self.uint16('uc')
+        self.uint16('u8')
+        self.int16('z')  # Calling this Z to keep consistent with 2d maps
+        self.uint16('uc')  # 0 when 2 long, 0xc0000 when 2 long down??
         self.int16('y')
         self.uint32('u10')
         self.uint32('u14')
@@ -29,7 +32,27 @@ class MapObject(Editable):
         self.uint32('u20')
         self.uint32('u24')
         self.uint32('u28')
+        self.uint32('u2c')"""
+        self.int32('x_fx')
+        self.int32('z_fx')
+        self.int32('y_fx')
+        self.int32('rot1')
+        self.int32('rot2')
+        self.int32('rot3')
+        self.int32('scale_x_fx', default=4096)
+        self.int32('scale_z_fx', default=4096)
+        self.int32('scale_y_fx', default=4096)
+        self.uint32('u28')
         self.uint32('u2c')
+
+    def get_x(self):
+        return self.x_fx/65536.0 + 0x10
+
+    def get_z(self):
+        return self.z_fx/65536.0 + 0x10
+
+    def get_y(self):
+        return self.y_fx/65536.0 + 0x10
 
 
 class SizedCollection(Editable):
@@ -102,8 +125,8 @@ class LandDataMap(Editable):
                 idx += 1
         for obj in self.objects.entries:
             color = (255, 255, 255, 255)
-            x = obj.x + 0x10
-            y = obj.y + 0x10
+            x = MapObject.get_x(obj)
+            y = MapObject.get_y(obj)
             for i in range(res-2):
                 pix[x*res+i+2, y*res+res-1] = color
                 pix[x*res+res-1, y*res+i+2] = color

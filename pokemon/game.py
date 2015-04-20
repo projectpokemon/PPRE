@@ -67,7 +67,9 @@ class Version(object):
         return not self.__lt__(other) and not self.__eqx__(other)
 
     def __contains__(self, item):
-        if not isinstance(item, Version):
+        try:
+            item.gen
+        except:
             item = Version.from_string(item)
         return self.__eqx__(item)
 
