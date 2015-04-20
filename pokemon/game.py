@@ -281,6 +281,10 @@ class Game(Editable, Version):
         elif name[:4] == 'set_':
             def set_wrapper(fileid, data):
                 archive = getattr(self, name[4:]+'_archive')
+                if hasattr(data, 'save'):
+                    data = data.save()
+                if hasattr(data, 'getvalue'):
+                    data = data.getvalue()
                 archive.files[fileid] = data
                 self.save_archive(archive,
                                   getattr(self, name[4:]+'_archive_file'))
