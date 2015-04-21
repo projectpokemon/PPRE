@@ -61,7 +61,7 @@ class Command(Function):
     to_dict : dict
     """
     __metaclass__ = CommandMetaRegistry
-    _fields = ('name', 'args', 'returns', )
+    _fields = ('name', 'args', 'returns', 'aliases')
 
     def __call__(self, *args, **kwargs):
         if self.engine.state != self.engine.STATE_COMPILING:
@@ -699,6 +699,11 @@ class Script(object):
             command = self.commands[cmd] = Command.from_dict(cmd, data)
             command.engine = self.engine
             self.engine.funcs._cache[command.name] = command
+            try:
+                for alias in command.aliases:
+                    self.engine.funcs._cache[alias] = command
+            except AttributeError:
+                pass
 
     def load_text(self, text):
         """Load a text archive to be associated with these scripts
