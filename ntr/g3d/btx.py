@@ -337,7 +337,6 @@ class TEX(ArchiveList):
             if ofs % 8:
                 self.texdata += '\x00'*(8 - (ofs % 8))  # Align
         self.paldata = ''
-        print(palettes)
         for i in xrange(num):
             try:
                 pal = palettes[i]
