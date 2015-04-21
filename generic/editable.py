@@ -775,6 +775,9 @@ class XEditable(Emitter, AtomicStruct):
             self._keys = OrderedDict()
             return self._keys
 
+    def __dir__(self):
+        return self.__dict__.keys()+self.keys.keys()
+
     def restrict(self, name, validator=None, children=None, **kwargs):
         """Restrict an attribute. This adds the attribute to the key
         collection used to build textual representations.

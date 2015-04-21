@@ -154,6 +154,8 @@ class Game(Editable, Version):
 
     @classmethod
     def from_workspace(cls, workspace, init=False):
+        if 0:  # auto-documentation
+            return DP()
         files = Files(workspace)
         try:
             # NTR

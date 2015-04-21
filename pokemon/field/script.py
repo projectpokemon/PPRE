@@ -702,7 +702,7 @@ class Script(object):
             try:
                 for alias in command.aliases:
                     self.engine.funcs._cache[alias] = command
-            except AttributeError:
+            except (AttributeError, TypeError):
                 pass
 
     def load_text(self, text):
