@@ -81,7 +81,7 @@ class G3DResDict(object):
             writer.writeUInt16(nameofs)
         nameofs = writer.tell()
         for i in xrange(num):
-            writer.write(self.names[i])
+            writer.write(str(self.names[i]))
             writer.writePadding(nameofs+i*16)
         size = writer.tell()-start
         with writer.seek(sizeofs):
