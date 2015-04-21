@@ -640,6 +640,11 @@ class Script(object):
     def save(self, writer=None):
         writer = BinaryIO(writer)
         start = writer.tell()
+        if not self.compiled_scripts and self.scripts:
+            handle = BinaryIO()
+            self.export(handle)
+            handle.seek(0)
+            self.import_(handle)
         blocks = []  # set(self.engine.blocks)
         for block in self.engine.blocks:
             for used_block in blocks:
