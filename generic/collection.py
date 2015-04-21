@@ -43,4 +43,19 @@ class SizedCollection(Editable):
         self.restrict('entries')
         self.freeze()
         ctypes.memmove(self.entries, old_entries, ctypes.sizeof(old_entries))
-        self.entries[length] = obj
+        self[length] = obj
+
+    def __getitem__(self, key):
+        return self.entries[key]
+
+    def __setitem__(self, key, value):
+        # TODO cast {} to new object
+        entry_size = ctypes.sizeof(self.entries[key])
+        if ctypes.sizeof(value) != entry_size:
+            raise ValueError('Incorrect type. Expected {0}'
+                             .format(self.entries[key]._type_))
+        ctypes.memmove(ctypes.addressof(self.entries[key]),
+                       ctypes.addressof(value), entry_size)
+
+    def __len__(self):
+        return len(self.entries)
