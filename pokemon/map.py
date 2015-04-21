@@ -127,8 +127,8 @@ class Map(Editable):
         self.events.load(self.game.get_event(self.event_idx))
 
     def commit(self, map_id, shallow=False):
-        with open(os.path.join(self.game.files.directory, 'arm9.dec.bin',
-                               mode='r+')) as handle:
+        with open(os.path.join(self.game.files.directory, 'arm9.dec.bin'),
+                  mode='r+') as handle:
             handle.seek(self.game.map_table+map_id*self.size())
             self.save(handle)
         if shallow:

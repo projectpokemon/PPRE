@@ -91,3 +91,23 @@ class ZoneEvents(Editable):
         self.num_triggers = reader.readUInt32()
         self.triggers = [Trigger(reader=reader)
                          for i in range(self.num_triggers)]
+
+    def save(self, writer=None):
+        writer = BinaryIO.writer(writer)
+        self.num_furniture = len(self.furniture)
+        self.num_overworlds = len(self.overworlds)
+        self.num_warps = len(self.warps)
+        self.num_triggers = len(self.triggers)
+        writer.writeUInt32(self.num_furniture)
+        for furniture in self.furniture:
+            writer = furniture.save(writer)
+        writer.writeUInt32(self.num_overworlds)
+        for overworld in self.overworlds:
+            writer = overworld.save(writer)
+        writer.writeUInt32(self.num_warps)
+        for warp in self.warps:
+            writer = warp.save(writer)
+        writer.writeUInt32(self.num_triggers)
+        for trigger in self.triggers:
+            writer = trigger.save(writer)
+        return writer
