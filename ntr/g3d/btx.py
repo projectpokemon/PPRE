@@ -1,5 +1,6 @@
 
 from collections import namedtuple
+import json
 import struct
 from cStringIO import StringIO
 
@@ -68,6 +69,10 @@ class TexInfo(object):
 
 TexParam = namedtuple('TexParam', 'ofs width height format color0')
 PalParam = namedtuple('PalParam', 'ofs count4')
+
+
+class PNGInfo(object):
+    __slots__ = ('chunks',)
 
 
 class TEX(ArchiveList):
@@ -213,9 +218,14 @@ class TEX(ArchiveList):
                         data += palette[pix[0]]
                     else:
                         data += palette[pix[0]][:3] + chr(pix[1])
-            self._images.append(Image.frombytes('RGBA',
-                                                (len(row), len(bitmap)),
-                                                data))
+            image = Image.frombytes('RGBA', (len(row), len(bitmap)), data)
+            comment = json.dumps({'texidx': texidx, 'palidx': palidx,
+                                  'texname': self.texdict.names[texidx],
+                                  'palname': self.paldict.names[palidx]
+                                  })
+            image.info['pnginfo'] = PNGInfo()
+            image.info['pnginfo'].chunks = [('tEXt', 'Comment\0'+comment)]
+            self._images.append(image)
         return self._images
 
     @property
@@ -233,7 +243,7 @@ class TEX(ArchiveList):
         files = []
         for image in self.images:
             buffer = StringIO()
-            image.save(buffer, format='PNG')
+            image.save(buffer, format='PNG', pnginfo=image.info['pnginfo'])
             files.append(buffer.getvalue())
             buffer.close()
         return files
@@ -245,7 +255,10 @@ class TEX(ArchiveList):
         if self._images is None:
             self._images = []
         image = Image.open(StringIO(data))
+        info = image.info
         image = image.convert('RGBA')
+        if 'Comment' in info:
+            image.info['Comment'] = info['Comment']
         self._images.append(image)
 
     def flush(self):
@@ -256,17 +269,43 @@ class TEX(ArchiveList):
         images = self.images
         num = len(images)
         imagemap = zip(xrange(num), [0]*num)  # 1:1
-        pal0 = ['\x00\x00']*16
-        pal2idx = 1  # max 15
+        pal0 = ['\x00\x00']
+        palettes = {0: pal0}
         self.texdata = ''  # Delete old images
         self.texparams = []
         self.palparams = []
-        for texidx, palidx in imagemap:
+        self.paldict.names = ['palette_all_%03d\x00' % i
+                              for i in xrange(num)]
+        self.texdict.names = ['image_%03d\x00\x00\x00\x00\x00\x00\x00' % i
+                              for i in xrange(num)]
+        for mapidx, (texidx, palidx) in enumerate(imagemap):
             tex = []
             format = 3  # 16-color
-            for pix in images[texidx].getdata():
+            image = images[texidx]
+            try:
+                info = json.loads(image.info.get('Comment'))
+                palidx = info.get('palidx', palidx)
+                texidx = info.get('texidx', texidx)
+                if 'texname' in info:
+                    self.texdict.names[texidx] = info['texname']
+                if 'palname' in info:
+                    self.paldict.names[palidx] = info['palname']
+            except:
+                pass
+            try:
+                pal = palettes[palidx]
+            except:
+                pal = ['\x00\x00']
+                palettes[palidx] = pal
+            has_alpha = None  # None = not determined. False = max colors.
+            imagemap[mapidx] = (texidx, palidx)
+            for pix in image.getdata():
                 alpha = pix[3]
                 if not alpha:  # color0=1
+                    if has_alpha is False:
+                        raise OverflowError('Cannot have more than 16 colors'
+                                            ' in palette {0}'.format(palidx))
+                    has_alpha = True
                     tex.append(0)
                     continue
                 color = (pix[0] >> 3) << 0 |\
@@ -274,32 +313,48 @@ class TEX(ArchiveList):
                     (pix[2] >> 3) << 10
                 color = struct.pack('H', color)
                 try:
-                    index = pal0.index(color, 1)
+                    index = pal.index(color)
                 except ValueError:
-                    pal0[pal2idx] = color
-                    index = pal2idx
-                    pal2idx += 1
-                    if pal2idx > 16:
+                    index = len(pal)
+                    if index >= 16:
+                        if has_alpha is None:
+                            has_alpha = False
+                            pal[0] = color
+                            tex.append(0)
+                            continue
+                        print(pal)
                         raise OverflowError('Cannot have more than 16 colors'
-                                            ' for all images')
+                                            ' in palette {0}'.format(palidx))
+                    pal.append(color)
                 tex.append(index)
             ofs = len(self.texdata)
             size = images[texidx].size
-            self.texparams.append(TexParam(ofs, size[0], size[1], format, 1))
+            self.texparams.append(TexParam(ofs, size[0], size[1], format,
+                                           int(has_alpha or 0)))
             self.texdata += ''.join([chr(tex[n] | (tex[n+1] << 4))
                                      for n in xrange(0, len(tex), 2)])
             ofs = len(self.texdata)
             if ofs % 8:
                 self.texdata += '\x00'*(8 - (ofs % 8))  # Align
-        self.paldata = ''.join(pal0)
+        self.paldata = ''
+        print(palettes)
         for i in xrange(num):
-            self.palparams.append(PalParam(0, 0))
+            try:
+                pal = palettes[i]
+            except IndexError:
+                pal = palettes[0]
+            self.paldata += ''.join(pal)
+            for j in range(len(pal), 16):
+                self.paldata += '\x00\x00'
+        for i in xrange(num):
+            if i in palettes:
+                ofs = i*32
+            else:
+                ofs = 0
+            self.palparams.append(PalParam(ofs, 0))
         self.paldict.num = num
         self.texdict.num = num
-        self.paldict.names = ['palette_all_%03d\x00' % i
-                              for i in xrange(num)]
-        self.texdict.names = ['image_%03d\x00\x00\x00\x00\x00\x00\x00' % i
-                              for i in xrange(num)]
+        self._images = None
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
