@@ -2,6 +2,7 @@
 from PIL import Image
 
 from generic import Editable
+from generic.collection import SizedCollection
 from util import BinaryIO
 from util.colors import color_gen
 
@@ -36,12 +37,6 @@ class MapObject(Editable):
         self.uint32('u2c')
 
 
-class SizedCollection(Editable):
-    def define(self, entry, total_size):
-        self.array('entries', entry.base_struct,
-                   length=total_size/entry.get_size())
-
-
 class BDHC(Editable):
     def define(self, game):
         self.uint32('u0')
@@ -72,11 +67,13 @@ class LandDataMap(Editable):
         entry_size = MapObject(self.game).get_size()
         self.objects = [MapObject(self.game, reader=reader)
                         for i in range(self.objects_size/entry_size)]"""
-        self.permissions = SizedCollection(Permission(self.game),
-                                           self.permission_size)
+        entry = Permission(self.game)
+        self.permissions = SizedCollection(
+            entry.base_struct, self.permission_size/entry.get_size())
         self.permissions.load(reader)
-        self.objects = SizedCollection(MapObject(self.game),
-                                       self.objects_size)
+        entry = MapObject(self.game)
+        self.objects = SizedCollection(
+            entry.base_struct, self.objects_size/entry.get_size())
         self.objects.load(reader)
         self.bmd = reader.read(self.bmd_size)  # TODO later
         self.bdhc = reader.read(self.bdhc_size)

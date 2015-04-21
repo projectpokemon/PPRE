@@ -393,7 +393,7 @@ class AtomicStruct(object):
         self._anonymous.append(name)
         return self._add(name, self.get_type(type_callable, base_obj))
 
-    def array(self, name, type_callable, base_obj=None, length=1):
+    def array(self, name, type_callable, base_obj=None, length=1, **kwargs):
         """Builds an `length`-long array of a type named `name`
 
         Parameters
