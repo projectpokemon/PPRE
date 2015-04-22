@@ -340,7 +340,7 @@ class TEX(ArchiveList):
         for i in xrange(num):
             try:
                 pal = palettes[i]
-            except IndexError:
+            except KeyError:
                 pal = palettes[0]
             self.paldata += ''.join(pal)
             for j in range(len(pal), 16):
