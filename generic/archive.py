@@ -3,7 +3,7 @@ import abc
 import time
 import zipfile
 
-from util.io import BinaryIO
+from util import BinaryIO, natsort_key
 
 
 class Archive(object):
@@ -76,7 +76,7 @@ class Archive(object):
         """
         self.reset()
         with zipfile.ZipFile(handle, mode) as archive:
-            for name in archive.namelist():
+            for name in sorted(archive.namelist(), key=natsort_key):
                 if name.endswith(self.extension):
                     internalname = name[:-len(self.extension)]
                 else:
