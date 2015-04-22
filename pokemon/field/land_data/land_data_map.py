@@ -2,7 +2,7 @@
 from PIL import Image
 
 from generic import Editable
-from generic.collection import SizedCollection
+from generic.collection import SizedCollection, Collection2d
 from util import BinaryIO
 from util.colors import color_gen
 
@@ -68,8 +68,8 @@ class LandDataMap(Editable):
         self.objects = [MapObject(self.game, reader=reader)
                         for i in range(self.objects_size/entry_size)]"""
         entry = Permission(self.game)
-        self.permissions = SizedCollection(
-            entry.base_struct, self.permission_size/entry.get_size())
+        # TODO: non-fixed w/h
+        self.permissions = Collection2d(entry.base_struct, 0x20, 0x20)
         self.permissions.load(reader)
         entry = MapObject(self.game)
         self.objects = SizedCollection(
