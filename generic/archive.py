@@ -1,5 +1,6 @@
 
 import abc
+import os
 import time
 import zipfile
 
@@ -63,6 +64,28 @@ class Archive(object):
                 zipinfo.external_attr = 33152 << 16
                 archive.writestr(zipinfo, self.files[name])
         return handle
+
+    def export_dir(self, dir_name):
+        """Build a directory from files
+
+        Parameters
+        ----------
+        dir_name : string
+            Destination directory. It will be created if it does not exist.
+        """
+        try:
+            os.makedirs(dir_name)
+        except:
+            pass
+        try:
+            names = self.files.keys()
+        except AttributeError:
+            names = xrange(len(self.files))
+        for name in names:
+            with open(os.path.join(dir_name, str(name)+self.extension), 'w')\
+                    as handle:
+                handle.write(self.files[name])
+        return dir_name
 
     def import_(self, handle, mode='r'):
         """Import files from the zip archive into this
