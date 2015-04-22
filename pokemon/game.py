@@ -361,7 +361,7 @@ class DP(Game):
         'Pearl': 'fielddata/encountdata/p_enc_data.narc'}
     trades_archive_file = 'fielddata/pokemon_trade/fld_trade.narc'
     event_archive_file = 'fielddata/eventdata/zone_event_release.narc'
-    map_archive_file = 'fielddata/areadata/area_data.narc'
+    area_data_archive_file = 'fielddata/areadata/area_data.narc'
     land_data_archive_file = 'fielddata/land_data/land_data_release.narc'
     map_matrix_archive_file = 'fielddata/mapmatrix/map_matrix.narc'
     mapname_file = 'fielddata/maptable/mapname.bin'
@@ -419,6 +419,7 @@ class HGSS(Game):
         'HeartGold': 'a/0/3/7',
         'SoulSilver': 'a/1/3/6'}
     event_archive_file = 'a/0/3/2'
+    area_data_archive_file = 'a/0/4/2'
     land_data_archive_file = 'a/0/6/5'
     map_matrix_archive_file = 'a/0/4/1'
     mapname_file = 'fielddata/maptable/mapname.bin'

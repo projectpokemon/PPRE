@@ -6,6 +6,7 @@ from generic.editable import XEditable as Editable
 from pokemon.field.script import Script
 from pokemon.field.encounters import Encounters
 from pokemon.field.zone_events import ZoneEvents
+from pokemon.field.area.area_data import AreaData
 from pokemon.game import Game
 from pokemon.msgdata.msg import Text
 
@@ -38,7 +39,7 @@ class Map(Editable):
         elif game <= Game.from_string('SoulSilver'):
             # chunks derived from 0203b290
             self.uint16('encounter_idx', default=0xFF, width=8)
-            self.uint16('land_data_texture_idx', width=8)
+            self.uint16('area_data_idx', width=8)
             self.uint16('u2_0', width=4)
             self.uint16('u2_1', width=6)
             self.uint16('u2_2', width=6)
@@ -70,6 +71,7 @@ class Map(Editable):
         self.encounter = Encounters(game)
         self.events = ZoneEvents(game)
         self.text = Text(game)
+        self.area_data = AreaData()
         self.names = self.game.text(self.game.locale_text_id('map_names'))
         self.code_names = self.get_code_names()
 
@@ -122,6 +124,7 @@ class Map(Editable):
         else:
             self.encounter.load('\x00'*self.encounter.size())
         self.text.load(self.game.get_text(self.text_idx))
+        self.area_data.load(self.game.get_area_data(self.area_data_idx))
         self.script.load_text(self.text)
         self.script.load(self.game.get_script(self.script_idx))
         self.events.load(self.game.get_event(self.event_idx))
@@ -139,6 +142,7 @@ class Map(Editable):
                                self.names)
         # TODO: codename?
         self.game.set_text(self.text_idx, self.text)
+        self.game.set_area_data(self.area_data_idx, self.area_data)
         self.game.set_script(self.script_idx, self.script)
         self.game.set_event(self.event_idx, self.events)
         # TODO: encounters
