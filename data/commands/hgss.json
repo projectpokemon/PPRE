@@ -298,7 +298,8 @@
       1, 
       2
     ], 
-    "name": "CallTextMsgbox"
+    "name": "CallTextMsgbox",
+    "class": "MessageCommand"
   }, 
   "60": {
     "args": [
