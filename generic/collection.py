@@ -46,7 +46,9 @@ class SizedCollection(Editable):
         self[length] = obj
 
     def base_struct(self, name):
-        raise TypeError('Cannot embed resizable data structure')
+        if self.resizable:
+            raise TypeError('Cannot embed resizable data structure')
+        return Editable.base_struct(self, name)
 
     def __getitem__(self, key):
         return self.entries[key]
