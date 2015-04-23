@@ -29,7 +29,8 @@ class Furniture(Editable):
 
 class Overworld(Editable):
     """Interactable sprite present on a map"""
-    def define(self):
+    def define(self, game):
+        self.game = game
         self.uint16('id')
         self.uint16('sprite')
         self.uint16('movement')
@@ -108,7 +109,7 @@ class ZoneEvents(Editable):
         self.furniture = [Furniture(reader=reader)
                           for i in range(self.num_furniture)]
         self.num_overworlds = reader.readUInt32()
-        self.overworlds = [Overworld(reader=reader)
+        self.overworlds = [Overworld(self.game, reader=reader)
                            for i in range(self.num_overworlds)]
         self.num_warps = reader.readUInt32()
         self.warps = [Warp(reader=reader) for i in range(self.num_warps)]

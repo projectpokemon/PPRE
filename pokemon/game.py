@@ -388,6 +388,7 @@ class DP(Game):
     trainer_pokemon_archive_file = 'poketool/trainer/trpoke.narc'
     battle_tower_trainer_archive_file = 'battle/b_tower/btdtr.narc'
     battle_tower_trainer_pokemon_archive_file = 'battle/b_tower/btdpm.narc'
+    mmodel_archive_file = 'data/mmodel/mmodel.narc'
 
     load_info = 0x2000b68
     map_table = 0xeedbc
@@ -440,9 +441,11 @@ class HGSS(Game):
     mapname_file = 'fielddata/maptable/mapname.bin'
     script_archive_file = 'a/0/1/2'
     text_archive_file = 'a/0/2/7'
+    mmodel_archive_file = 'a/0/8/1'
 
     load_info = 0x02000ba0
     map_table = 0xf6be0
+    overworld_sprite_table = (1, 0x22074a0-0x021e5900)
     commands_files = ('hgss.json', )
 
     text_contents = {
