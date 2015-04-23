@@ -45,17 +45,31 @@ class SizedCollection(Editable):
         ctypes.memmove(self.entries, old_entries, ctypes.sizeof(old_entries))
         self[length] = obj
 
+    def base_struct(self, name):
+        raise TypeError('Cannot embed resizable data structure')
+
     def __getitem__(self, key):
         return self.entries[key]
 
     def __setitem__(self, key, value):
-        # TODO cast {} to new object
-        entry_size = ctypes.sizeof(self.entries[key])
-        if ctypes.sizeof(value) != entry_size:
-            raise ValueError('Incorrect type. Expected {0}'
-                             .format(self.entries[key]._type_))
-        ctypes.memmove(ctypes.addressof(self.entries[key]),
-                       ctypes.addressof(value), entry_size)
+        """Accepts assignment from similar entry objects as well as dicts
+        containing object properties
+
+        See Also
+        --------
+        Editable.from_dict
+        """
+        try:
+            value_size = ctypes.sizeof(value)
+        except TypeError:
+            self.entries[key].from_dict(value)
+        else:
+            entry_size = ctypes.sizeof(self.entries[key])
+            if value_size != entry_size:
+                raise ValueError('Incorrect type. Expected {0}'
+                                 .format(self.entries[key]._type_))
+            ctypes.memmove(ctypes.addressof(self.entries[key]),
+                           ctypes.addressof(value), entry_size)
 
     def __len__(self):
         return len(self.entries)
