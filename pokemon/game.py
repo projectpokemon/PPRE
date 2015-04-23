@@ -445,7 +445,7 @@ class HGSS(Game):
 
     load_info = 0x02000ba0
     map_table = 0xf6be0
-    overworld_sprite_table = (1, 0x22074a0-0x021e5900)
+    overworld_sprite_table = (1, 0x22074a2-0x021e5900)
     commands_files = ('hgss.json', )
 
     text_contents = {

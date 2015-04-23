@@ -7,12 +7,17 @@ from ntr.g3d.btx import BTX
 class OverworldSprite(Editable):
     def define(self, collection):
         self.collection = collection
-        self.uint16('u0')
         self.uint16('sprite_id')
         self.uint16('file_id')
+        self.uint16('attr')
+        # attr = 0 for most normal people
+        # attr = 20007 for most pokemon
+        # attr = 20006 for diglett/dugtrio (won't jump?)
+        # attr = 21000 for large poke sprites (Steelix, Lugia, etc.)
+        # many other values...
 
     def get_btx(self):
-        btx = BTX(self.collection.game.get_mmodel(self.file_id))
+        btx = BTX(reader=self.collection.game.get_mmodel(self.file_id))
         return btx
 
 
@@ -35,3 +40,8 @@ class OverworldSprites(Editable):
 
     def __getitem__(self, key):
         return self.map[key]
+
+    def get_pokemon_sprite(self, natid, forme=0):
+        if forme:
+            raise NotImplementedError('Forme handling not enabled yet')
+        return self.table[natid+216]
