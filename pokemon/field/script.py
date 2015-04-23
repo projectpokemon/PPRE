@@ -177,8 +177,18 @@ class Command(Function):
             data['args'] = []
         if 'returns' not in data:
             data['returns'] = []
+        if 'description' not in data:
+            data['description'] = 'No description'
+        if 'doc' not in data:
+            doc = """{name} ({class_name})
+            {name}({args}) -> {returns}
+
+            {description}
+            """.format(**dict(data, class_name=class_name))
+            data['doc'] = doc
         command = cls()
         command.cmd_id = cmd
+        command.__doc__ = data['doc']
         for field in cls._fields:
             setattr(command, field, data.get(field))
         return command
