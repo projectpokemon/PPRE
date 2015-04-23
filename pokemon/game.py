@@ -9,6 +9,7 @@ from ctr import ctrtool
 from ctr.header_bin import HeaderBin as CTRHeaderBin
 from ntr.header_bin import HeaderBin as NTRHeaderBin
 from ntr.narc import NARC
+from ntr.overlay import OverlayTable
 from ctr.garc import GARC
 from util import cached_property, subclasses
 from util import BinaryIO
@@ -305,6 +306,20 @@ class Game(Editable, Version):
         m = Map(self)
         m.load_id(map_id)
         return m
+
+    @cached_property
+    def overlay_table(self):
+        with self.open('header.bin') as header:
+            reader = BinaryIO.adapter(header)
+            reader.seek(0x24)
+            entry = reader.readUInt32()
+            ram_offset = reader.readUInt32()
+            size = reader.readUInt32()
+            reader.seek(0x54)
+            overlay_count = reader.readUInt32() >> 5  # Size/sizeof(entry)
+        with self.open('overarm9.dec.bin') as overarm:
+            ovt = OverlayTable(overlay_count, reader=overarm)
+        return ovt
 
     @cached_property
     def personal_archive(self):

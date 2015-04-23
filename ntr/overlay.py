@@ -1,4 +1,5 @@
 
+from arm.elf import ELF
 from generic.editable import XEditable as Editable
 
 
@@ -23,6 +24,22 @@ class Overlay(Editable):
             self.reserved |= 1 << 24
         else:
             self.reserved &= ~(1 << 24)
+
+    def to_object_file(self, game, handle):
+        """Converts an overlay to an object file loaded at the proper offsets
+
+        Parameters
+        ----------
+        game : Game
+            Game to load overlays from
+        handle : writable
+            Output handle
+        """
+        elf = ELF()
+        with game.open('overlays_dez/overlay_{0:04}.bin'.format(self.id))\
+                as overlay:
+            elf.add_binary(overlay, address=self.address)
+        elf.to_file(handle)
 
 
 class OverlayTable(Editable):
