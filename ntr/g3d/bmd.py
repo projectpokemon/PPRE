@@ -75,7 +75,42 @@ class Node(Editable):
             self.inv_scale_z_fx32 = reader.readUInt32()
 
     def save(self, writer):
-        raise NotImplementedError()
+        writer = BinaryIO.writer(writer)
+        flag = self.flag
+        writer.writeUInt16(flag)
+        writer.writeUInt16(self.rot_00_fx16)
+        if not (self.flag & self.FLAG_NO_TRANSLATE):
+            writer.writeUInt32(self.trans_x_fx32)
+            writer.writeUInt32(self.trans_y_fx32)
+            writer.writeUInt32(self.trans_z_fx32)
+        if not (self.flag & self.FLAG_NO_ROTATE):
+            writer.writeUInt16(self.rot_01_fx16)
+            writer.writeUInt16(self.rot_02_fx16)
+            writer.writeUInt16(self.rot_10_fx16)
+            writer.writeUInt16(self.rot_11_fx16)
+            writer.writeUInt16(self.rot_20_fx16)
+            writer.writeUInt16(self.rot_21_fx16)
+            writer.writeUInt16(self.rot_22_fx16)
+        if not (self.flag & self.FLAG_NO_SCALE):
+            try:
+                self.inv_scale_x = 1/self.scale_x
+            except ZeroDivisionError:
+                self.inv_scale_x = 0.0
+            try:
+                self.inv_scale_y = 1/self.scale_y
+            except ZeroDivisionError:
+                self.inv_scale_y = 0.0
+            try:
+                self.inv_scale_z = 1/self.scale_z
+            except ZeroDivisionError:
+                self.inv_scale_z = 0.0
+            writer.writeUInt32(self.scale_x_fx32)
+            writer.writeUInt32(self.scale_y_fx32)
+            writer.writeUInt32(self.scale_z_fx32)
+            writer.writeUInt32(self.inv_scale_x_fx32)
+            writer.writeUInt32(self.inv_scale_y_fx32)
+            writer.writeUInt32(self.inv_scale_z_fx32)
+        return writer
 
     @property
     def flag(self):
@@ -134,7 +169,16 @@ class NodeSet(object):
             self.nodes.append(Node(reader=reader))
 
     def save(self, writer):
-        raise NotImplementedError()
+        self.nodedict.num = len(self.nodes)
+        self.nodedict.data = [chr(0)*4]*self.nodedict.num
+        start = writer.tell()
+        writer = self.nodedict.save(writer)
+        for i in range(self.nodedict.num):
+            self.nodedict.data[i] = struct.pack('I', writer.tell()-start)
+            writer = self.nodes[i].save(writer)
+        with writer.seek(start):
+            writer = self.nodedict.save(writer)
+        return writer
 
 
 class Model(Editable):
