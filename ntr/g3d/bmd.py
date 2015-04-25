@@ -13,51 +13,84 @@ class Node(Editable):
     FLAG_NO_ROTATE = 0x2
     FLAG_NO_SCALE = 0x4
     FLAG_NO_PIVOT = 0x8
+    FLAG_PIVOT_REVC = 0x200
+    FLAG_PIVOT_REVD = 0x200
 
     def define(self):
         self.uint16('flag_')
         for i in range(3):
             for j in range(3):
-                self.uint16('rot_{0}{1}_fx16'.format(i, j))
-        self.uint32('trans_x_fx32')
-        self.uint32('trans_y_fx32')
-        self.uint32('trans_z_fx32')
-        self.uint16('pivot_a_fx16')
-        self.uint16('pivot_b_fx16')
-        self.uint32('scale_x_fx32', default=4096)
-        self.uint32('scale_y_fx32', default=4096)
-        self.uint32('scale_z_fx32', default=4096)
-        self.uint32('inv_scale_x_fx32', default=4096)
-        self.uint32('inv_scale_y_fx32', default=4096)
-        self.uint32('inv_scale_z_fx32', default=4096)
+                self.int16('rot_{0}{1}_fx16'.format(i, j),
+                           default=int(i == j)*4096)
+        self.int32('trans_x_fx32')
+        self.int32('trans_y_fx32')
+        self.int32('trans_z_fx32')
+        self.int16('pivot_a_fx16')
+        self.int16('pivot_b_fx16')
+        self.int32('scale_x_fx32', default=4096)
+        self.int32('scale_y_fx32', default=4096)
+        self.int32('scale_z_fx32', default=4096)
+        self.int32('inv_scale_x_fx32', default=4096)
+        self.int32('inv_scale_y_fx32', default=4096)
+        self.int32('inv_scale_z_fx32', default=4096)
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
         self.flag_ = reader.readUInt16()
-        self.rot_00_fx16 = reader.readUInt16()
+        self.rot_00_fx16 = reader.readInt16()
         if self.flag_ & self.FLAG_NO_TRANSLATE:
             self.trans_x_fx32 = 0
             self.trans_y_fx32 = 0
             self.trans_z_fx32 = 0
         else:
-            self.trans_x_fx32 = reader.readUInt32()
-            self.trans_y_fx32 = reader.readUInt32()
-            self.trans_z_fx32 = reader.readUInt32()
+            self.trans_x_fx32 = reader.readInt32()
+            self.trans_y_fx32 = reader.readInt32()
+            self.trans_z_fx32 = reader.readInt32()
         if self.flag_ & self.FLAG_NO_ROTATE:
             for i in range(3):
                 for j in range(3):
-                    setattr(self, 'rot_{0}{1}_fx16'.format(i, j), 0)
+                    setattr(self, 'rot_{0}{1}_fx16'.format(i, j),
+                            int(i == j)*4096)
         elif self.flag_ & self.FLAG_NO_PIVOT:
-            self.rot_01_fx16 = reader.readUInt16()
-            self.rot_02_fx16 = reader.readUInt16()
-            self.rot_10_fx16 = reader.readUInt16()
-            self.rot_11_fx16 = reader.readUInt16()
-            self.rot_12_fx16 = reader.readUInt16()
-            self.rot_20_fx16 = reader.readUInt16()
-            self.rot_21_fx16 = reader.readUInt16()
-            self.rot_22_fx16 = reader.readUInt16()
+            self.rot_01_fx16 = reader.readInt16()
+            self.rot_02_fx16 = reader.readInt16()
+            self.rot_10_fx16 = reader.readInt16()
+            self.rot_11_fx16 = reader.readInt16()
+            self.rot_12_fx16 = reader.readInt16()
+            self.rot_20_fx16 = reader.readInt16()
+            self.rot_21_fx16 = reader.readInt16()
+            self.rot_22_fx16 = reader.readInt16()
         else:
-            raise NotImplementedError('Cannot read pivots')
+            for i in range(3):
+                for j in range(3):
+                    setattr(self, 'rot_{0}{1}_fx16'.format(i, j),
+                            int(i == j)*4096)
+            self.pivot_a_fx16 = reader.readInt16()
+            self.pivot_b_fx16 = reader.readInt16()
+            pivot = (self.flag_ >> 4) & 0xf
+            if self.flag_ & self.FLAG_PIVOT_REVC:
+                pivoc_c = -self.pivot_b_fx16
+            else:
+                pivoc_c = self.pivot_b_fx16
+            if self.flag_ & self.FLAG_PIVOT_REVD:
+                pivoc_d = -self.pivot_a_fx16
+            else:
+                pivoc_d = self.pivot_a_fx16
+            if pivot == 0:
+                self.rot_11_fx16 = self.pivot_a_fx16
+                self.rot_12_fx16 = self.pivot_b_fx16
+                self.rot_21_fx16 = pivoc_c
+                self.rot_22_fx16 = pivoc_d
+            if pivot == 4:
+                self.rot_00_fx16 = self.pivot_a_fx16
+                self.rot_02_fx16 = self.pivot_b_fx16
+                self.rot_20_fx16 = pivoc_c
+                self.rot_22_fx16 = pivoc_d
+            if pivot == 8:
+                self.rot_00_fx16 = self.pivot_a_fx16
+                self.rot_01_fx16 = self.pivot_b_fx16
+                self.rot_10_fx16 = pivoc_c
+                self.rot_11_fx16 = pivoc_d
 
         if self.flag_ & self.FLAG_NO_SCALE:
             self.scale_x_fx32 = 4096
@@ -67,30 +100,30 @@ class Node(Editable):
             self.inv_scale_y_fx32 = 4096
             self.inv_scale_z_fx32 = 4096
         else:
-            self.scale_x_fx32 = reader.readUInt32()
-            self.scale_y_fx32 = reader.readUInt32()
-            self.scale_z_fx32 = reader.readUInt32()
-            self.inv_scale_x_fx32 = reader.readUInt32()
-            self.inv_scale_y_fx32 = reader.readUInt32()
-            self.inv_scale_z_fx32 = reader.readUInt32()
+            self.scale_x_fx32 = reader.readInt32()
+            self.scale_y_fx32 = reader.readInt32()
+            self.scale_z_fx32 = reader.readInt32()
+            self.inv_scale_x_fx32 = reader.readInt32()
+            self.inv_scale_y_fx32 = reader.readInt32()
+            self.inv_scale_z_fx32 = reader.readInt32()
 
     def save(self, writer):
         writer = BinaryIO.writer(writer)
         flag = self.flag
         writer.writeUInt16(flag)
-        writer.writeUInt16(self.rot_00_fx16)
+        writer.writeInt16(self.rot_00_fx16)
         if not (self.flag & self.FLAG_NO_TRANSLATE):
-            writer.writeUInt32(self.trans_x_fx32)
-            writer.writeUInt32(self.trans_y_fx32)
-            writer.writeUInt32(self.trans_z_fx32)
+            writer.writeInt32(self.trans_x_fx32)
+            writer.writeInt32(self.trans_y_fx32)
+            writer.writeInt32(self.trans_z_fx32)
         if not (self.flag & self.FLAG_NO_ROTATE):
-            writer.writeUInt16(self.rot_01_fx16)
-            writer.writeUInt16(self.rot_02_fx16)
-            writer.writeUInt16(self.rot_10_fx16)
-            writer.writeUInt16(self.rot_11_fx16)
-            writer.writeUInt16(self.rot_20_fx16)
-            writer.writeUInt16(self.rot_21_fx16)
-            writer.writeUInt16(self.rot_22_fx16)
+            writer.writeInt16(self.rot_01_fx16)
+            writer.writeInt16(self.rot_02_fx16)
+            writer.writeInt16(self.rot_10_fx16)
+            writer.writeInt16(self.rot_11_fx16)
+            writer.writeInt16(self.rot_20_fx16)
+            writer.writeInt16(self.rot_21_fx16)
+            writer.writeInt16(self.rot_22_fx16)
         if not (self.flag & self.FLAG_NO_SCALE):
             try:
                 self.inv_scale_x = 1/self.scale_x
@@ -104,12 +137,12 @@ class Node(Editable):
                 self.inv_scale_z = 1/self.scale_z
             except ZeroDivisionError:
                 self.inv_scale_z = 0.0
-            writer.writeUInt32(self.scale_x_fx32)
-            writer.writeUInt32(self.scale_y_fx32)
-            writer.writeUInt32(self.scale_z_fx32)
-            writer.writeUInt32(self.inv_scale_x_fx32)
-            writer.writeUInt32(self.inv_scale_y_fx32)
-            writer.writeUInt32(self.inv_scale_z_fx32)
+            writer.writeInt32(self.scale_x_fx32)
+            writer.writeInt32(self.scale_y_fx32)
+            writer.writeInt32(self.scale_z_fx32)
+            writer.writeInt32(self.inv_scale_x_fx32)
+            writer.writeInt32(self.inv_scale_y_fx32)
+            writer.writeInt32(self.inv_scale_z_fx32)
         return writer
 
     @property
@@ -120,7 +153,8 @@ class Node(Editable):
             flag |= self.FLAG_NO_TRANSLATE
         for i in range(3):
             for j in range(3):
-                if getattr(self, 'rot_{0}{1}_fx16'.format(i, j)):
+                if getattr(self, 'rot_{0}{1}_fx16'.format(i, j))\
+                        != int(i == j)*4096:
                     break
             else:
                 continue
@@ -164,8 +198,8 @@ class NodeSet(object):
         self.nodedict.load(reader)
         self.nodes = []
         for i in range(self.nodedict.num):
-            ofs, = struct.unpack(self.nodedict.data[i])
-            self.reader.seek(start+ofs)
+            ofs, = struct.unpack('I', self.nodedict.data[i])
+            reader.seek(start+ofs)
             self.nodes.append(Node(reader=reader))
 
     def save(self, writer):
@@ -220,11 +254,7 @@ class Model(Editable):
         start = reader.tell()
         Editable.load(self, reader)
 
-        self.nodes = []
-        for i in range(self.num_nodes):
-            nodedict = G3DResDict()
-            nodedict.load(reader)
-            self.nodes.append(Node(nodedict, reader=reader))  # Node
+        self.nodes.load(reader)
 
         self.sbc = []
         reader.seek(start+self.sbc_offset)
