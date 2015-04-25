@@ -344,6 +344,18 @@ class AtomicStruct(object):
     def int32(self, name, **kwargs):
         return self._add(name, ctypes.c_int32, **kwargs)
 
+    def uint64(self, name, **kwargs):
+        return self._add(name, ctypes.c_uint64, **kwargs)
+
+    def int64(self, name, **kwargs):
+        return self._add(name, ctypes.c_int64, **kwargs)
+
+    def float32(self, name, **kwargs):
+        return self._add(name, ctypes.c_float, **kwargs)
+
+    def float64(self, name, **kwargs):
+        return self._add(name, ctypes.c_double, **kwargs)
+
     def char(self, name, **kwargs):
         return self._add(name, ctypes.c_char, **kwargs)
 
