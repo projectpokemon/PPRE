@@ -8,6 +8,55 @@ from ntr.g3d.resdict import G3DResDict
 from util import BinaryIO
 
 
+class MaterialSet(Editable):
+    def define(self):
+        self.uint16('texmatdict_offset')
+        self.uint16('palmatdict_offset')
+        self.matdict = G3DResDict()
+        self.texmatdict = G3DResDict()
+        self.palmatdict = G3DResDict()
+        self.materials = []
+        self.tex_map = {}
+        self.pal_map = {}
+
+    def load(self, reader):
+        start = reader.tell()
+        Editable.load(self, reader)
+        self.matdict.load(reader)
+        reader.seek(start+self.texmatdict_offset)
+        self.texmatdict.load(reader)
+        reader.seek(start+self.palmatdict_offset)
+        self.palmatdict.load(reader)
+
+        self.materials = []
+        self.tex_map = {}
+        self.pal_map = {}
+
+        for i in range(self.texmatdict.num):
+            idx_ofs, idx_num, bound = struct.unpack('HBB', self.texmatdict.data[i])
+            reader.seek((idx_ofs & 0xFFFF)+start)
+            for j in range(idx_num):
+                idx = reader.readUInt8()
+                if idx in self.tex_map and not bound:
+                    continue
+                self.tex_map[idx] = i
+        for i in range(self.palmatdict.num):
+            idx_ofs, idx_num, bound = struct.unpack('HBB', self.palmatdict.data[i])
+            reader.seek((idx_ofs & 0xFFFF)+start)
+            for j in range(idx_num):
+                idx = reader.readUInt8()
+                if idx in self.pal_map and not bound:
+                    continue
+                self.pal_map[idx] = i
+        for i in range(self.matdict.num):
+            ofs, = struct.unpack('I', self.matdict.data[i])
+            reader.seek(ofs+start)
+            self.materials.append(Material(reader=reader))
+
+    def save(self, writer):
+        return writer
+
+
 class Node(Editable):
     FLAG_NO_TRANSLATE = 0x1
     FLAG_NO_ROTATE = 0x2
@@ -249,7 +298,7 @@ class Model(Editable):
         self.uint32('inv_box_scale_fx32')
         self.nodes = NodeSet()
         self.sbc = []
-        self.materials = []
+        self.materials = MaterialSet()
         self.shapes = []
         self.matrixes = []
 
@@ -258,16 +307,16 @@ class Model(Editable):
         Editable.load(self, reader)
 
         self.nodes.load(reader)
+        assert self.nodes.nodedict.num == self.num_nodes
 
         self.sbc = []
         reader.seek(start+self.sbc_offset)
         for i in range(self.mat_offset-self.sbc_offset):
             self.sbc.append(reader.readUInt8())  # SBC
 
-        self.materials = []
         reader.seek(start+self.mat_offset)
-        for i in range(self.num_materials):
-            self.materials.append(None)  # Material
+        self.materials.load(reader)
+        assert self.materials.matdict.num == self.num_materials
 
         self.shapes = []
         reader.seek(start+self.shp_offset)
@@ -277,6 +326,23 @@ class Model(Editable):
     def save(self, writer):
         start = writer.tell()
         writer = Editable.save(self, writer)
+
+        writer = self.nodes.save(writer)
+
+        ofs = writer.tell()-start
+        with writer.seek(start+self.get_offset('sbc_offset')):
+            writer.writeUInt32(ofs)
+        for command in self.sbc:
+            writer.writeUInt8(command)
+
+        ofs = writer.tell()-start
+        with writer.seek(start+self.get_offset('mat_offset')):
+            writer.writeUInt32(ofs)
+
+        ofs = writer.tell()-start
+        with writer.seek(start+self.get_offset('size_')):
+            writer.writeUInt32(ofs)
+        return writer
 
 
 class MDL(Editable):
@@ -297,8 +363,11 @@ class MDL(Editable):
     def save(self, writer=None):
         writer = BinaryIO.writer(writer)
         start = writer.tell()
+        self.mdldict.num = len(self.models)
         writer = Editable.save(self, writer)
         writer = self.mdldict.save(writer)
+        for i in range(self.mdldict.num):
+            writer = self.models[i].save(writer)
         size = writer.tell()-start
         with writer.seek(start+self.get_offset('size_')):
             writer.writeUInt32(size)
