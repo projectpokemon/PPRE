@@ -975,6 +975,27 @@ class XEditable(Emitter, AtomicStruct):
         # TODO: validate lengths?
         self.fire('remove', (name, index, value))
 
+    @staticmethod
+    def fx_property(attr_name, shift=12):
+        """Create a property that turns an int into a fixed point number
+
+        Parameters
+        ----------
+        attr_name : str
+            Name of underlying attribute
+        shift : int
+            Number of bits that go after the binary point
+        """
+        factor = float(1 << shift)
+
+        def fget(self):
+            return getattr(self, attr_name)/factor
+
+        def fset(self, value):
+            return setattr(self, attr_name, value*factor)
+
+        return property(fget, fset)
+
     def checksum(self):
         """Returns a recursive weak_hash for this instance"""
         weak_hash = 0
