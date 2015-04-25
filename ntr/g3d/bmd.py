@@ -1,8 +1,140 @@
 
+import struct
+
 from generic import Editable
+from generic.collection import SizedCollection
 from ntr.g3d.btx import TEX
 from ntr.g3d.resdict import G3DResDict
 from util import BinaryIO
+
+
+class Node(Editable):
+    FLAG_NO_TRANSLATE = 0x1
+    FLAG_NO_ROTATE = 0x2
+    FLAG_NO_SCALE = 0x4
+    FLAG_NO_PIVOT = 0x8
+
+    def define(self):
+        self.uint16('flag_')
+        for i in range(3):
+            for j in range(3):
+                self.uint16('rot_{0}{1}_fx16'.format(i, j))
+        self.uint32('trans_x_fx32')
+        self.uint32('trans_y_fx32')
+        self.uint32('trans_z_fx32')
+        self.uint16('pivot_a_fx16')
+        self.uint16('pivot_b_fx16')
+        self.uint32('scale_x_fx32', default=4096)
+        self.uint32('scale_y_fx32', default=4096)
+        self.uint32('scale_z_fx32', default=4096)
+        self.uint32('inv_scale_x_fx32', default=4096)
+        self.uint32('inv_scale_y_fx32', default=4096)
+        self.uint32('inv_scale_z_fx32', default=4096)
+
+    def load(self, reader):
+        reader = BinaryIO.reader(reader)
+        self.flag_ = reader.readUInt16()
+        self.rot_00_fx16 = reader.readUInt16()
+        if self.flag_ & self.FLAG_NO_TRANSLATE:
+            self.trans_x_fx32 = 0
+            self.trans_y_fx32 = 0
+            self.trans_z_fx32 = 0
+        else:
+            self.trans_x_fx32 = reader.readUInt32()
+            self.trans_y_fx32 = reader.readUInt32()
+            self.trans_z_fx32 = reader.readUInt32()
+        if self.flag_ & self.FLAG_NO_ROTATE:
+            for i in range(3):
+                for j in range(3):
+                    setattr(self, 'rot_{0}{1}_fx16'.format(i, j), 0)
+        elif self.flag_ & self.FLAG_NO_PIVOT:
+            self.rot_01_fx16 = reader.readUInt16()
+            self.rot_02_fx16 = reader.readUInt16()
+            self.rot_10_fx16 = reader.readUInt16()
+            self.rot_11_fx16 = reader.readUInt16()
+            self.rot_12_fx16 = reader.readUInt16()
+            self.rot_20_fx16 = reader.readUInt16()
+            self.rot_21_fx16 = reader.readUInt16()
+            self.rot_22_fx16 = reader.readUInt16()
+        else:
+            raise NotImplementedError('Cannot read pivots')
+
+        if self.flag_ & self.FLAG_NO_SCALE:
+            self.scale_x_fx32 = 4096
+            self.scale_y_fx32 = 4096
+            self.scale_z_fx32 = 4096
+            self.inv_scale_x_fx32 = 4096
+            self.inv_scale_y_fx32 = 4096
+            self.inv_scale_z_fx32 = 4096
+        else:
+            self.scale_x_fx32 = reader.readUInt32()
+            self.scale_y_fx32 = reader.readUInt32()
+            self.scale_z_fx32 = reader.readUInt32()
+            self.inv_scale_x_fx32 = reader.readUInt32()
+            self.inv_scale_y_fx32 = reader.readUInt32()
+            self.inv_scale_z_fx32 = reader.readUInt32()
+
+    def save(self, writer):
+        raise NotImplementedError()
+
+    @property
+    def flag(self):
+        flag = 0
+        if not self.trans_x_fx32 and not self.trans_y_fx32 and\
+                not self.trans_z_fx32:
+            flag |= self.FLAG_NO_TRANSLATE
+        for i in range(3):
+            for j in range(3):
+                if getattr(self, 'rot_{0}{1}_fx16'.format(i, j)):
+                    break
+            else:
+                continue
+            break
+        else:
+            flag |= self.FLAG_NO_ROTATE
+        flag |= self.FLAG_NO_PIVOT
+        if self.scale_x_fx32 == 4096 and self.scale_y_fx32 == 4096\
+                and self.scale_z_fx32 == 4096:
+            flag |= self.FLAG_NO_SCALE
+            # TODO: make sure inv_scale match
+
+    @flag.setter
+    def flag(self, value):
+        self.flag_ = value
+
+    trans_x = Editable.fx_property('trans_x_fx32')
+    trans_y = Editable.fx_property('trans_y_fx32')
+    trans_z = Editable.fx_property('trans_z_fx32')
+    pivot_a = Editable.fx_property('pivot_a_fx16')
+    pivot_b = Editable.fx_property('pivot_b_fx16')
+    scale_x = Editable.fx_property('scale_x_fx32')
+    scale_y = Editable.fx_property('scale_y_fx32')
+    scale_z = Editable.fx_property('scale_z_fx32')
+    inv_scale_x = Editable.fx_property('inv_scale_x_fx32')
+    inv_scale_y = Editable.fx_property('inv_scale_y_fx32')
+    inv_scale_z = Editable.fx_property('inv_scale_z_fx32')
+for i in range(3):
+    for j in range(3):
+        setattr(Node, 'rot_{0}{1}'.format(i, j),
+                Editable.fx_property('rot_{0}{1}_fx16'.format(i, j)))
+
+
+class NodeSet(object):
+    def __init__(self):
+        self.nodedict = G3DResDict()
+        self.nodes = []
+
+    def load(self, reader):
+        start = reader.tell()
+        self.nodedict.load(reader)
+        self.nodes = []
+        for i in range(self.nodedict.num):
+            ofs, = struct.unpack(self.nodedict.data[i])
+            self.reader.seek(start+ofs)
+            self.nodes.append(Node(reader=reader))
+
+    def save(self, writer):
+        raise NotImplementedError()
 
 
 class Model(Editable):
@@ -34,7 +166,7 @@ class Model(Editable):
         self.uint16('box_d_fx16')
         self.uint32('box_scale_fx32')
         self.uint32('inv_box_scale_fx32')
-        self.nodes = []
+        self.nodes = NodeSet()
         self.sbc = []
         self.materials = []
         self.shapes = []
@@ -46,12 +178,14 @@ class Model(Editable):
 
         self.nodes = []
         for i in range(self.num_nodes):
-            self.nodes.append(None)  # Node
+            nodedict = G3DResDict()
+            nodedict.load(reader)
+            self.nodes.append(Node(nodedict, reader=reader))  # Node
 
         self.sbc = []
         reader.seek(start+self.sbc_offset)
         for i in range(self.mat_offset-self.sbc_offset):
-            self.sbc.append(None)  # SBC
+            self.sbc.append(reader.readUInt8())  # SBC
 
         self.materials = []
         reader.seek(start+self.mat_offset)
