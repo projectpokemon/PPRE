@@ -8,6 +8,66 @@ from ntr.g3d.resdict import G3DResDict
 from util import BinaryIO
 
 
+class Material(Editable):
+    FLAG_NO_SCALE = 0x2
+    FLAG_NO_ROTATE = 0x4
+    FLAG_NO_TRANSLATE = 0x8
+    FLAG_EFFECT_MATRIX = 0x2000
+
+    def define(self):
+        self.uint16('u0')
+        self.uint16('size_')
+        self.uint32('diffuse')
+        self.uint32('specular')
+        self.uint32('poly_attr')
+        self.uint32('poly_attr_mask')
+        self.uint32('tex_param')
+        self.uint32('pal')
+        self.uint16('flag_')
+        self.uint16('orig_width')
+        self.uint16('orig_height')
+        self.uint32('mag_w_fx32')
+        self.uint32('mag_h_fx32')
+        self.scale_s_fx32 = 4096
+        self.scale_t_fx32 = 4096
+        self.rot_sin_fx32 = 0
+        self.rot_cos_fx32 = 0
+        self.trans_s_fx32 = 0
+        self.trans_t_fx32 = 0
+        self.effect = []
+
+    def load(self, reader):
+        Editable.load(self, reader)
+
+        if self.flag_ & self.FLAG_NO_SCALE:
+            self.scale_s_fx32 = 4096
+            self.scale_t_fx32 = 4096
+        else:
+            self.scale_s_fx32 = reader.readInt32()
+            self.scale_t_fx32 = reader.readInt32()
+
+        if self.flag_ & self.FLAG_NO_ROTATE:
+            self.rot_sin_fx32 = 0
+            self.rot_cos_fx32 = 0
+        else:
+            self.rot_sin_fx32 = reader.readInt32()
+            self.rot_cos_fx32 = reader.readInt32()
+
+        if self.flag_ & self.FLAG_NO_ROTATE:
+            self.trans_s_fx32 = 0
+            self.trans_t_fx32 = 0
+        else:
+            self.trans_s_fx32 = reader.readInt32()
+            self.trans_t_fx32 = reader.readInt32()
+
+        if self.flag_ & self.FLAG_EFFECT_MATRIX:
+            self.effect = [reader.readInt32() for i in range(16)]
+
+    def save(self, writer):
+        raise NotImplementedError()
+        return writer
+
+
 class MaterialSet(Editable):
     def define(self):
         self.uint16('texmatdict_offset')
@@ -54,6 +114,7 @@ class MaterialSet(Editable):
             self.materials.append(Material(reader=reader))
 
     def save(self, writer):
+        raise NotImplementedError()
         return writer
 
 
