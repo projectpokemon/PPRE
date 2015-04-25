@@ -1,4 +1,5 @@
 
+import array
 import struct
 
 from generic import Editable
@@ -6,6 +7,52 @@ from generic.collection import SizedCollection
 from ntr.g3d.btx import TEX
 from ntr.g3d.resdict import G3DResDict
 from util import BinaryIO
+
+
+class Shape(Editable):
+    def define(self):
+        self.uint16('u0')
+        self.uint16('size_')
+        self.uint32('flag')
+        self.uint32('data_offset')
+        self.uint32('data_size')
+        self.data = []
+
+    def load(self, reader):
+        start = reader.tell()
+        Editable.load(self, reader)
+        reader.seek(start+self.data_offset)
+        self.data = array.array('B', reader.read(self.data_size))
+
+    def save(self, writer):
+        raise NotImplementedError()
+
+
+class ShapeSet(object):
+    def __init__(self):
+        self.shapedict = G3DResDict()
+        self.shapes = []
+
+    def load(self, reader):
+        start = reader.tell()
+        self.shapedict.load(reader)
+        self.shapes = []
+        for i in range(self.shapedict.num):
+            ofs, = struct.unpack('I', self.shapedict.data[i])
+            reader.seek(start+ofs)
+            self.shapes.append(Shape(reader=reader))
+
+    def save(self, writer):
+        self.shapedict.num = len(self.shapes)
+        self.shapedict.data = [chr(0)*4]*self.shapedict.num
+        start = writer.tell()
+        writer = self.shapedict.save(writer)
+        for i in range(self.shapedict.num):
+            self.shapedict.data[i] = struct.pack('I', writer.tell()-start)
+            writer = self.shapes[i].save(writer)
+        with writer.seek(start):
+            writer = self.shapedict.save(writer)
+        return writer
 
 
 class Material(Editable):
@@ -114,7 +161,17 @@ class MaterialSet(Editable):
             self.materials.append(Material(reader=reader))
 
     def save(self, writer):
-        raise NotImplementedError()
+        start = writer.tell()
+        writer = Editable.save(self, writer)
+        writer = self.matdict.save(writer)
+        ofs = writer.tell()-start
+        with writer.seek(start+self.get_offset('texmatdict_offset')):
+            writer.writeUInt32(ofs)
+        writer = self.texmatdict.save(writer)
+        ofs = writer.tell()-start
+        with writer.seek(start+self.get_offset('palmatdict_offset')):
+            writer.writeUInt32(ofs)
+        writer = self.palmatdict.save(writer)
         return writer
 
 
@@ -124,7 +181,7 @@ class Node(Editable):
     FLAG_NO_SCALE = 0x4
     FLAG_NO_PIVOT = 0x8
     FLAG_PIVOT_REVC = 0x200
-    FLAG_PIVOT_REVD = 0x200
+    FLAG_PIVOT_REVD = 0x400
 
     def define(self):
         self.uint16('flag_')
@@ -360,7 +417,7 @@ class Model(Editable):
         self.nodes = NodeSet()
         self.sbc = []
         self.materials = MaterialSet()
-        self.shapes = []
+        self.shapes = ShapeSet()
         self.matrixes = []
 
     def load(self, reader):
@@ -379,10 +436,9 @@ class Model(Editable):
         self.materials.load(reader)
         assert self.materials.matdict.num == self.num_materials
 
-        self.shapes = []
         reader.seek(start+self.shp_offset)
-        for i in range(self.num_shapes):
-            self.shapes.append(None)  # Shape
+        self.shapes.load(reader)
+        assert self.shapes.shapedict.num == self.num_shapes
 
     def save(self, writer):
         start = writer.tell()
@@ -399,6 +455,12 @@ class Model(Editable):
         ofs = writer.tell()-start
         with writer.seek(start+self.get_offset('mat_offset')):
             writer.writeUInt32(ofs)
+        writer = self.materials.save(writer)
+
+        ofs = writer.tell()-start
+        with writer.seek(start+self.get_offset('shp_offset')):
+            writer.writeUInt32(ofs)
+        writer = self.shapes.save(writer)
 
         ofs = writer.tell()-start
         with writer.seek(start+self.get_offset('size_')):
