@@ -854,6 +854,36 @@ class XEditable(Emitter, AtomicStruct):
         self.restrict(name, **params)
         return field
 
+    def int64(self, name, **kwargs):
+        params = {'default': 0, 'min_value': -0x8000000000000000,
+                  'max_value': 0x7FFFFFFFFFFFFFFF, 'type': long}
+        params.update(kwargs)
+        field = AtomicStruct.int64(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
+
+    def uint64(self, name, **kwargs):
+        params = {'default': 0, 'min_value': 0,
+                  'max_value': 0xFFFFFFFFFFFFFFFF, 'type': long}
+        params.update(kwargs)
+        field = AtomicStruct.uint64(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
+
+    def float32(self, name, **kwargs):
+        params = {'default': 0.0, 'type': float}
+        params.update(kwargs)
+        field = AtomicStruct.float32(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
+
+    def float64(self, name, **kwargs):
+        params = {'default': 0.0, 'type': float}
+        params.update(kwargs)
+        field = AtomicStruct.float64(self, name, **kwargs)
+        self.restrict(name, **params)
+        return field
+
     def struct(self, name, *args, **kwargs):
         field = AtomicStruct.struct(self, name, *args, **kwargs)
         self.restrict(name, **kwargs)
