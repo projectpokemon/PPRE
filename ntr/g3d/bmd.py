@@ -81,16 +81,19 @@ class Node(Editable):
                 self.rot_12_fx16 = self.pivot_b_fx16
                 self.rot_21_fx16 = pivoc_c
                 self.rot_22_fx16 = pivoc_d
-            if pivot == 4:
+            elif pivot == 4:
                 self.rot_00_fx16 = self.pivot_a_fx16
                 self.rot_02_fx16 = self.pivot_b_fx16
                 self.rot_20_fx16 = pivoc_c
                 self.rot_22_fx16 = pivoc_d
-            if pivot == 8:
+            elif pivot == 8:
                 self.rot_00_fx16 = self.pivot_a_fx16
                 self.rot_01_fx16 = self.pivot_b_fx16
                 self.rot_10_fx16 = pivoc_c
                 self.rot_11_fx16 = pivoc_d
+            else:
+                raise NotImplementedError('Pivot {0} is not supported'
+                                          .format(pivot))
 
         if self.flag_ & self.FLAG_NO_SCALE:
             self.scale_x_fx32 = 4096
