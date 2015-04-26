@@ -1,4 +1,6 @@
 
+import array
+
 from PIL import Image
 
 from generic import Editable
@@ -30,6 +32,17 @@ class CHAR(Editable):
     def load(self, reader):
         Editable.load(self, reader)
         self.data = reader.read(self.datasize)
+        if self.cgr.encryption != NCGR.ENCRYPTION_NONE:
+            enc_data = array.array('H', self.data)
+            if self.cgr.encryption == NCGR.ENCRYPTION_DP:
+                enc_data = enc_data[::-1]
+            dec_data = array.array('H')
+            key = enc_data[0]
+            for val in enc_data:
+                dec_data.append(val ^ (key & 0xFFFF))
+                key *= 0x41c64e6d
+                key += 0x6073
+            self.data = dec_data.tostring()
 
     def save(self, writer):
         old_datasize = self.datasize
@@ -131,6 +144,18 @@ class CHAR(Editable):
             subwidth = 4
         elif self.format == self.FORMAT_256BIT:
             subwidth = 8
+        if self.type == 1:
+            data_idx = 0
+            for suby in range(height*8):
+                for subx in range(width*4):
+                    val = ord(self.data[data_idx])
+                    if self.format == self.FORMAT_16BIT:
+                        pixels.append(val & 0xF)
+                        pixels.append(val >> 0x4)
+                    elif self.format == self.FORMAT_256BIT:
+                        pixels.append(val)
+                    data_idx += 1
+            return pixels
         for blocky in range(height):
             for suby in range(8):
                 for blockx in range(width):
@@ -161,7 +186,11 @@ class CPOS(Editable):
 class NCGR(Editable):
     """2D Character Graphics
     """
-    def define(self):
+    ENCRYPTION_NONE = 0
+    ENCRYPTION_DP = 1
+    ENCRYPTION_PT = 2
+
+    def define(self, encryption=ENCRYPTION_NONE):
         self.string('magic', length=4, default='RGCN')
         self.uint16('endian', default=0xFFFE)
         self.uint16('version', default=0x101)
@@ -171,6 +200,7 @@ class NCGR(Editable):
         self.char = CHAR(self)
         self.cpos = CPOS(self)
         self.palette = default_palette()
+        self.encryption = encryption
 
     def load(self, reader):
         Editable.load(self, reader)
