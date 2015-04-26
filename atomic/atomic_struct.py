@@ -357,10 +357,14 @@ class AtomicStruct(object):
         return self._add(name, ctypes.c_double, **kwargs)
 
     def char(self, name, **kwargs):
+        if 'default' not in kwargs:
+            kwargs['default'] = '\x00'
         return self._add(name, ctypes.c_char, **kwargs)
 
     def string(self, name, length=1, **kwargs):
-        return self.array(name, self.char, self, length=length)
+        if 'default' not in kwargs:
+            kwargs['default'] = ''
+        return self.array(name, self.char, self, length=length, **kwargs)
 
     def get_type(self, type_callable, base_obj=None):
         """Gets the type of a type_callable owned by base_obj
@@ -438,7 +442,8 @@ class AtomicStruct(object):
         }
         """
         return self._add(name,
-                         self.get_type(type_callable, base_obj) * length)
+                         self.get_type(type_callable, base_obj) * length,
+                         **kwargs)
 
     def struct(self, name, type_callable, base_obj=None):
         """Adds a custom type field directly.
@@ -547,8 +552,16 @@ class AtomicStruct(object):
                                            ctypes.Structure),
                           dict(self.__dict__))
         self._data = self._type()
-        for key, value in self._defaults.iteritems():
-            setattr(self, key, value)
+        self.reset()
+
+    def reset(self):
+        """Set the data fields to their original values/defaults.
+        """
+        for attr in self._fields:
+            if attr in self._defaults:
+                setattr(self, attr, self._defaults[attr])
+            else:
+                setattr(self, attr, 0)
 
     def describe(self):
         """Create a string representation of this struct.
