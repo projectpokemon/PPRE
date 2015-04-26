@@ -80,9 +80,9 @@ class AtomicStruct(object):
             'simulate': False
         }
         if name is None:
-            self.name = self.__class__.__name__  # : Name of the type
+            self._name = self.__class__.__name__  # : Name of the type
         else:
-            self.name = name
+            self._name = name
 
     def _add(self, name, type_, **kwargs):
         """Adds a field to the structure
@@ -564,8 +564,8 @@ class AtomicStruct(object):
         self._pack_ = self.alignment
         self._anonymous_ = tuple(self._anonymous)
         self._fields_ = self._fields
-        self._type = type(self.name+'_s', (NullInitializer, self.__class__,
-                                           ctypes.Structure),
+        self._type = type(self._name+'_s', (NullInitializer, self.__class__,
+                                            ctypes.Structure),
                           dict(self.__dict__))
         self._data = self._type()
         self.set_defaults()
@@ -621,7 +621,7 @@ class AtomicStruct(object):
             out.append('  '*level)
             if not level:
                 fields = struct._fields
-                name = struct.name
+                name = struct._name
             else:
                 fields = struct._fields_
                 name = struct.__name__
