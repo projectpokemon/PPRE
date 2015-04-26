@@ -1051,8 +1051,10 @@ class XEditable(Emitter, AtomicStruct):
         for key in self.keys:
             try:
                 value = source[key]
-            except:
+            except KeyError:
                 # TODO: handle reset if merge=False
+                if not merge:
+                    raise KeyError('Non-merge expected key: {0}'.format(key))
                 continue
             old_value = getattr(self, key)
             try:
