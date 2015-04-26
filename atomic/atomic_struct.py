@@ -552,16 +552,13 @@ class AtomicStruct(object):
                                            ctypes.Structure),
                           dict(self.__dict__))
         self._data = self._type()
-        self.reset()
+        self.set_defaults()
 
-    def reset(self):
-        """Set the data fields to their original values/defaults.
+    def set_defaults(self):
+        """Set the data fields to their original defaults.
         """
-        for attr in self._fields:
-            if attr in self._defaults:
-                setattr(self, attr, self._defaults[attr])
-            else:
-                setattr(self, attr, 0)
+        for key, value in self._defaults.iteritems():
+            setattr(self, key, value)
 
     def describe(self):
         """Create a string representation of this struct.
