@@ -60,10 +60,10 @@ class Map(Editable):
             self.uint32('following_allowed', width=2)  # 18-19, 1 = small, 2 = any
             self.uint32('battle_background', width=5)  # 20-24, ??
             self.uint32('can_bike', width=1)  # 25
-            self.uint32('u14_7', width=1)  # where is 26 used?
+            self.uint32('is_map_used', width=1, default=1)  # 26, discarded maps=0
             self.uint32('can_escape_rope', width=1)  # 27, or dig
             self.uint32('can_fly', width=1)  # 28
-            self.uint32('u14_10', width=1)  # 29
+            self.uint32('circle_focus', width=1)  # 29, dark ring shows around outside of map
             self.uint32('u14_11', width=1)  # 30
             self.uint32('u14_12', width=1)  # 31
         self.name = ''
