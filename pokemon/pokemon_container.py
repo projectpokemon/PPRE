@@ -1,40 +1,39 @@
 
-from generic.editable import Editable
+from generic import Editable
 from pokemon.poketool.evo import Evolutions
 from pokemon.poketool.personal import Personal
 from pokemon.poketool.wotbl import LevelMoves
 
 
 class Pokemon(Editable):
-    available = {0: '--', 1: 'Bulbasaur', 2: 'Ivysaur'}
-
-    def __init__(self, game):
+    def define(self, game):
         self.game = game
-        self.natid = None
-        self.restrict('natid', min_value=0, values=self.available)
         self.personal = Personal(version=game)
         self.restrict('personal')
         self.evolutions = Evolutions()
         self.restrict('evolutions')
         self.levelmoves = LevelMoves(version=game)
         self.restrict('levelmoves')
+        self.name = ''
+        self.names = game.text(game.locale_text_id('pokemon_names'))
 
     def load_id(self, natid):
-        print(self.personal, natid)
         self.personal.load(self.game.get_personal(natid))
         self.evolutions.load(self.game.get_evo(natid))
         self.levelmoves.load(self.game.get_wotbl(natid))
-        self.natid = natid
+        self.name = self.names[natid]
 
-    @staticmethod
-    def from_id(game, natid):
-        target = Pokemon(game)
+    @classmethod
+    def from_id(cls, game, natid):
+        target = cls(game)
         target.load_id(natid)
         return target
 
-    def save(self):
-        if self.natid is None:
-            raise ValueError('This Pokemon has no natid set')
-        self.game.set_personal(self.natid, self.personal.save().getvalue())
-        self.game.set_evo(self.natid, self.evolutions.save().getvalue())
-        self.game.set_wotbl(self.natid, self.evolutions.save().getvalue())
+    def commit(self, natid):
+        self.game.set_personal(natid, self.personal)
+        self.game.set_evo(natid, self.evolutions)
+        self.game.set_wotbl(natid, self.levelmoves)
+        if self.name != self.names[natid]:
+            self.names[natid] = self.name
+            self.game.set_text(self.game.locale_text_id('pokemon_names'),
+                               self.names)
