@@ -122,6 +122,22 @@ class AtomicStruct(object):
                 self._defaults[name] = kwargs['default']
         return (name, type_)
 
+    def change_default(self, name, value):
+        """Changes the default value for a field.
+
+        Parameters
+        ----------
+        name : string
+            Name of the field to change
+        value : mixed
+            Default value to be set upon clear
+
+        See Also
+        --------
+        set_defaults() - Set the defaults
+        """
+        self._defaults[name] = value
+
     def simulate(self):
         """Provides a context that does not modify the current fields
 
