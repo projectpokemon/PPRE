@@ -1,27 +1,29 @@
 
-from generic.editable import Editable
+from generic import Editable
 from pokemon.poketool.waza import Waza
 
 
 class Move(Editable):
     def __init__(self, game):
         self.game = game
-        self.moveid = None
-        self.restrict('moveid', min_value=0)
-        self.waza = Waza(version=game.game_name)
+        self.waza = Waza(game)
         self.restrict('waza')
+        self.name = ''
+        self.names = game.text(game.locale_text_id('move_names'))
 
-    def load_id(self, moveid):
-        self.waza.load(self.game.get_waza(moveid))
-        self.moveid = moveid
+    def load_id(self, move_id):
+        self.waza.load(self.game.get_waza(move_id))
+        self.name = self.names[move_id]
 
-    @staticmethod
-    def from_id(game, moveid):
-        target = Move(game)
-        target.load_id(moveid)
+    @classmethod
+    def from_id(cls, game, move_id):
+        target = cls(game)
+        target.load_id(move_id)
         return target
 
-    def save(self):
-        if self.moveid is None:
-            raise ValueError('This Move has no moveid set')
-        self.game.set_waza(self.moveid, self.waza.save().getvalue())
+    def commit(self, move_id):
+        self.game.set_waza(move_id, self.waza)
+        if self.name != self.names[move_id]:
+            self.names[move_id] = self.name
+            self.game.set_text(self.game.locale_text_id('move_names'),
+                               self.names)
