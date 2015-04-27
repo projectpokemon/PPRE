@@ -53,3 +53,24 @@ class Personal(Editable):
                 self.array('tutorblock', self.uint32, length=1)
             else:
                 self.array('tutorblock', self.uint32, length=5)
+
+    @property
+    def tms(self):
+        tms = []
+        idx = 1
+        for data in self.tmblock:
+            for bit in range(32):
+                if (data >> bit) & 0x1:
+                    tms.append(idx)
+                idx += 1
+        return tms
+
+    def save(self, writer=None):
+        idx = 1
+        blocks = [0]*4
+        for block_id in range(4):
+            for bit in range(32):
+                if idx in self.tms:
+                    blocks[block_id] |= 1 << bit
+                idx += 1
+        Editable.save(self, writer)
