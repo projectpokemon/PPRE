@@ -391,6 +391,7 @@ class DP(Game):
     mmodel_archive_file = 'data/mmodel/mmodel.narc'
 
     load_info = 0x2000b68
+    type_effectiveness_table = (11, 0x225e378-0x222d5c0)
     map_table = 0xeedbc
     commands_files = ('dp.json', )
 
