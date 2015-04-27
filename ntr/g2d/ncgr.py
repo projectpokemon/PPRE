@@ -306,6 +306,8 @@ class NCGR(Editable):
             palette = clr.get_palettes()[pal_id]
         pixels = []
         width, height = img.size
+        width >>= 3
+        height >>= 3
         for pix in img.getdata():
             if pix[3] < 0x80:
                 pixels.append(0)
@@ -332,6 +334,10 @@ class NCGR(Editable):
                     palette.append(color)
             pixels.append(index)
         self.char.set_pixels(pixels, width, height)
+        if modify_palette != self.EDIT_NONE:
+            clr.set_palette(pal_id, palette)
+        self.char.width = width
+        self.char.height = height
 
     def get_tiles(self):
         return self.char.get_tiles()
