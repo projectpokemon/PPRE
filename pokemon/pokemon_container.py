@@ -8,11 +8,11 @@ from pokemon.poketool.wotbl import LevelMoves
 class Pokemon(Editable):
     def define(self, game):
         self.game = game
-        self.personal = Personal(version=game)
+        self.personal = Personal(game)
         self.restrict('personal')
         self.evolutions = Evolutions()
         self.restrict('evolutions')
-        self.levelmoves = LevelMoves(version=game)
+        self.levelmoves = LevelMoves(game)
         self.restrict('levelmoves')
         self.name = ''
         self.names = game.text(game.locale_text_id('pokemon_names'))
