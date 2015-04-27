@@ -446,6 +446,7 @@ class HGSS(Game):
     mmodel_archive_file = 'a/0/8/1'
 
     load_info = 0x02000ba0
+    type_effectiveness_table = (12, 0x226cc7c-0x22378c0)
     map_table = 0xf6be0
     overworld_sprite_table = (1, 0x22074a2-0x021e5900)
     commands_files = ('hgss.json', )

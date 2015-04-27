@@ -22,6 +22,7 @@ class Pokemon(Editable):
         self.evolutions.load(self.game.get_evo(natid))
         self.levelmoves.load(self.game.get_wotbl(natid))
         self.name = self.names[natid]
+        return self
 
     @classmethod
     def from_id(cls, game, natid):

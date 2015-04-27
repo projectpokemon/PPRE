@@ -14,6 +14,7 @@ class Move(Editable):
     def load_id(self, move_id):
         self.waza.load(self.game.get_waza(move_id))
         self.name = self.names[move_id]
+        return self
 
     @classmethod
     def from_id(cls, game, move_id):
