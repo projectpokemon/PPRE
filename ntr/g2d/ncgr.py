@@ -15,6 +15,8 @@ class CHAR(Editable):
     """Character information"""
     FORMAT_16BIT = 3
     FORMAT_256BIT = 4
+    ENCRYPT_MULT = 0x41c64e6d
+    ENCRYPT_CARRY = 0x6073
 
     def define(self, cgr):
         self.cgr = cgr
@@ -33,24 +35,37 @@ class CHAR(Editable):
         Editable.load(self, reader)
         self.data = reader.read(self.datasize)
         if self.cgr.encryption != NCGR.ENCRYPTION_NONE:
-            enc_data = array.array('H', self.data)
-            if self.cgr.encryption == NCGR.ENCRYPTION_DP:
-                enc_data = enc_data[::-1]
-            dec_data = array.array('H')
-            key = enc_data[0]
-            for val in enc_data:
-                dec_data.append(val ^ (key & 0xFFFF))
-                key *= 0x41c64e6d
-                key += 0x6073
-            self.data = dec_data.tostring()
+            self.decrypt(self.cgr.encryption)
 
     def save(self, writer):
         old_datasize = self.datasize
+        if self.cgr.encryption != NCGR.ENCRYPTION_NONE:
+            self.encrypt(self.cgr.encryption)
         self.datasize = len(self.data)
         self.size_ += self.datasize-old_datasize
         writer = Editable.save(self, writer)
         writer.write(self.data)
         return writer
+
+    def encrypt(self, encryption):
+        """Applies encryption/decryption to the sprite.
+
+        Each call toggles its encrypted state, so calling it twice will
+        bring it back to its original state.
+        """
+        if encryption is NCGR.ENCRYPTION_NONE:
+            return
+        enc_data = array.array('H', self.data)
+        if encryption == NCGR.ENCRYPTION_REVERSE:
+            enc_data = enc_data[::-1]
+        dec_data = array.array('H')
+        key = enc_data[0]
+        for val in enc_data:
+            dec_data.append(val ^ (key & 0xFFFF))
+            key *= self.ENCRYPT_MULT
+            key += self.ENCRYPT_CARRY
+        self.data = dec_data.tostring()
+    decrypt = encrypt
 
     def get_tiles(self):
         tiles = []
@@ -187,8 +202,8 @@ class NCGR(Editable):
     """2D Character Graphics
     """
     ENCRYPTION_NONE = 0
-    ENCRYPTION_DP = 1
-    ENCRYPTION_PT = 2
+    ENCRYPTION_REVERSE = 1
+    ENCRYPTION_FORWARDS = 2
 
     def define(self, encryption=ENCRYPTION_NONE):
         self.string('magic', length=4, default='RGCN')
