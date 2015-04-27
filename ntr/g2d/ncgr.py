@@ -17,6 +17,7 @@ class CHAR(Editable):
     FORMAT_256BIT = 4
     ENCRYPT_MULT = 0x41c64e6d
     ENCRYPT_CARRY = 0x6073
+    TYPE_LINEAR = 1
 
     def define(self, cgr):
         self.cgr = cgr
@@ -159,7 +160,9 @@ class CHAR(Editable):
             subwidth = 4
         elif self.format == self.FORMAT_256BIT:
             subwidth = 8
-        if self.type == 1:
+        else:
+            raise ValueError('Unknown format: {0}'.format(self.format))
+        if self.type == self.TYPE_LINEAR:
             data_idx = 0
             for suby in range(height*8):
                 for subx in range(width*4):
@@ -185,6 +188,36 @@ class CHAR(Editable):
                             pixels.append(val)
         return pixels
 
+    def set_pixels(self, pixels, width, height):
+        data = array.array('B')
+        if self.format == self.FORMAT_16BIT:
+            subwidth = 4
+        elif self.format == self.FORMAT_256BIT:
+            subwidth = 8
+        else:
+            raise ValueError('Unknown format: {0}'.format(self.format))
+        if self.type == self.TYPE_LINEAR:
+            for pix_idx in range(width*height*8*subwidth):
+                if self.format == self.FORMAT_16BIT:
+                    data.append(pixels[pix_idx*2] |
+                                (pixels[pix_idx*2+1] << 4))
+                elif self.format == self.FORMAT_256BIT:
+                    data.append(pixels[pix_idx])
+        else:
+            for blocky in range(height):
+                for suby in range(8):
+                    for blockx in range(width):
+                        for subx in range(subwidth):
+                            pix_idx = ((blocky*width*8*subwidth) +
+                                       (blockx*8*subwidth) +
+                                       (suby*subwidth)+subx)
+                            if self.format == self.FORMAT_16BIT:
+                                data.append(pixels[pix_idx*2] |
+                                            (pixels[pix_idx*2+1] << 4))
+                            elif self.format == self.FORMAT_256BIT:
+                                data.append(pixels[pix_idx])
+        self.data = data.tostring()
+
 
 class CPOS(Editable):
     """Character Position"""
@@ -204,6 +237,10 @@ class NCGR(Editable):
     ENCRYPTION_NONE = 0
     ENCRYPTION_REVERSE = 1
     ENCRYPTION_FORWARDS = 2
+
+    EDIT_NONE = 0
+    EDIT_ANY = 1
+    ADD_ONLY = 2
 
     def define(self, encryption=ENCRYPTION_NONE):
         self.string('magic', length=4, default='RGCN')
@@ -252,6 +289,41 @@ class NCGR(Editable):
         for pix in self.char.get_pixels(width, height):
             data += ''.join(map(chr, self.palette[pix]))
         return Image.frombytes('RGBA', (width*8, height*8), data)
+
+    def set_image(self, img, clr, modify_palette=EDIT_ANY, pal_id=0):
+        img = img.convert('RGBA')
+        if modify_palette == self.EDIT_ANY:
+            palette = [(0xF8, 0xF8, 0xF8, 0)]
+        else:
+            palette = clr.get_palettes()[pal_id]
+        pixels = []
+        width, height = img.size
+        for pix in img.getdata():
+            if pix[3] < 0x80:
+                pixels.append(0)
+                continue
+            color = (pix[0] & 0xF8, pix[1] & 0xF8,
+                     pix[2] & 0xF8, 255)
+            try:
+                index = palette.index(color, 1)
+            except:
+                if modify_palette is self.EDIT_NONE:
+                    raise ValueError('Some colors do not exist'
+                                     ' in current palette')
+                index = len(palette)
+                if index >= 16:
+                    if modify_palette is self.ADD_ONLY:
+                        last = palette[-1]
+                        index = palette.index(last, 1)
+                        if last == len(palette)-1:
+                            raise ValueError('Cannot have more than 16 colors')
+                        palette[index] = color
+                    else:
+                        raise ValueError('Cannot have more than 16 colors')
+                else:
+                    palette.append(color)
+            pixels.append(index)
+        self.char.set_pixels(pixels, width, height)
 
     def get_tiles(self):
         return self.char.get_tiles()
