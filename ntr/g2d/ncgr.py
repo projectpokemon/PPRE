@@ -276,7 +276,7 @@ class NCGR(Editable):
             writer.writeUInt32(size)
         return writer
 
-    def get_image(self, width=None, height=None):
+    def get_image(self, width=None, height=None, transparent=True):
         data = ''
         if width is None:
             width = self.char.width
@@ -287,7 +287,10 @@ class NCGR(Editable):
         else:
             height >>= 3
         for pix in self.char.get_pixels(width, height):
-            data += ''.join(map(chr, self.palette[pix]))
+            if not pix and transparent:
+                data += chr(0)*4
+            else:
+                data += ''.join(map(chr, self.palette[pix]))
         return Image.frombytes('RGBA', (width*8, height*8), data)
 
     def set_image(self, img, clr, modify_palette=EDIT_ANY, pal_id=0):
