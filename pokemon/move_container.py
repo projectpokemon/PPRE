@@ -4,7 +4,7 @@ from pokemon.poketool.waza import Waza
 
 
 class Move(Editable):
-    def __init__(self, game):
+    def define(self, game):
         self.game = game
         self.waza = Waza(game)
         self.restrict('waza')

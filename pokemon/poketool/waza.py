@@ -1,5 +1,5 @@
 
-from generic.editable import Editable
+from generic import Editable
 import pokemon.game as game
 from util import BinaryIO
 
@@ -8,77 +8,78 @@ class StatChange(Editable):
     STATS = ['hp', 'attack', 'defense', 'spatk', 'spdef', 'speed', 'accuracy',
              'evasion', 'all']
 
-    def __init__(self, statid, level, chance):
-        self.statid = statid
-        self.restrictUInt8('stat')
-        self.level = level
-        self.restrictInt8('level')
-        self.chance = chance
-        self.restrictUInt8('chance')
+    def define(self):
+        self.uint8('stat_id')
+        self.uint8('level')
+        self.uint8('chance')
 
     @property
     def stat(self):
-        return self.STATS[self.statid]
+        return self.STATS[self.stat_id]
 
     @stat.setter
     def stat(self, value):
-        self.statid = self.STATS.index(value)
+        self.stat_id = self.STATS.index(value)
 
 
 class Waza(Editable):
-    def __init__(self, reader=None, version='Diamond'):
-        self.version = version
-        self.effect = 0
-        self.restrictUInt16('effect')
-        self.effectcategory = 0
-        self.restrictUInt8('effectcategory')
-        self.category = 0
-        self.restrictUInt8('category')
-        self.power = 0
-        self.restrictUInt8('power')
-        self.type = 0
-        self.restrictUInt8('type')
-        self.accuracy = 100
-        self.restrictUInt8('accuracy')
-        self.pp = 25
-        self.restrictUInt8('pp')
-        self.effectchance = 0
-        self.restrictUInt8('effectchance')
-        self.flag1 = 0
-        self.restrictUInt16('flag1')
-        self.priority = 0
-        self.restrictInt8('priority')
-        self.flag2 = 0
-        self.restrictUInt8('flag2')
-        self.minhits = 0
-        self.restrict('minhits', min_value=0, max_value=0xF)
-        self.maxhits = 0
-        self.restrict('maxhits', min_value=0, max_value=0xF)
-        self.status = 0
-        self.restrictUInt8('status')
-        self.minturns = 0
-        self.restrictUInt8('minturns')
-        self.maxturns = 0
-        self.restrictUInt8('maxturns')
-        self.crit = 0
-        self.restrictUInt8('crit')
-        self.flinch = 0
-        self.restrictUInt8('flinch')
-        self.recoil = 0
-        self.restrictInt8('recoil')
-        self.healing = 0
-        self.restrictInt8('healing')
-        self.target = 0
-        self.restrictUInt8('target')
-        self.stats = []
-        self.restrict('stats', max_length=3)
+    TARGET_SINGLE = 0
+    TARGET_ANY = 1
+    TARGET_RANDOM = 2
+    TARGET_BOTH = 4
+    TARGET_ALL = 8
+    TARGET_SELF = 16
+    TARGET_TEAM = 32
+    TARGET_FIELD = 64
+    TARGET_OPPOSITE_FIELD = 128
+    TARGET_PARTNER = 256
+    TARGET_ALLIES = 512
+    TARGET_ACTING_FOE = 1024
 
-        if reader is not None:
-            self.load(reader)
-
-    def load(self, reaader):
-        reader = BinaryIO.reader(reader)
-
-    def save(self, writer=None):
-        writer = BinaryIO() if writer is None else writer
-        return writer
+    def define(self, game):
+        self.game = game
+        if game.gen == 4:
+            self.uint16('effect')
+            self.uint8('category')
+            self.uint8('power', default=70)
+            self.uint8('type')
+            self.uint8('accuracy', default=100)
+            self.uint8('pp', default=15)
+            self.uint8('effect_chance')
+            self.uint16('target')
+            self.int8('priority')
+            self.uint8('contact', width=1)
+            self.uint8('protected', width=1)
+            self.uint8('magic_bounced', width=1)
+            self.uint8('snatchable', width=1)
+            self.uint8('u8_5', width=1)
+            self.uint8('u8_6', width=1)
+            self.uint8('u8_7', width=1)
+            self.uint8('u8_8', width=1)
+            self.uint8('contest_effect')
+            self.uint8('contest_type')
+            self.uint16('pad_e')
+        else:
+            self.uint16('effect')
+            self.uint8('effect_category')
+            self.uint8('category')
+            self.uint8('power')
+            self.uint8('type')
+            self.uint8('accuracy', default=100)
+            self.uint8('pp', default=15)
+            self.uint8('effect_chance')
+            self.uint16('flag1')
+            self.int8('priority')
+            self.uint8('flag2')
+            self.uint8('minhits', width=4)
+            self.uint8('maxhits', width=4)
+            self.uint8('status')
+            self.uint8('minturns')
+            self.uint8('maxturns')
+            self.uint8('crit')
+            self.uint8('flinch')
+            self.int8('recoil')
+            self.int8('healing')
+            self.uint8('target')
+            self.stats = []
+            self.restrict('stats', max_length=3)

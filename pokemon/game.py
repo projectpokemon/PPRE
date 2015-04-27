@@ -369,7 +369,7 @@ class DP(Game):
     level_moves_archive_file = wotbl_archive_file
 
     exp_archive_file = 'poketool/personal/growtbl.narc'
-    move_data_archive_file = 'poketool/waza/waza_tbl.narc'
+    waza_archive_file = 'poketool/waza/waza_tbl.narc'
     baby_file = 'poketool/personal/pms.narc'
     encounter_archive_files = {
         'Diamond': 'fielddata/encountdata/d_enc_data.narc',
@@ -413,6 +413,7 @@ class Pt(DP):
     idx = 3
     versions = {'Platinum': 2}
     personal_archive_file = 'poketool/personal/pl_personal.narc'
+    waza_archive_file = 'poketool/waza/pl_waza_tbl.narc'
     encounter_archive_file = 'fielddata/encountdata/pl_enc_data.narc'
     item_archive_file = 'itemtool/itemdata/pl_item_data.narc'
     commands_files = ('dp.json', 'pt.json')
@@ -430,6 +431,7 @@ class HGSS(Game):
     evo_archive_file = 'a/0/3/4'
     personal_archive_file = 'a/0/0/2'
     exp_archive_file = 'a/0/0/3'
+    waza_archive_file = 'a/0/1/1'
     wotbl_archive_file = 'a/0/3/3'
     encounter_archive_files = {
         'HeartGold': 'a/0/3/7',
