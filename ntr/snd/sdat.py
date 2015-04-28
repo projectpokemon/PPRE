@@ -60,6 +60,26 @@ class SYMB(Editable):
         return entries
 
 
+class FATRecord(Editable):
+    def define(self):
+        self.uint32('offset_')
+        self.uint32('size_')
+        self.uint32('u8')
+        self.uint32('uc')
+
+
+class FAT(Editable):
+    def define(self, sdat):
+        self.sdat = sdat
+        self.string('magic', length=4, default='FAT ')
+        self.uint32('size_')
+        self.uint32('num')
+        self.records = []
+
+    def load(self, reader):
+        self.records = [FATRecord(reader=reader) for i in range(self.num)]
+
+
 class SDAT(Archive, Editable):
     """Sound Data Archive"""
     extension = ''  # filenames include their own extension
@@ -77,7 +97,7 @@ class SDAT(Archive, Editable):
         block_ofs.freeze()
         self.array('block_offsets', block_ofs.base_struct, length=8)
         self.symb = SYMB(self)
-        self.fat = None  # FAT(self)
+        self.fat = FAT(self)
         self.info = None  # INFO(self)
         self.file = None  # FILE(self)
 
