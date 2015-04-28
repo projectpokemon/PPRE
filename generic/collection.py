@@ -32,17 +32,21 @@ class SizedCollection(Editable):
         self.resizable = resizable
         self.array('entries', entry, length=length, max_length=0xFFFFFFF)
 
-    def append(self, obj):
+    def resize(self, length):
         if not self.resizable:
             raise ValueError('This SizedCollection is not resizable')
-        length = self.entries._length_
+        old_length = self.entries._length_
         old_entries = self.entries
         self._data = None  # HACK: Deletes all contents and thaws definition
         self.remove('entries')
-        self._add('entries', old_entries._type_*(length+1))
+        self._add('entries', old_entries._type_*(length))
         self.restrict('entries')
         self.freeze()
         ctypes.memmove(self.entries, old_entries, ctypes.sizeof(old_entries))
+
+    def append(self, obj):
+        length = self.entries._length_
+        self.resize(length+1)
         self[length] = obj
 
     def base_struct(self, name):
