@@ -140,6 +140,7 @@ class INFO(Editable):
     def load(self, reader):
         reader = BinaryIO.reader(reader)
         start = reader.tell()
+        Editable.load(self, reader)
         self.records = {}
         for i, record_ofs in enumerate(self.record_offsets):
             if not record_ofs:
@@ -147,7 +148,7 @@ class INFO(Editable):
             reader.seek(start+record_ofs)
             num = reader.readUInt32()
             entries = []
-            for i in range(num):
+            for j in range(num):
                 entries.append(self.record_classes[i](reader=reader))
             self.records[SYMB.record_names[i]] = entries
 
