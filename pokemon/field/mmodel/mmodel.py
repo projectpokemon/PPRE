@@ -24,7 +24,7 @@ class OverworldSprite(Editable):
 class OverworldSprites(Editable):
     def define(self, game):
         self.game = game
-        self.array('table', OverworldSprite(self).base_struct, length=1000)
+        self.array('table', OverworldSprite(self).base_struct, length=1100)
         self.map = {}
 
     def load(self):
@@ -37,6 +37,13 @@ class OverworldSprites(Editable):
         for sprite in self.table:
             self.map[sprite.sprite_id] = sprite.file_id
         return self
+
+    def save(self):
+        with self.game.open('overlays_dez', 'overlay_{0:04}.bin'.format(
+                self.game.overworld_sprite_table[0]), 'r+') as handle:
+            writer = BinaryIO.writer(handle)
+            writer.seek(self.game.overworld_sprite_table[1])
+            Editable.save(self, writer)
 
     def __getitem__(self, key):
         return self.map[key]
