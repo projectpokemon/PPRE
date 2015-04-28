@@ -152,14 +152,6 @@ class INFO(Editable):
             self.records[SYMB.record_names[i]] = entries
 
 
-class FATRecord(Editable):
-    def define(self):
-        self.uint32('offset_')
-        self.uint32('size_')
-        self.uint32('u8')
-        self.uint32('uc')
-
-
 class FAT(Editable):
     def define(self, sdat):
         self.sdat = sdat
