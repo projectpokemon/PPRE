@@ -37,12 +37,17 @@ class SizedCollection(Editable):
             raise ValueError('This SizedCollection is not resizable')
         old_length = self.entries._length_
         old_entries = self.entries
+        new_type = old_entries._type_*(length)
         self._data = None  # HACK: Deletes all contents and thaws definition
         self.remove('entries')
-        self._add('entries', old_entries._type_*(length))
+        self._add('entries', new_type)
         self.restrict('entries')
         self.freeze()
-        ctypes.memmove(self.entries, old_entries, ctypes.sizeof(old_entries))
+        if old_length < length:
+            size = ctypes.sizeof(old_entries)
+        else:
+            size = ctypes.sizeof(self.entries)
+        ctypes.memmove(self.entries, old_entries, size)
 
     def append(self, obj):
         length = self.entries._length_
