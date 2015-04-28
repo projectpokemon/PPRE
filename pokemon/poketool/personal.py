@@ -73,4 +73,4 @@ class Personal(Editable):
                 if idx in self.tms:
                     blocks[block_id] |= 1 << bit
                 idx += 1
-        Editable.save(self, writer)
+        return Editable.save(self, writer)

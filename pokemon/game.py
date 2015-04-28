@@ -288,6 +288,8 @@ class Game(Editable, Version):
                     data = data.save()
                 if hasattr(data, 'getvalue'):
                     data = data.getvalue()
+                if data is None:
+                    raise RuntimeError('Did not return writable data')
                 archive.files[fileid] = data
                 self.save_archive(archive,
                                   getattr(self, name[4:]+'_archive_file'))
@@ -320,39 +322,6 @@ class Game(Editable, Version):
         with self.open('overarm9.dec.bin') as overarm:
             ovt = OverlayTable(overlay_count, reader=overarm)
         return ovt
-
-    @cached_property
-    def personal_archive(self):
-        return self.archive(self.personal_archive_file)
-
-    def get_personal(self, natid):
-        return self.personal_archive.files[natid]
-
-    def set_personal(self, natid, data):
-        self.personal_archive.files[natid] = data
-        self.save_archive(self.personal_archive, self.personal_archive_file)
-
-    @cached_property
-    def evo_archive(self):
-        return self.archive(self.evo_archive_file)
-
-    def get_evo(self, natid):
-        return self.evo_archive.files[natid]
-
-    def set_evo(self, natid, data):
-        self.evo_archive.files[natid] = data
-        self.save_archive(self.evo_archive, self.evo_archive_file)
-
-    @cached_property
-    def wotbl_archive(self):
-        return self.archive(self.wotbl_archive_file)
-
-    def get_wotbl(self, natid):
-        return self.wotbl_archive.files[natid]
-
-    def set_wotbl(self, natid, data):
-        self.wotbl_archive.files[natid] = data
-        self.save_archive(self.wotbl_archive, self.wotbl_archive_file)
 
     def save(self):
         pass
