@@ -1060,7 +1060,22 @@ class XEditable(Emitter, AtomicStruct):
             try:
                 old_value.from_dict(value, merge)
             except AttributeError:
-                setattr(self, key, value)
+                try:
+                    value[0]
+                except TypeError:
+                    setattr(self, key, value)
+                else:
+                    for i, subvalue in enumerate(value):
+                        try:
+                            try:
+                                old_value[i].from_dict(subvalue, merge)
+                            except AttributeError:
+                                old_value[i] = subvalue
+                        except IndexError:
+                            old_value.append(subvalue)
+                    i += 1
+                    while len(old_value) > i:
+                        old_value.pop(i)
 
     def to_json(self, **json_args):
         """Returns the JSON version of this instance
