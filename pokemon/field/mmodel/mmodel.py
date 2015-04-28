@@ -40,7 +40,7 @@ class OverworldSprites(Editable):
 
     def save(self):
         with self.game.open('overlays_dez', 'overlay_{0:04}.bin'.format(
-                self.game.overworld_sprite_table[0]), 'r+') as handle:
+                self.game.overworld_sprite_table[0]), mode='r+') as handle:
             writer = BinaryIO.writer(handle)
             writer.seek(self.game.overworld_sprite_table[1])
             Editable.save(self, writer)
@@ -51,4 +51,4 @@ class OverworldSprites(Editable):
     def get_pokemon_sprite(self, natid, forme=0):
         if forme:
             raise NotImplementedError('Forme handling not enabled yet')
-        return self.table[natid+216]
+        return self.table[natid+215]
