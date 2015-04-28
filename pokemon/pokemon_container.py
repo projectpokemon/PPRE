@@ -15,13 +15,18 @@ class Pokemon(Editable):
         self.levelmoves = LevelMoves(game)
         self.restrict('levelmoves')
         self.name = ''
+        self.restrict('name')
         self.names = game.text(game.locale_text_id('pokemon_names'))
+        self.species_name = ''
+        self.restrict('species_name')
+        self.species_names = game.text(game.locale_text_id('species_names'))
 
     def load_id(self, natid):
         self.personal.load(self.game.get_personal(natid))
         self.evolutions.load(self.game.get_evo(natid))
         self.levelmoves.load(self.game.get_wotbl(natid))
         self.name = self.names[natid]
+        self.species_name = self.species_names[natid]
         return self
 
     @classmethod
@@ -38,3 +43,7 @@ class Pokemon(Editable):
             self.names[natid] = self.name
             self.game.set_text(self.game.locale_text_id('pokemon_names'),
                                self.names)
+        if self.species_name != self.species_names[natid]:
+            self.species_names[natid] = self.species_name
+            self.game.set_text(self.game.locale_text_id('species_names'),
+                               self.species_names)
