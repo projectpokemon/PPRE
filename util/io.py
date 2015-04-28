@@ -173,6 +173,16 @@ class BinaryIO(StringIO):
         StringIO.seek(self, offset, whence)
         return SeekReturn(self, position)
 
+    def peek(self):
+        """Returns a seek context to its current position. When the context
+        exists, it will return back to its original position.
+
+        Returns
+        -------
+        SeekReturn
+        """
+        return self.seek(self.tell())
+
     @staticmethod
     def adapter(handle):
         """Create a BinaryIOAdapter around a file handle"""
