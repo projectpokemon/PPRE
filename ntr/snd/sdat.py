@@ -2,6 +2,7 @@
 
 from generic import Editable
 from generic.archive import Archive
+from generic.collection import SizedCollection
 from util import BinaryIO
 
 
@@ -60,6 +61,97 @@ class SYMB(Editable):
         return entries
 
 
+class InfoSEQ(Editable):
+    def define(self):
+        self.uint16('file_id')
+        self.uint16('u2')
+        self.uint16('bank_id')
+        self.uint8('volume')
+        self.uint8('cpr')
+        self.uint8('ppr')
+        self.uint8('poly')
+        self.uint16('ua')
+
+
+class InfoARC(Editable):
+    """Info for both SEQARC and WAVEARC"""
+    def define(self):
+        self.uint16('file_id')
+        self.uint16('u2')
+
+
+class InfoBANK(Editable):
+    def define(self):
+        self.uint16('file_id')
+        self.uint16('u2')
+        self.array('wavearc_ids', self.uint16, length=4)
+
+
+class InfoPLAYER(Editable):
+    def define(self):
+        self.uint32('u0')
+        self.uint32('u4')
+
+
+class InfoGROUPEntry(Editable):
+    def define(self):
+        self.uint32('type_')
+        self.uint32('entry_id')
+
+
+class InfoGROUP(Editable):
+    def define(self):
+        self.uint32('num')
+        self.entries = []
+
+    def load(self, reader):
+        Editable.load(self, reader)
+        self.entries = SizedCollection(InfoGROUPEntry().base_struct,
+                                       length=self.num)
+
+
+class InfoPLAYER2(Editable):
+    def define(self):
+        self.array('u0', self.uint8, length=24)
+
+
+class InfoSTRM(Editable):
+    def define(self):
+        self.uint16('file_id')
+        self.uint16('unknown')
+        self.uint8('volume')
+        self.uint8('pri')
+        self.uint8('ply')
+        self.uint8('u7')
+        self.uint32('u8')
+
+
+class INFO(Editable):
+    record_classes = [InfoSEQ, InfoARC, InfoBANK, InfoARC, InfoPLAYER,
+                      InfoGROUP, InfoPLAYER2, InfoSTRM]
+
+    def define(self, sdat):
+        self.sdat = sdat
+        self.string('magic', length=4, default='INFO')
+        self.uint32('size_')
+        self.array('record_offsets', self.uint32, length=14)
+        self.records = {}
+
+    def load(self, reader):
+        reader = BinaryIO.reader(reader)
+        start = reader.tell()
+        self.records = {}
+        for i, record_ofs in enumerate(self.record_offsets):
+            if not record_ofs:
+                continue
+            reader.seek(start+record_ofs)
+            num = reader.readUInt32()
+            entries = []
+            for i in range(num):
+                entries.append(self.record_classes[i](reader=reader))
+            self.records[SYMB.record_names[i]] = entries
+
+
 class FATRecord(Editable):
     def define(self):
         self.uint32('offset_')
@@ -97,8 +189,8 @@ class SDAT(Archive, Editable):
         block_ofs.freeze()
         self.array('block_offsets', block_ofs.base_struct, length=8)
         self.symb = SYMB(self)
+        self.info = INFO(self)
         self.fat = FAT(self)
-        self.info = None  # INFO(self)
         self.file = None  # FILE(self)
 
     @property
@@ -111,7 +203,7 @@ class SDAT(Archive, Editable):
         Editable.load(self, reader)
         assert self.magic == 'SDAT'
         for block_ofs, block in zip(self.block_offsets, [
-                self.symb, self.fat, self.info, self.file]):
+                self.symb, self.info, self.fat, self.file]):
             if not block_ofs.block_offset:
                 continue
             reader.seek(start+block_ofs.block_offset)
