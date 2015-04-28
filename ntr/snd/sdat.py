@@ -166,10 +166,26 @@ class FAT(Editable):
         self.string('magic', length=4, default='FAT ')
         self.uint32('size_')
         self.uint32('num')
-        self.records = []
+        self.entries = []
 
     def load(self, reader):
-        self.records = [FATRecord(reader=reader) for i in range(self.num)]
+        Editable.load(self, reader)
+        self.entries = []
+        for i in range(self.num):
+            start = reader.readUInt32()
+            stop = start+reader.readUInt32()
+            reader.read(8)
+            self.entries.append(slice(start, stop))
+
+
+class FILE(Editable):
+    def define(self, sdat):
+        self.sdat = sdat
+        self.string('magic', length=4, default='FILE')
+        self.uint32('size_')
+        self.uint32('num')
+        self.uint32('uc')
+        self.files = []
 
 
 class SDAT(Archive, Editable):
@@ -191,7 +207,7 @@ class SDAT(Archive, Editable):
         self.symb = SYMB(self)
         self.info = INFO(self)
         self.fat = FAT(self)
-        self.file = None  # FILE(self)
+        self.file = FILE(self)
 
     @property
     def files(self):
@@ -208,6 +224,10 @@ class SDAT(Archive, Editable):
                 continue
             reader.seek(start+block_ofs.block_offset)
             block.load(reader)
+        self.file.files = []
+        for entry in self.fat.entries:
+            reader.seek(start+entry.start)
+            self.file.files.append(reader.read(entry.stop-entry.start))
 
     def save(self, writer=None):
         writer = BinaryIO.writer(writer)
