@@ -232,9 +232,9 @@ class Thumb(ARM):
         elif cmd & 0b1111100000000000 == 0b0100100000000000:
             # ldr dest [pc, #ofs]
             current = self.tell()
-            ofs = ((cmd & 0x7F) << 2) + 2
+            ofs = ((cmd & 0x7F) << 2)
             dest = self.get_var(self.get_reg((cmd >> 8) & 7), left=True)
-            self.seek(current+ofs)
+            self.seek((current+ofs+2) & ~0x2)
             val = self.read_value(4)
             self.seek(current)
             return [self.assign(dest, val)]
