@@ -31,7 +31,7 @@ class OverworldSprite(Editable):
 class OverworldSprites(Editable):
     def define(self, game):
         self.game = game
-        self.array('table', OverworldSprite(self).base_struct, length=1100)
+        self.array('table', OverworldSprite(self).base_struct, length=993)
         self.map = {}
 
     def load(self):
