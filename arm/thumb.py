@@ -208,7 +208,7 @@ class Thumb(ARM):
             # bx
             reg = self.get_reg((cmd >> 3) & 0x7, cmd & 0x40)
             if reg.slot == Register.SLOT_LR:
-                return [self.end()]
+                return [self.end(self.get_var(self.get_reg(0)))]
             if (cmd >> 7) & 0x1:
                 func = 'blx'
             else:
@@ -284,7 +284,7 @@ class Thumb(ARM):
             for idx in [0, 1, 2, 3, 13, 14, 15]:
                 var = self.get_var(self.get_reg(idx))
                 var.const = True
-            self.registers[0].name = 'state'
+            # self.registers[0].name = 'state'
             self.registers[13].name = 'stack'
             self.registers[14].name = 'lr'
             self.registers[15].name = 'pc'
