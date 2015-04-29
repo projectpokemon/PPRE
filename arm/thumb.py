@@ -190,7 +190,7 @@ class Thumb(ARM):
         elif cmd & 0b1111100000000000 == 0b1110000000000000:
             # b
             self.seek(self.tell()+((cmd & 0x3FF) << 1)+2)
-            return [self.noop()]
+            return []
         elif cmd & 0b1111000000000000 == 0b1111000000000000:
             # bl
             ofs = (cmd & 0x7FF) << 12

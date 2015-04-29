@@ -29,6 +29,7 @@ class ARM(Decompiler):
     stack = []
     deferred = False
     functions = {}
+    variable_namespace = 'engine.vars.'
 
     def branch_duplicate(self):
         dup = self.__class__(self.handle)
@@ -68,6 +69,7 @@ class ARM(Decompiler):
             var = self.registers[reg.slot]
         except KeyError:
             var = Variable(reg)
+            var.namespace = self.variable_namespace
             self.variables.append(var)
             self.registers[reg.slot] = var
         if not left:
