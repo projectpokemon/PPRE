@@ -1,4 +1,11 @@
+"""
+About HGSS height bans:
+Bans are by natid.
+OverworldSprite.attr controls how sprites are drawn.
 
+Sprite shown is the first entry who has a matching sprite_id.
+Table is searched until this sprite is found
+"""
 from generic import Editable
 from util import BinaryIO
 from ntr.g3d.btx import BTX
@@ -11,9 +18,9 @@ class OverworldSprite(Editable):
         self.uint16('file_id')
         self.uint16('attr')
         # attr = 0 for most normal people
-        # attr = 20007 for most pokemon
+        # attr = 20007 for most pokemon (32x32)
         # attr = 20006 for diglett/dugtrio (won't jump?)
-        # attr = 21000 for large poke sprites (Steelix, Lugia, etc.)
+        # attr = 21000 for large poke sprites (64x64) (Steelix, Lugia, etc.)
         # many other values...
 
     def get_btx(self):
