@@ -30,12 +30,20 @@ def build(fname, directory):
             raise OSError()
     except OSError:
         arm9 = os.path.join(directory, 'arm9.bin')
+    overarm9 = os.path.join(directory, 'overarm9.dec.bin')
+    overlays = os.path.join(directory, 'overlays_dez')
+    try:
+        if not os.path.getsize(overarm9):
+            raise OSError()
+    except OSError:
+        arm9 = os.path.join(directory, 'arm9.bin')
+        overlays = os.path.join(directory, 'overlays')
     subprocess.call([binary, '-c', fname,
                      '-7', os.path.join(directory, 'arm7.bin'),
                      '-y7', os.path.join(directory, 'overarm7.bin'),
                      '-9', arm9,
-                     '-y9', os.path.join(directory, 'overarm9.bin'),
-                     '-y', os.path.join(directory, 'overlays'),
+                     '-y9', overarm9,
+                     '-y', overlays,
                      '-t', os.path.join(directory, 'banner.bin'),
                      '-h', os.path.join(directory, 'header.bin'),
                      '-d', os.path.join(directory, 'fs')
