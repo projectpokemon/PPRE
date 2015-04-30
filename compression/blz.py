@@ -89,8 +89,8 @@ def decompress_arm9(game):
             open(os.path.join(workspace, 'arm9.dec.bin'), 'w') as arm9dec:
         arm9.seek(game.load_info-ram_offset+0x14)
         end, u18, beacon, unbeacon = struct.unpack('IIII', arm9.read(16))
-        assert beacon == ARM9_BLZ_BEACON
-        assert unbeacon == ARM9_BLZ_UNBEACON
+        assert beacon & 0xFFFF0000 == ARM9_BLZ_BEACON & 0xFFFF0000
+        assert unbeacon & 0xFFFF == ARM9_BLZ_UNBEACON & 0xFFFF
         # TODO: if beacons do not match, scan ARM9 for beacon
         try:
             assert end
