@@ -59,3 +59,15 @@ class OverworldSprites(Editable):
         if forme:
             raise NotImplementedError('Forme handling not enabled yet')
         return self.table[natid+215]
+
+
+class PartnerPokemon(Editable):
+    """How HGSS Partners appear.
+    If oversized, they will not fit into buildings
+    """
+    def define(self):
+        self.uint8('u0', default=0)
+        self.uint8('oversized')
+        self.uint8('orientation')
+        # If not overworld, orientation = 0x11 for flying or 0x10 for small things
+        self.uint8('u3', default=0)

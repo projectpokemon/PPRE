@@ -414,7 +414,7 @@ class HGSS(Game):
     script_archive_file = 'a/0/1/2'
     text_archive_file = 'a/0/2/7'
     mmodel_archive_file = 'a/0/8/1'
-    partner_control_archive_file = 'a/1/4/1'
+    partner_appearance_archive_file = 'a/1/4/1'
 
     load_info = 0x02000ba0
     type_effectiveness_table = (12, 0x226cc7c-0x22378c0)
