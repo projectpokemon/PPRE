@@ -361,6 +361,7 @@ class DP(Game):
 
     load_info = 0x2000b68
     type_effectiveness_table = (11, 0x225e378-0x222d5c0)
+    file_system_table = (-1, 0x021058a0-0x02000000)
     map_table = 0xeedbc
     commands_files = ('dp.json', )
 
@@ -387,6 +388,8 @@ class Pt(DP):
     encounter_archive_file = 'fielddata/encountdata/pl_enc_data.narc'
     item_archive_file = 'itemtool/itemdata/pl_item_data.narc'
     commands_files = ('dp.json', 'pt.json')
+
+    file_system_table = (-1, 0x02100498-0x02000000)
 
     text_contents = {
         'US': {
@@ -418,6 +421,7 @@ class HGSS(Game):
 
     load_info = 0x02000ba0
     type_effectiveness_table = (12, 0x226cc7c-0x22378c0)
+    file_system_table = (-1, 0x0210f210-0x02000000)
     map_table = 0xf6be0
     following_sprite_table = (-1, 0x020ff088-0x02000000, 993, 428)
     overworld_sprite_table = (1, 0x22074a2-0x021e5900, 993)
