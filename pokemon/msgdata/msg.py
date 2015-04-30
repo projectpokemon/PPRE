@@ -145,6 +145,15 @@ class Text(Archive, Editable):
         except KeyError as err:
             raise IndexError(err)
 
+    def populate(self, new_size):
+        """Add entries until new_size is reached"""
+        for i in range(new_size):
+            if i in self.ids:
+                continue
+            name = '0_{0:05}'.format(i)
+            self.ids[i] = name
+            self.files[name] = ''
+
     def load(self, reader):
         reader = BinaryIO.reader(reader)
         AtomicStruct.load(self, reader)

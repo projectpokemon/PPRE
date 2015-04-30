@@ -385,7 +385,7 @@ class MessageCommand(Command):
             except TypeError:
                 warnings.warn('Text is not loaded. No text will be replaced')
             except IndexError:
-                warnings.warn('Text is not defined for {idx}'.format(text_id))
+                warnings.warn('Text is not defined for {0}'.format(text_id))
         Command.__call__(self, *args, **kwargs)
 
     def decompile_args(self, decompiler):

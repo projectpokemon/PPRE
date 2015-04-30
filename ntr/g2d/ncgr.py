@@ -205,15 +205,16 @@ class CHAR(Editable):
                     data.append(pixels[pix_idx])
         else:
             for blocky in range(height):
-                for suby in range(8):
-                    for blockx in range(width):
+                for blockx in range(width):
+                    for suby in range(8):
                         for subx in range(subwidth):
-                            pix_idx = ((blocky*width*8*subwidth) +
-                                       (blockx*8*subwidth) +
-                                       (suby*subwidth)+subx)
+                            pix_idx = ((blocky*width*8*8) +
+                                       (suby*width*8) +
+                                       (blockx*8) +
+                                       subx*2)
                             if self.format == self.FORMAT_16BIT:
-                                data.append(pixels[pix_idx*2] |
-                                            (pixels[pix_idx*2+1] << 4))
+                                data.append(pixels[pix_idx] |
+                                            (pixels[pix_idx+1] << 4))
                             elif self.format == self.FORMAT_256BIT:
                                 data.append(pixels[pix_idx])
         self.data = data.tostring()
