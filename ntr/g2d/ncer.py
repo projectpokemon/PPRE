@@ -320,7 +320,7 @@ class NCER(Editable, ArchiveList):
                 self.cebk.cells.append(cell)
                 try:
                     info = json.loads(comment)
-                    pal_id = info['pal_id']
+                    pal_id = info.get('pal_id', 0)
                     cell.from_dict(json.loads(comment))
                 except:
                     pass
@@ -349,6 +349,7 @@ class NCER(Editable, ArchiveList):
                 height -= 64
             cell.maxX = scr_x
             cell.maxY = scr_y
+            cell.num = len(cell.attrs)
 
             for attr in cell.attrs:
                 tilestrip = []
