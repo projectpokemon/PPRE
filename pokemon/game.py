@@ -389,6 +389,7 @@ class Pt(DP):
     item_archive_file = 'itemtool/itemdata/pl_item_data.narc'
     commands_files = ('dp.json', 'pt.json')
 
+    load_info = 0x02000ba0
     file_system_table = (-1, 0x02100498-0x02000000)
 
     text_contents = {
