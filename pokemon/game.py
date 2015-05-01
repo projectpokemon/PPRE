@@ -497,6 +497,7 @@ class XY(Game):
     evo_archive_file = 'a/2/1/5'
     personal_archive_file = 'a/2/1/8'
     wotbl_archive_file = 'a/2/1/4'
+    script_archive_file = 'a/0/1/1'
 
     def archive(self, filename):
         return GARC(open(os.path.join(self.files.directory, 'fs', filename)))
@@ -506,3 +507,4 @@ class ORAS(XY):
     idx = 2
     versions = {'OmegaRuby': 2, 'AlphaSapphire': 3}
     personal_archive_file = 'a/1/9/5'
+    script_archive_file = 'a/0/1/3'
