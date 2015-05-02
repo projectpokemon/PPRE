@@ -7,6 +7,7 @@ from collections import namedtuple
 from dispatch.events import Emitter
 
 from atomic import AtomicStruct
+from atomic.atomic_accelerator import AcceleratedAtomicStruct
 from util.iter import auto_iterate
 from util import lcm
 
@@ -719,6 +720,9 @@ class XEditable(Emitter, AtomicStruct):
     ----------
     keys : dict
         Mapping of restrictions
+    accelerated : Bool
+        If this object has a consistent structure, it can be built faster.
+        define() will only get called the first time for all instances.
 
     Methods
     -------
@@ -742,14 +746,21 @@ class XEditable(Emitter, AtomicStruct):
         looks matches the method's arguments
     """
     # __metaclass__ = abc.ABCMeta
+    accelerated = False
 
     def __init__(self, *args, **kwargs):
-        AtomicStruct.__init__(self)
         reader = kwargs.pop('reader', None)
-        self.define(*args, **kwargs)
-        if self._data is None and self._fields:
-            # Check if frozen and has things to freeze.
-            self.freeze()
+        if self.accelerated:
+            AcceleratedAtomicStruct.__init__(self)
+            if self._data is None:
+                self.define(*args, **kwargs)
+                AcceleratedAtomicStruct.freeze()
+        else:
+            AtomicStruct.__init__(self)
+            self.define(*args, **kwargs)
+            if self._data is None and self._fields:
+                # Check if frozen and has things to freeze.
+                self.freeze()
         if reader is not None:
             self.load(reader)
 
