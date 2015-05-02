@@ -435,10 +435,10 @@ class Editable(Emitter, AtomicStruct):
     def __init__(self, *args, **kwargs):
         reader = kwargs.pop('reader', None)
         if self.accelerated:
-            AcceleratedAtomicStruct.__init__(self)
+            AcceleratedAtomicStruct.initialize(self)
             if self._data is None:
                 self.define(*args, **kwargs)
-                AcceleratedAtomicStruct.freeze()
+                AcceleratedAtomicStruct.freeze(self)
         else:
             AtomicStruct.__init__(self)
             self.define(*args, **kwargs)

@@ -62,6 +62,8 @@ class SYMB(Editable):
 
 
 class InfoSEQ(Editable):
+    accelerated = True
+
     def define(self):
         self.uint16('file_id')
         self.uint16('u2')
@@ -75,12 +77,16 @@ class InfoSEQ(Editable):
 
 class InfoARC(Editable):
     """Info for both SEQARC and WAVEARC"""
+    accelerated = True
+
     def define(self):
         self.uint16('file_id')
         self.uint16('u2')
 
 
 class InfoBANK(Editable):
+    accelerated = True
+
     def define(self):
         self.uint16('file_id')
         self.uint16('u2')
@@ -88,12 +94,16 @@ class InfoBANK(Editable):
 
 
 class InfoPLAYER(Editable):
+    accelerated = True
+
     def define(self):
         self.uint32('u0')
         self.uint32('u4')
 
 
 class InfoGROUPEntry(Editable):
+    accelerated = True
+
     def define(self):
         self.uint32('type_')
         self.uint32('entry_id')
@@ -111,11 +121,15 @@ class InfoGROUP(Editable):
 
 
 class InfoPLAYER2(Editable):
+    accelerated = True
+
     def define(self):
         self.array('u0', self.uint8, length=24)
 
 
 class InfoSTRM(Editable):
+    accelerated = True
+
     def define(self):
         self.uint16('file_id')
         self.uint16('unknown')

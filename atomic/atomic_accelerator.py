@@ -29,22 +29,24 @@ class AcceleratedAtomicStruct(AtomicStruct):
     instead of using AtomicStruct's supered methods
 
     """
-    def __init__(self, name=None):
-        AtomicStruct.__init__(self, name)
+    @staticmethod
+    def initialize(atomic, name=None):
+        AtomicStruct.__init__(atomic, name)
         try:
-            entry = accelerated_cache[self._name]
+            entry = accelerated_cache[atomic._name]
         except KeyError:
             pass
         else:
             for attr in entry.__slots__:
-                setattr(self, attr, getattr(entry, attr))
-            self._data = self._type()
-            self.set_defaults()
+                setattr(atomic, attr, getattr(entry, attr))
+            atomic._data = atomic._type()
+            atomic.set_defaults()
 
-    def freeze(self):
-        if self._data is not None:
+    @staticmethod
+    def freeze(atomic):
+        if atomic._data is not None:
             return
-        AtomicStruct.freeze(self)
-        entry = accelerated_cache[self._name] = AtomicCacheEntry()
+        AtomicStruct.freeze(atomic)
+        entry = accelerated_cache[atomic._name] = AtomicCacheEntry()
         for attr in entry.__slots__:
-            setattr(entry, attr, getattr(self, attr))
+            setattr(entry, attr, getattr(atomic, attr))
