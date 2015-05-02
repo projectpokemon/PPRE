@@ -1072,8 +1072,12 @@ class XEditable(Emitter, AtomicStruct):
                 old_value.from_dict(value, merge)
             except AttributeError:
                 try:
-                    value[0]
+                    value[:0]
+                    if hasattr(value, 'strip'):
+                        # String handling
+                        raise TypeError
                 except TypeError:
+                    # TODO: handle dicts?
                     setattr(self, key, value)
                 else:
                     for i, subvalue in enumerate(value):

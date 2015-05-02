@@ -13,7 +13,7 @@ from ntr.overlay import OverlayTable
 from ctr.garc import GARC
 from util import cached_property, subclasses
 from util import BinaryIO
-from generic.editable import Editable
+from generic import Editable
 
 GAME_CODES = {
     'ADA': 'Diamond',
@@ -115,7 +115,7 @@ GAME_COLORS = {
 
 
 class Project(Editable):
-    def __init__(self):
+    def define(self):
         self.name = 'Project'
         self.restrict('name')
         self.description = 'Description'
@@ -127,7 +127,7 @@ class Project(Editable):
 
 
 class Files(Editable):
-    def __init__(self, directory):
+    def define(self, directory):
         self.base = ''
         self.restrict('base')
         self.directory = directory
@@ -142,6 +142,7 @@ class Game(Editable, Version):
     commands_files = ()
 
     def __init__(self):
+        Editable.__init__(self)
         self.files = None
         self.restrict('files')
         self.project = Project()
