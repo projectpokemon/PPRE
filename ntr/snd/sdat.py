@@ -161,9 +161,8 @@ class INFO(Editable):
                 continue
             reader.seek(start+record_ofs)
             num = reader.readUInt32()
-            entries = []
-            for j in range(num):
-                entries.append(self.record_classes[i](reader=reader))
+            entries = SizedCollection(self.record_classes[i]().base_struct, length=num)
+            entries.load(reader=reader)
             self.records[SYMB.record_names[i]] = entries
 
 
@@ -229,6 +228,7 @@ class SDAT(Archive, Editable):
                 self.symb, self.info, self.fat, self.file]):
             if not block_ofs.block_offset:
                 continue
+            print(block)
             reader.seek(start+block_ofs.block_offset)
             block.load(reader)
         self.file.files = []
