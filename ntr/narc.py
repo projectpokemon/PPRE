@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from atomic import AtomicStruct
 from generic.archive import ArchiveList
-from generic.editable import XEditable as Editable
+from generic import Editable
 from util.io import BinaryIO
 
 
@@ -211,7 +211,7 @@ class NARC(ArchiveList, Editable):
         writer = self.fimg.save(writer)
         writer.writeAlign(4)
         size = writer.tell()-start
-        with writer.seek(start+self.offset('size_')):
+        with writer.seek(start+self.get_offset('size_')):
             writer.writeUInt32(size)
         return writer
 
@@ -258,7 +258,7 @@ class FATB(Editable):
             writer.writeUInt32(entry.stop)
         writer.writeAlign(4)
         size = writer.tell()-start
-        with writer.seek(start+self.offset('size_')):
+        with writer.seek(start+self.get_offset('size_')):
             writer.writeUInt32(size)
         return writer
 
@@ -294,6 +294,6 @@ class FIMG(Editable):
             writer.write(self.files[file_id])
         writer.writeAlign(4)
         size = writer.tell()-start
-        with writer.seek(start+self.offset('size_')):
+        with writer.seek(start+self.get_offset('size_')):
             writer.writeUInt32(size)
         return writer
