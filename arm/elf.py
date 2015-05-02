@@ -39,7 +39,7 @@ class Section(object):
         if type == SectionHeader.TYPE_STRTAB:
             self.data.writeUInt8(0)
         elif type == SectionHeader.TYPE_SYMTAB:
-            self.header.entsize = Symbol(None).size()
+            self.header.entsize = Symbol(None).get_size()
 
 
 class Symbol(Editable):
@@ -122,7 +122,7 @@ class ELF(object):
         writer.writeUInt16(0x34)  # header size
         writer.writeUInt16(0)  # phentsize?
         writer.writeUInt16(0)  # phnum?
-        writer.writeUInt16(self.sections[0].header.size())  # shentsize
+        writer.writeUInt16(self.sections[0].header.get_size())  # shentsize
         writer.writeUInt16(len(self.sections))  # shnum
         writer.writeUInt16(1)  # shstrndx
         for section in self.sections:

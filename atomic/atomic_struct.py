@@ -514,24 +514,6 @@ class AtomicStruct(object):
         """
         return (name, self._type)
 
-    def size(self):
-        """Size of the data structure
-
-        Returns
-        -------
-        size : int
-
-        Raises
-        ------
-        TypeError
-            If this model is not yet frozen.
-        """
-        import warnings
-
-        warnings.warn('Use get_size() to avoid field conflicts',
-                      DeprecationWarning)
-        return ctypes.sizeof(self._data)
-
     def get_size(self):
         """Size of the data structure
 
@@ -663,7 +645,7 @@ class AtomicStruct(object):
             A new or modified writer that has this data in it
         """
         writer = writer if writer is not None else BinaryIO()
-        amount = self.size()
+        amount = self.get_size()
         writer.write(ctypes.string_at(ctypes.addressof(self._data),
                                       size=amount))
         return writer

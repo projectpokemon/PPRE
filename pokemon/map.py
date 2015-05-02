@@ -112,8 +112,8 @@ class Map(Editable):
     def load_id(self, map_id, shallow=False):
         with open(os.path.join(self.game.files.directory, 'arm9.dec.bin'))\
                 as handle:
-            handle.seek(self.game.map_table+map_id*self.size())
-            # data = handle.read(self.size())
+            handle.seek(self.game.map_table+map_id*self.get_size())
+            # data = handle.read(self.get_size())
             self.load(handle)
         self.code_name = self.code_names[map_id]
         self.name = self.names[self.map_name]
@@ -122,7 +122,7 @@ class Map(Editable):
         if 0 and self.encounter_idx != 0xFFFF:
             self.encounter.load(self.game.get_encounter(self.encounter_idx))
         else:
-            self.encounter.load('\x00'*self.encounter.size())
+            self.encounter.load('\x00'*self.encounter.get_size())
         self.text.load(self.game.get_text(self.text_idx))
         self.area_data.load(self.game.get_area_data(self.area_data_idx))
         self.script.load_text(self.text)
@@ -132,7 +132,7 @@ class Map(Editable):
     def commit(self, map_id, shallow=False):
         with open(os.path.join(self.game.files.directory, 'arm9.dec.bin'),
                   mode='r+') as handle:
-            handle.seek(self.game.map_table+map_id*self.size())
+            handle.seek(self.game.map_table+map_id*self.get_size())
             self.save(handle)
         if shallow:
             return
