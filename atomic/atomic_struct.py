@@ -326,7 +326,7 @@ class AtomicStruct(object):
         >>> atomic.uint32('c')
         >>> atomic.uint16('d')
         >>> atomic.freeze()
-        >>> atomic.offset('d', relative='b')
+        >>> atomic.get_offset('d', relative='b')
         7
         """
         if relative is None:
@@ -334,13 +334,6 @@ class AtomicStruct(object):
         else:
             base = self.get_offset(name)
         return getattr(self._type, name).offset - base
-
-    def offset(self, name, relative=None):
-        import warnings
-
-        warnings.warn('Use get_offset() to avoid field conflicts',
-                      DeprecationWarning)
-        return self.get_offset(name, relative)
 
     def uint8(self, name, **kwargs):
         return self._add(name, ctypes.c_uint8, **kwargs)
