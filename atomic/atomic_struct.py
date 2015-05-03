@@ -18,6 +18,9 @@ class AtomicExhaustionError(AtomicError):
     pass
 
 
+SIMULATING_PLACEHOLDER = object()
+
+
 class AtomicContext(object):
     def __init__(self, atomic, key, value=True, rel=False):
         self.atomic = atomic
@@ -91,6 +94,8 @@ class AtomicStruct(object):
         ----------
         name : string
             Identifier. This name should be unique across the struct.
+            if SIMULATING_PLACEHOLDER is passed, This field will not be
+            added.
         type_ : _CData type
         width : int, optional
             Number of bits wide
@@ -106,12 +111,13 @@ class AtomicStruct(object):
         AtomicError
             If something cannot be added.
         """
-        if not self.context['simulate']:
+        if name is not SIMULATING_PLACEHOLDER:
+            if self.context['simulate']:
+                raise AtomicError('Subtype is being simulated but '
+                                  'trying to generate fields. name={0}'
+                                  .format(name))
             if self._data is not None:
                 raise AtomicError('Frozen Atoms cannot be modified')
-            if name == '_':
-                raise AtomicError('Subtype is not being simulated when '
-                                  'fetched. base_obj={0}'.format(self))
             if 'width' in kwargs:
                 field = (name, type_, kwargs['width'])
             else:
@@ -395,7 +401,7 @@ class AtomicStruct(object):
         if base_obj is None:
             base_obj = self
         with base_obj.simulate():
-            return type_callable('_')[1]
+            return type_callable(SIMULATING_PLACEHOLDER)[1]
 
     def embed(self, name, type_callable, base_obj=None):
         """Embeds a type into the struct. The type's fields will be accessible
