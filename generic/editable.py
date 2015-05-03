@@ -8,13 +8,14 @@ from dispatch.events import Emitter
 
 from atomic import AtomicStruct
 from atomic.atomic_accelerator import AcceleratedAtomicStruct
+from atomic.atomic_struct import SIMULATING_PLACEHOLDER
 from util.iter import auto_iterate
 from util import lcm
 
 
 #: See Editable.restrict
 Restriction_ = namedtuple('Restriction', 'name min_value max_value min_length'
-                         ' max_length validator children')
+                          ' max_length validator children')
 
 
 class Restriction(object):
@@ -502,7 +503,7 @@ class Editable(Emitter, AtomicStruct):
         restriction = Restriction(name, **kwargs)
         if validator is not None:
             restriction.restrict(validator)
-        if not self.context['simulate']:
+        if name is not SIMULATING_PLACEHOLDER:
             self.keys[name] = restriction
         return restriction
 
