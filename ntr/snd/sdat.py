@@ -1,5 +1,7 @@
 """Sound Data Archive"""
 
+from itertools import izip
+
 from generic import Editable
 from generic.archive import Archive
 from generic.collection import SizedCollection
@@ -62,7 +64,7 @@ class SYMB(Editable):
 
 
 class InfoSEQ(Editable):
-    accelerated = True
+    # accelerated = True
 
     def define(self):
         self.uint16('file_id')
@@ -161,9 +163,29 @@ class INFO(Editable):
                 continue
             reader.seek(start+record_ofs)
             num = reader.readUInt32()
-            entries = SizedCollection(self.record_classes[i]().base_struct, length=num)
+            offsets = SizedCollection(self.uint32, length=num)
+            offsets.load(reader=reader)
+            first_entry = expected = reader.tell()-start
+            template_entry = self.record_classes[i]()
+            entries = SizedCollection(template_entry.base_struct,
+                                      length=num)
             entries.load(reader=reader)
-            self.records[SYMB.record_names[i]] = entries
+            entry_size = template_entry.get_size()
+            for offset in offsets.entries:
+                if offset != expected:
+                    break
+            else:
+                self.records[SYMB.record_names[i]] = entries
+                continue
+
+            new_entries = SizedCollection(self.record_classes[i]().base_struct,
+                                          length=num)
+            for idx, offset in enumerate(offsets.entries):
+                if not offset:  # what are these entries even?
+                    continue
+                target = (offset-first_entry)/entry_size
+                new_entries[idx] = entries.entries[target]
+            self.records[SYMB.record_names[i]] = new_entries
 
 
 class FAT(Editable):
@@ -217,7 +239,17 @@ class SDAT(Archive, Editable):
 
     @property
     def files(self):
-        return dict(zip(self.symb.entries, self.file.files))
+        files = {}
+        for name in SYMB.record_names:
+            try:
+                self.info.records[name][0].file_id
+            except:
+                continue
+            for name_parts, entry in izip(self.symb.records[name],
+                                          self.info.records[name]):
+                print(entry)
+                files['/'.join(name_parts)] = self.file.files[entry.file_id]
+        return files
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
