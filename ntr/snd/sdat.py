@@ -167,16 +167,21 @@ class INFO(Editable):
             offsets.load(reader=reader)
             first_entry = expected = reader.tell()-start
             template_entry = self.record_classes[i]()
-            entries = SizedCollection(template_entry.base_struct,
-                                      length=num)
-            entries.load(reader=reader)
             entry_size = template_entry.get_size()
             for offset in offsets.entries:
                 if offset != expected:
                     break
             else:
+                entries = SizedCollection(template_entry.base_struct,
+                                          length=num)
+                entries.load(reader=reader)
                 self.records[SYMB.record_names[i]] = entries
                 continue
+
+            adjusted_num = (max(offsets.entries[:]+[first_entry])-first_entry)/entry_size+1
+            entries = SizedCollection(template_entry.base_struct,
+                                      length=adjusted_num)
+            entries.load(reader=reader)
 
             new_entries = SizedCollection(self.record_classes[i]().base_struct,
                                           length=num)
