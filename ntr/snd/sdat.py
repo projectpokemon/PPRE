@@ -187,6 +187,7 @@ class INFO(Editable):
                                           length=num)
             for idx, offset in enumerate(offsets.entries):
                 if not offset:  # what are these entries even?
+                    new_entries[idx].file_id = 0
                     continue
                 target = (offset-first_entry)/entry_size
                 new_entries[idx] = entries.entries[target]
@@ -252,8 +253,8 @@ class SDAT(Archive, Editable):
                 continue
             for name_parts, entry in izip(self.symb.records[name],
                                           self.info.records[name]):
-                print(entry)
-                files['/'.join(name_parts)] = self.file.files[entry.file_id]
+                data = self.file.files[entry.file_id]
+                files['/'.join(name_parts)+'.'+data[:4].lower()] = data
         return files
 
     def load(self, reader):
@@ -265,7 +266,6 @@ class SDAT(Archive, Editable):
                 self.symb, self.info, self.fat, self.file]):
             if not block_ofs.block_offset:
                 continue
-            print(block)
             reader.seek(start+block_ofs.block_offset)
             block.load(reader)
         self.file.files = []
