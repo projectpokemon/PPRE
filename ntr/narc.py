@@ -265,6 +265,7 @@ class FATB(Editable):
 
     def save(self, writer):
         start = writer.tell()
+        self._data.num = self.num
         writer = Editable.save(self, writer)
         for entry in self.entries:
             writer.writeUInt32(entry.start)
