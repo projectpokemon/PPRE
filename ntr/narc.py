@@ -215,6 +215,19 @@ class NARC(ArchiveList, Editable):
             writer.writeUInt32(size)
         return writer
 
+    def resize(self, num):
+        """Changes the number of files in the NARC. This needs to be done
+        before freely addressing later file entries
+
+        Parameters
+        ----------
+        num : int
+            Number to increase/decrease to
+        """
+        while len(self) < num:
+            self.add()
+        self.fimg.files = self.files[:num]
+
 
 class FATB(Editable):
     def __init__(self, narc):
