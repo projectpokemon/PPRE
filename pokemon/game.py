@@ -3,9 +3,9 @@ import functools
 import json
 import os
 
-import ndstool
 from compression import blz
 from ctr import ctrtool
+from ntr import ndstool
 from ctr.header_bin import HeaderBin as CTRHeaderBin
 from ntr.header_bin import HeaderBin as NTRHeaderBin
 from ntr.narc import NARC
