@@ -123,6 +123,9 @@ class LandDataMap(Editable):
             x = obj.x + 0x10
             y = obj.y + 0x10
             for i in range(res-2):
-                pix[x*res+i+2, y*res+res-1] = color
-                pix[x*res+res-1, y*res+i+2] = color
+                try:
+                    pix[x*res+i+2, y*res+res-1] = color
+                    pix[x*res+res-1, y*res+i+2] = color
+                except:
+                    pass  # Don't bother with objects off-map
         return image
