@@ -24,16 +24,17 @@ class Map(Editable):
     def define(self, game):
         self.game = game
         if game <= Game.from_string('Platinum'):
-            self.uint16('u0')
+            self.uint16('u0_0', width=8)
+            self.uint16('area_data_idx', width=8)
             self.uint16('u2')
             self.uint16('script_idx')
-            self.uint16('u6')
-            self.uint16('text_idx')
-            self.uint16('ua')
-            self.uint16('uc')
+            self.uint16('script_condition_idx')
+            self.uint16('text_idx', default=0)
+            self.uint16('music_orig_idx')
+            self.uint16('music_copy_idx')  # Actually differs here?
             self.uint16('encounter_idx')
             self.uint16('event_idx')
-            self.uint16('u12')
+            self.uint16('map_name')
             self.uint16('u14')
             self.uint16('u16')
         elif game <= Game.from_string('SoulSilver'):
