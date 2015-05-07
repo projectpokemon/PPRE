@@ -304,10 +304,10 @@ class Game(Editable, Version):
     def locale_text_id(self, key):
         return self.text_contents[REGION_CODES[self.region_code]][key]
 
-    def map(self, map_id):
+    def map(self, map_id, shallow=False):
         from pokemon.map import Map
         m = Map(self)
-        m.load_id(map_id)
+        m.load_id(map_id, shallow)
         return m
 
     @cached_property
