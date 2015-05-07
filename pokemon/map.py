@@ -3,7 +3,7 @@ import os
 import re
 
 from generic.editable import XEditable as Editable
-from pokemon.field.script import Script
+from pokemon.field.script import Script, ScriptConditions
 from pokemon.field.encounters import Encounters
 from pokemon.field.zone_events import ZoneEvents
 from pokemon.field.area.area_data import AreaData
@@ -45,7 +45,7 @@ class Map(Editable):
             self.uint16('u2_2', width=6)
             self.uint16('matrix_idx')
             self.uint16('script_idx')
-            self.uint16('u8')
+            self.uint16('script_condition_idx')
             self.uint16('text_idx', default=3)
             self.uint16('music_orig_idx')
             self.uint16('music_copy_idx')
@@ -68,6 +68,7 @@ class Map(Editable):
             self.uint32('u14_12', width=1)  # 31
         self.name = ''
         self.script = Script(game)
+        self.script_conditions = ScriptConditions(game)
         self.encounter = Encounters(game)
         self.events = ZoneEvents(game)
         self.text = Text(game)
@@ -126,6 +127,7 @@ class Map(Editable):
         self.text.load(self.game.get_text(self.text_idx))
         self.area_data.load(self.game.get_area_data(self.area_data_idx))
         self.script.load_text(self.text)
+        self.script_conditions.load(self.game.get_script(self.script_condition_idx))
         self.script.load(self.game.get_script(self.script_idx))
         self.events.load(self.game.get_event(self.event_idx))
 
@@ -144,5 +146,6 @@ class Map(Editable):
         self.game.set_text(self.text_idx, self.text)
         self.game.set_area_data(self.area_data_idx, self.area_data)
         self.game.set_script(self.script_idx, self.script)
+        self.game.set_script(self.script_condition_idx, self.script_conditions)
         self.game.set_event(self.event_idx, self.events)
         # TODO: encounters

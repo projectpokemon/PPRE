@@ -9,6 +9,7 @@ from compileengine import Decompiler, Variable, ExpressionBlock
 from compileengine.engine import Engine, Function, VariableCollection, FunctionCollection
 import six
 
+from generic import Editable
 from util.io import BinaryIO
 
 
@@ -760,3 +761,43 @@ class Script(object):
                 scr_idx += 1
             self.compiled_scripts.append(self.engine.compile(func))
             scr_idx += 1
+
+
+class ScriptCondition(Editable):
+    def define(self):
+        self.uint16('var')
+        self.uint16('value')
+        self.uint16('script')
+
+
+class ScriptConditions(Editable):
+    """Script conditions are settings that run alongside a script on a map.
+    If the condition is met, the script referred to is activated.
+
+    Conditions are located in the same archive as Scripts (they are
+    not actually parseable as scripts).
+    """
+    def define(self, game):
+        self.game = game
+        self.uint32('u0')
+        self.conditions = []
+
+    def load(self, reader):
+        reader = BinaryIO.reader(reader)
+        self.u0 = reader.readUInt32()
+        self.conditions = []
+        while True:
+            try:
+                self.conditions.append(ScriptCondition().load(reader))
+            except:
+                break
+        self.__getitem__ = self.conditions.__getitem__
+        self.__setitem__ = self.conditions.__setitem__
+
+    def save(self, writer=None):
+        writer = BinaryIO.writer(writer)
+        writer.writeUInt32(self.u0)
+        for cond in self.conditions:
+            writer = cond.save(writer)
+        writer.writeAlign(4)
+        return writer

@@ -1,5 +1,5 @@
 
 from archive import Archive, ArchiveList
-from editable import XEditable as Editable
+from editable import Editable
 
 __all__ = ['Archive', 'ArchiveList', 'Editable']
