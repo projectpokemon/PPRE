@@ -779,24 +779,38 @@ class ScriptConditions(Editable):
     """
     def define(self, game):
         self.game = game
-        self.uint32('u0')
+        self.uint16('u0')
+        self.uint16('u2')
+        self.uint16('u4')
         self.conditions = []
+        self.restrict('conditions')
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
-        self.u0 = reader.readUInt32()
         self.conditions = []
-        while True:
-            try:
-                self.conditions.append(ScriptCondition().load(reader))
-            except:
-                break
         self.__getitem__ = self.conditions.__getitem__
         self.__setitem__ = self.conditions.__setitem__
+        self.u0 = reader.readUInt16()
+        self.u2 = reader.readUInt16()
+        try:
+            self.u4 = reader.readUInt16()
+        except:
+            self.u4 = 0
+            return
+        while True:
+            try:
+                cond = ScriptCondition()
+                cond.load(reader)
+                self.conditions.append(cond)
+            except:
+                break
 
     def save(self, writer=None):
         writer = BinaryIO.writer(writer)
-        writer.writeUInt32(self.u0)
+        writer.writeUInt16(self.u0)
+        writer.writeUInt16(self.u2)
+        if self.conditions:
+            writer.writeUInt16(self.u4)
         for cond in self.conditions:
             writer = cond.save(writer)
         writer.writeAlign(4)
