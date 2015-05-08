@@ -479,7 +479,8 @@ class MovementDecompiler(Decompiler):
         command = self.movements.get(cmd)
         if command is None:
             command = 'mov_{0}'.format(cmd)
-        return [self.func(command, namespace='movement.')]
+        count = self.read_value(2)
+        return [self.func(command, count, namespace='movement.')]
 
 
 class ScriptEngine(Engine):
@@ -708,7 +709,7 @@ class Script(object):
             cmd = int(cmd, 0)
             self.commands['movements'][cmd] = command
             self.engine.movements._cache[command] = Command.from_dict(cmd, {
-                'args': [],
+                'args': [2],
                 'name': command
             })
             self.engine.movements._cache[command].engine = self.engine
