@@ -562,6 +562,8 @@ class Script(object):
         self.text = None
         self.game = game
         self.engine = ScriptEngine()
+        self.script_start = 1  # First script ID. Scripts are 1-indexed
+        self.function_start = 1  # First function ID
         self.load_commands(os.path.join(os.path.dirname(__file__), '..', '..',
                                         'data', 'commands', 'base.json'))
         try:
@@ -610,7 +612,7 @@ class Script(object):
         if not self.offsets:
             return
 
-        for scrnum, offset in enumerate(self.offsets):
+        for scrnum, offset in enumerate(self.offsets, self.script_start):
             with reader.seek(offset):
                 script = ScriptDecompiler(reader, self)
                 script.parse()
@@ -628,7 +630,7 @@ class Script(object):
                         script = ScriptDecompiler(reader, self)
                         script.parse()
                         self.func_map[offset][0] = script
-        cur_id = 0
+        cur_id = self.function_start
         embedded_functions = []
         for (offset, (func, count, func_id)) in self.func_map.items():
             if count > 1:
@@ -755,7 +757,7 @@ class Script(object):
         for name, func in dynamic_script.__dict__.items():
             if name[:7] == 'script_':
                 script_funcs[int(name[7:])] = func
-        scr_idx = 0
+        scr_idx = self.script_start
         self.compiled_scripts = []
 
         def script_stub(engine):
