@@ -27,6 +27,11 @@ class CommandMetaRegistry(type):
 
 
 class CommandRet(object):
+    __slots__ = ('command',
+                 'args',
+                 'current_arg',
+                 'final')
+
     def __init__(self, command):
         self.command = command
         self.args = []
@@ -209,6 +214,8 @@ class Command(Function):
 
 
 class VariableCompare(object):
+    __slots__ = ('arg1', 'arg2', 'operator')
+
     def __init__(self, arg1, arg2, operator):
         self.arg1 = arg1
         self.arg2 = arg2
