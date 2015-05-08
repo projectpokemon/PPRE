@@ -544,7 +544,8 @@ class Script(object):
     Attributes
     ----------
     scripts : list of ScriptDecompiler
-        Decompiled scripts
+        Decompiled scripts. scripts[0] will refer to script_1 because
+        scripts are 1-indexed
     commands : dict
         Command map
 
@@ -581,6 +582,21 @@ class Script(object):
                                             'commands.json'))
         except IOError:
             pass
+
+    def by_id(self, script_id):
+        """Return the script by it's script_id
+
+        Parameters
+        ----------
+        script_id : int
+            Script ID. Finds the script whose name is script_{script_id}
+            from self.scripts
+
+        Returns
+        -------
+        script : ScriptDecompiler
+        """
+        return self.scripts[script_id-self.script_start]
 
     def load(self, reader):
         self.offsets = []
