@@ -37,6 +37,7 @@ class Map(Editable):
             self.uint16('map_name')
             self.uint16('u14')
             self.uint16('u16')
+            self.no_encounters = 0xFFFF
         elif game <= Game.from_string('SoulSilver'):
             # chunks derived from 0203b290
             self.uint16('encounter_idx', default=0xFF, width=8)
@@ -67,6 +68,7 @@ class Map(Editable):
             self.uint32('circle_focus', width=1)  # 29, dark ring shows around outside of map
             self.uint32('u14_11', width=1)  # 30
             self.uint32('u14_12', width=1)  # 31
+            self.no_encounters = 0xFF
         self.name = ''
         self.script = Script(game)
         self.script_conditions = ScriptConditions(game)
@@ -121,7 +123,7 @@ class Map(Editable):
         self.name = self.names[self.map_name]
         if shallow:
             return
-        if 0 and self.encounter_idx != 0xFFFF:
+        if self.encounter_idx != self.no_encounters:
             self.encounter.load(self.game.get_encounter(self.encounter_idx))
         else:
             self.encounter.load('\x00'*self.encounter.get_size())
