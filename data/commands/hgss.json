@@ -2135,10 +2135,16 @@
   }, 
   "380": {
     "args": [
-      2, 
+      "var",
       2
     ], 
-    "name": "StoreIdPlayer"
+    "returns": [
+      0
+    ],
+    "description": "Get a random number",
+    "name": "random",
+    "deprecated": ["StoreIdPlayer"],
+    "aliases": ["StoreIdPlayer"]
   }, 
   "381": {
     "args": [
