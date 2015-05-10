@@ -121,8 +121,10 @@ class Map(Editable):
             self.load(handle)
         self.code_name = self.code_names[map_id]
         self.name = self.names[self.map_name]
-        if shallow:
-            return
+        if not shallow:
+            self.full_load()
+
+    def full_load(self):
         if self.encounter_idx != self.no_encounters:
             self.encounter.load(self.game.get_encounter(self.encounter_idx))
         else:
