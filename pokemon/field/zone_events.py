@@ -67,16 +67,20 @@ class ZoneEvents(Editable):
         self.game = game
         self.uint32('num_furniture')
         # self.array('furniture', Furniture().base_struct)
+        self.furniture = []
+        self.restrict('furniture')
         self.uint32('num_overworlds')
         # self.array('overworlds', Overworld().base_struct)
+        self.overworlds = []
+        self.restrict('overworlds')
         self.uint32('num_warps')
         # self.array('warps', Warp().base_struct)
+        self.warps = []
+        self.restrict('warps')
         self.uint32('num_triggers')
         # self.array('triggers', Trigger().base_struct)
-        self.furniture = []
-        self.overworlds = []
-        self.warps = []
         self.triggers = []
+        self.restrict('triggers')
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)

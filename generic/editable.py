@@ -639,7 +639,9 @@ class Editable(Emitter, AtomicStruct):
             except AttributeError:
                 pass
             else:
-                if self._data is None:
+                if name in self.__dict__:
+                    AtomicStruct.__setattr__(self, name, value)
+                elif self._data is None:
                     super(XEditable, self).__setattr__(name, value)
                 else:
                     setattr(self._data, name, value)
