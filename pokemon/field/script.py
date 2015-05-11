@@ -811,6 +811,12 @@ class ScriptConditions(Editable):
         self.conditions = []
         self.restrict('conditions')
 
+    def reset(self):
+        self.u0 = self.u2 = self.u4 = 0
+        self.conditions = []
+        self.__getitem__ = self.conditions.__getitem__
+        self.__setitem__ = self.conditions.__setitem__
+
     def load(self, reader):
         reader = BinaryIO.reader(reader)
         self.conditions = []
