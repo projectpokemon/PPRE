@@ -817,6 +817,27 @@ class ScriptConditions(Editable):
         self.__getitem__ = self.conditions.__getitem__
         self.__setitem__ = self.conditions.__setitem__
 
+    def add_condition(self, var, value, script):
+        """Adds a Script Condition
+
+        Parameters
+        ----------
+        var : int or Variable
+            var id or var itself
+        value : int
+            variable value which ocndition meets
+        script : int
+            Script ID to be run when condition is met
+        """
+        cond = ScriptCondition()
+        try:
+            cond.var = var.id
+        except AttributeError:
+            cond.var = int(var)
+        cond.value = value
+        cond.script = script
+        self.conditions.append(cond)
+
     def load(self, reader):
         reader = BinaryIO.reader(reader)
         self.conditions = []
