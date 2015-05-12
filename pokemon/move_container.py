@@ -10,6 +10,7 @@ class Move(Editable):
         self.restrict('waza')
         self.name = ''
         self.names = game.text(game.locale_text_id('move_names'))
+        self.restrict('name')
 
     def load_id(self, move_id):
         self.waza.load(self.game.get_waza(move_id))
