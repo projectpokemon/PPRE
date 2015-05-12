@@ -354,6 +354,7 @@ class DP(Game):
     item_archive_file = 'itemtool/itemdata/item_data.narc'
     berry_archive_file = 'itemtool/itemdata/nuts_data.narc'
     text_archive_file = 'msgdata/msg.narc'
+    font_archive_file = 'graphic/font.narc'
     trainer_archive_file = 'poketool/trainer/trdata.narc'
     trainer_pokemon_archive_file = 'poketool/trainer/trpoke.narc'
     battle_tower_trainer_archive_file = 'battle/b_tower/btdtr.narc'
@@ -388,6 +389,8 @@ class Pt(DP):
     waza_archive_file = 'poketool/waza/pl_waza_tbl.narc'
     encounter_archive_file = 'fielddata/encountdata/pl_enc_data.narc'
     item_archive_file = 'itemtool/itemdata/pl_item_data.narc'
+    font_archive_file = 'graphic/pl_font.narc'
+
     commands_files = ('dp.json', 'pt.json')
 
     load_info = 0x02000ba0
@@ -418,6 +421,7 @@ class HGSS(Game):
     mapname_file = 'fielddata/maptable/mapname.bin'
     script_archive_file = 'a/0/1/2'
     text_archive_file = 'a/0/2/7'
+    font_archive_file = 'a/0/1/6'
     mmodel_archive_file = 'a/0/8/1'
     partner_appearance_archive_file = 'a/1/4/1'
 
