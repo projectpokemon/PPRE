@@ -477,6 +477,7 @@ class BW(Game):
     item_archive_file = 'a/0/2/4'
     menu_archive_file = 'a/0/0/2'
     text_archive_file = 'a/0/0/3'
+    font_archive_file = 'a/0/2/3'
 
     load_info = 0x2004f70
 
