@@ -429,6 +429,7 @@ class HGSS(Game):
     overworld_sprite_table = (1, 0x22074a2-0x021e5900, 993)
     max_forme_table = (-1, 0x020fe8d0-0x02000000, 493)  # fe8d4-4
     gender_forme_table = (-1, 0x020fecaa-0x02000000, 493)  # fecae-4
+    type_icon_table = (-1, 0x02100048-0x02000000, 23)
     commands_files = ('hgss.json', )
 
     text_contents = {
