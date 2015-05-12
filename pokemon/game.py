@@ -92,6 +92,15 @@ class Version(object):
                     raise ValueError('Unknown version: {0}'.format(name))
         return Version(gen, idx)
 
+    def is_dpp(self):
+        return self.gen == 4 and self.idx < 3
+
+    def is_hgss(self):
+        return self.gen == 4 and self.idx > 2
+
+    def is_gen(self, gen):
+        return self.gen == gen
+
 
 GEN_IV = Version(4)
 GEN_V = Version(5)
@@ -383,7 +392,7 @@ class DP(Game):
 
 
 class Pt(DP):
-    idx = 3
+    idx = 2
     versions = {'Platinum': 2}
     personal_archive_file = 'poketool/personal/pl_personal.narc'
     waza_archive_file = 'poketool/waza/pl_waza_tbl.narc'
