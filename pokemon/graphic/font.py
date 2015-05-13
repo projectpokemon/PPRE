@@ -1,4 +1,6 @@
 
+import re
+
 from PIL import Image
 
 from atomic.atomic_struct import SIMULATING_PLACEHOLDER
@@ -178,3 +180,54 @@ CHARS {num}
             bdf += entries[ucode]
         bdf += 'ENDFONT\n'
         return bdf
+
+    def from_bdf(self, handle):
+        """Loads a BDF font file"""
+        try:
+            reader = BinaryIO.reader(handle)
+            assert reader.readline().split(' ')[0] == 'STARTFONT'
+        except:
+            raise ValueError('Expected BDF handle to be loaded')
+        # Skip everything up to the CHARS
+        while True:
+            line = reader.readline()
+            if line.startswith('CHARS'):
+                num = int(line.strip('\n').split(' ')[1])
+                break
+        startchar_re = re.compile('^STARTCHAR U?\+?([0-9A-F]+)')
+        bbox_re = re.compile('^BBX ([0-9]+) ([0-9]+) (-?[0-9]+) (-?[0-9]+)')
+        encoding_re = re.compile('^ENCODING (?:-1 )?([0-9]+)')
+        entries = {}
+        while num > 0:
+            while True:
+                line = reader.readline()
+                match = startchar_re.match(line)
+                if not match:
+                    continue
+                ucode = int(match.group(1), 16)
+                break
+            entries[ucode] = entry = Glyph()
+            ecode = None
+            width = height = None
+            while True:
+                line = reader.readline()
+                if line.startswith('ENDCHAR'):
+                    break
+                if line.startswith('STARTCHAR'):
+                    # WARNING: Overflowed
+                    break
+                match = encoding_re.match(line)
+                if match:
+                    ecode = int(match.group(1))
+                    continue
+                match = bbox_re.match(line)
+                if match:
+                    width = match.group(1)-match.group(3)
+                    height = match.group(2)-match.group(4)
+                if line.startswith('BITMAP'):
+                    if width is None:
+                        # WARNING: BBX not set
+                        continue
+                    # TODO: complete this
+                    raise NotImplementedError()
+                    continue
