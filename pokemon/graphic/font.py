@@ -105,12 +105,12 @@ class Font(Editable):
         self.uint32('headersize', default=0x10)
         self.uint32('footer_offset')
         self.uint32('num')
-        self.uint8('cell_width')
-        self.uint8('cell_height')
-        self.uint8('ue')  # baseline from bottom?
-        self.uint8('uf')  # bit depth?
+        self.uint8('cell_width', default=0x10)
+        self.uint8('cell_height', default=0x10)
+        self.uint8('ue', default=0x2)  # bit depth?
+        self.uint8('uf', default=0x2)  # ?
         self.glyphs = []
-        self.widths = []  # Footer array
+        self.widths = []
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
@@ -125,7 +125,21 @@ class Font(Editable):
         for i in range(self.num):
             self.widths.append(reader.readUInt8())
 
+    def save(self, writer=None):
+        writer = BinaryIO.writer(writer)
+        start = writer.tell()
+        self.num = len(self.glyphs)
+        base_glyph = Glyph()
+        self.footer_offset = base_glyph.get_size()*self.num+self.headersize
+        writer = Editable.save(writer)
+        writer = self.glyphs.save(writer)
+        for i, glyph in enumerate(self.glyphs):
+            self.widths[i] = width = glyph.get_bbox()[0]
+            writer.writeUInt8(width)
+        return writer
+
     def to_bdf(self):
+        """Returns the contents of a BDF font file"""
         table = load_table()
         entries = {}
         for glyph_id, glyph in enumerate(self.glyphs):
