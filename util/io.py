@@ -163,23 +163,6 @@ class BinaryIO(StringIO):
         else:
             self.write(chars[:nullidx+1])
 
-    def readline(self):
-        """Reads a line up-to and including its line terminator.
-
-        The only terminator handled is \n here.
-
-        Returns
-        -------
-        line : string
-        """
-        chars = ''
-        while True:
-            char = self.read(1)
-            chars += char
-            if char == '\n':
-                break
-        return chars
-
     def seek(self, offset, whence=0):
         """Seeks to the given offset
 
