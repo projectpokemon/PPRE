@@ -170,3 +170,31 @@ class ELF(object):
         self.symtab.data.write(symbol.save().getvalue())
         self.symtab.data.writeAlign(4)
         return symbol
+
+    def __add__(self, other):
+        try:
+            if self.entry <= other.entry:
+                base = self
+            else:
+                base = other
+                other = self
+        except AttributeError:
+            raise NotImplementedError()
+        for section in other.sections[4:]:
+            base.add_section(section)
+        for symbol in other.symbols[4:]:
+            name = symbol.namestring
+            for added in base.symbols:
+                if added.name == name:
+                    noconflict = 2
+                    while True:
+                        name = '{0}_{1}'.format(symbol.namestring, noconflict)
+                        for added in base.symbols:
+                            if added.name == name:
+                                break
+                        else:
+                            break
+                        noconflict += 1
+                    break
+            base.add_symbol(symbol.namestring, symbol.value, symbol.type_)
+        return base
