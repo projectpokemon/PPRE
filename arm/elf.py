@@ -196,5 +196,5 @@ class ELF(object):
                             break
                         noconflict += 1
                     break
-            base.add_symbol(symbol.namestring, symbol.value, symbol.type_)
+            base.add_symbol(name, symbol.value, symbol.type_)
         return base

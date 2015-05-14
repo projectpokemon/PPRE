@@ -25,21 +25,24 @@ class Overlay(Editable):
         else:
             self.reserved &= ~(1 << 24)
 
-    def to_object_file(self, game, handle):
+    def to_binary_object(self, game):
         """Converts an overlay to an object file loaded at the proper offsets
 
         Parameters
         ----------
         game : Game
             Game to load overlays from
-        handle : writable
-            Output handle
+
+        Returns
+        -------
+        elf : ELF
+            binary
         """
         elf = ELF()
         with game.open('overlays_dez/overlay_{0:04}.bin'.format(self.id))\
                 as overlay:
             elf.add_binary(overlay, address=self.address)
-        elf.to_file(handle)
+        return elf
 
 
 class OverlayTable(Editable):
