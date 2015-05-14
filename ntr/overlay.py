@@ -9,8 +9,8 @@ class Overlay(Editable):
         self.uint32('address')
         self.uint32('size')
         self.uint32('bss_size')
-        self.uint32('start')
-        self.uint32('end')
+        self.uint32('init_start')  # Pointer to the first initializer function.
+        self.uint32('init_end')
         self.uint32('file_id')
         self.uint32('reserved')
 
