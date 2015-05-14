@@ -41,7 +41,8 @@ class Overlay(Editable):
         elf = ELF()
         with game.open('overlays_dez/overlay_{0:04}.bin'.format(self.id))\
                 as overlay:
-            elf.add_binary(overlay, address=self.address)
+            elf.add_binary(overlay, name='overlay_0x{0:04X}'.format(self.id),
+                           address=self.address)
         return elf
 
 

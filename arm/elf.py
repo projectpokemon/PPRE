@@ -78,14 +78,16 @@ class Symbol(Editable):
 
 
 class ELF(object):
-    """
+    """Binary executable container format with symbol table
 
     Attributes
     ----------
-    binary : io instance
-        The main binary
-    symbols : list
-        List of (name, offset, type) symbols to be added
+    entry : int
+        Executable entry point
+    sections : list of Section
+        List of sections to be added
+    symbols : list of Symbol
+        List of symbols to be added
     """
     def __init__(self):
         self.symbols = []
@@ -103,6 +105,13 @@ class ELF(object):
         undef.shndx = 0
 
     def to_file(self, handle):
+        """Writes ELF to a writable file
+
+        Parameters
+        ----------
+        handle : writable
+            Output to write to
+        """
         writer = BinaryIO.adapter(handle)
         writer.writeUInt32(ELF_MAGIC)
         writer.writeUInt8(1)  # 32 bit
@@ -172,6 +181,13 @@ class ELF(object):
         return symbol
 
     def __add__(self, other):
+        """Add two ELF binaries together into one
+
+        Returns
+        -------
+        elf : ELF
+            The modified ELF
+        """
         try:
             if self.entry <= other.entry:
                 base = self
@@ -179,18 +195,18 @@ class ELF(object):
                 base = other
                 other = self
         except AttributeError:
-            raise NotImplementedError()
+            return NotImplemented
         for section in other.sections[4:]:
             base.add_section(section)
-        for symbol in other.symbols[4:]:
+        for symbol in other.symbols[1:]:
             name = symbol.namestring
             for added in base.symbols:
-                if added.name == name:
+                if added.namestring == name:
                     noconflict = 2
                     while True:
                         name = '{0}_{1}'.format(symbol.namestring, noconflict)
                         for added in base.symbols:
-                            if added.name == name:
+                            if added.namestring == name:
                                 break
                         else:
                             break
