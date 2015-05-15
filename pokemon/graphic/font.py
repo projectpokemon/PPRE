@@ -231,3 +231,23 @@ CHARS {num}
                     # TODO: complete this
                     raise NotImplementedError()
                     continue
+
+if __name__ == '__main__':
+    import sys
+    from pokemon import Game
+
+    try:
+        game = Game.from_workspace(sys.argv[1])
+        command = sys.argv[2]
+        assert command in ('--import', '--export')
+        filename = sys.argv[3]
+    except:
+        print('Usage: {0} <workspace/> < --import| --export> <filename.bdf>'
+              .format(sys.argv[0]))
+        exit()
+    font = Font(reader=game.font_archive.files[0])
+    if command == '--export':
+        with open(filename, 'w') as handle:
+            handle.write(font.to_bdf())
+    else:
+        raise NotImplementedError()
