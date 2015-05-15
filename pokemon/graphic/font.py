@@ -75,6 +75,21 @@ class Glyph(Editable):
                 y += 1
         return '\n'.join(lines)
 
+    def set_line(self, y, width, line):
+        tile_y = y/8
+        sub_y = y % 8
+        x = 2
+        line >>= -(width*2) % 8
+        for tile_x in range(2):
+            tile = 0
+            for sub_x in range(8)[::-1]:
+                if x > width*2:
+                    break
+                val = line & 0x3
+                line >>= 3
+                x += 2
+            self.tiles[tile_y*2+tile_x][sub_y] = tile
+
     def get_bbox(self):
         """Returns the bounding region of the Glyph
 
@@ -212,7 +227,9 @@ CHARS {num}
         startchar_re = re.compile('^STARTCHAR U?\+?([0-9A-F]+)')
         bbox_re = re.compile('^BBX ([0-9]+) ([0-9]+) (-?[0-9]+) (-?[0-9]+)')
         encoding_re = re.compile('^ENCODING (?:-1 )?([0-9]+)')
+        bits_re = re.compile('^BITS_?PER_?PIXEL_? (1|2|4|8|16|32)')
         entries = {}
+        bpp = 1
         while num > 0:
             while True:
                 line = reader.readline()
@@ -235,17 +252,30 @@ CHARS {num}
                 if match:
                     ecode = int(match.group(1))
                     continue
+                match = bits_re.match(line)
+                if match:
+                    bpp = int(match.group(1))
+                    continue
                 match = bbox_re.match(line)
                 if match:
-                    width = match.group(1)-match.group(3)
-                    height = match.group(2)-match.group(4)
+                    width = int(match.group(1))-int(match.group(3))
+                    height = int(match.group(2))-int(match.group(4))
                 if line.startswith('BITMAP'):
                     if width is None:
                         # WARNING: BBX not set
                         continue
-                    # TODO: complete this
-                    raise NotImplementedError()
-                    continue
+                    if bpp != 2:
+                        # WARNING: not 2bpp
+                        continue
+                    for y in range(height):
+                        line = reader.readline()
+                        if line.startswith('ENDCHAR'):
+                            break
+                        entry.set_line(y, width, int(line, 16))
+                    else:
+                        continue
+                    break
+            num -= 1
 
 if __name__ == '__main__':
     import sys
@@ -264,5 +294,8 @@ if __name__ == '__main__':
     if command == '--export':
         with open(filename, 'w') as handle:
             handle.write(font.to_bdf())
+    elif command == '--import':
+        with open(filename) as handle:
+            font.from_bdf(handle)
     else:
         raise NotImplementedError()
