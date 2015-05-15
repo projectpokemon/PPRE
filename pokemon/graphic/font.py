@@ -17,6 +17,8 @@ palette = (
     (0xCC, 0xCC, 0xCC, 255),
 )
 
+palette_2bpp = (0, 3, 2, 1)
+
 
 class Glyph(Editable):
     def define(self):
@@ -51,17 +53,22 @@ class Glyph(Editable):
                 elif y > 16-y_ofs:
                     break"""
                 line = 0
-                x = 1
+                x = 2  # x = 1
                 for tile_x in range(2):
                     tile = self.tiles[tile_y*2+tile_x][sub_y]
                     for sub_x in range(8)[::-1]:
-                        if x > width:
+                        if x > width*2:
                             break
-                        if (tile >> (sub_x*2)) & 0x3 == 1:
+                        """if (tile >> (sub_x*2)) & 0x3 == 1:
                             # HACK: BDF only supports 1bpp! Only keeping main
                             line |= 1
                         line <<= 1
                         x += 1
+                        """
+                        val = (tile >> (sub_x*2)) & 0x3
+                        line |= palette_2bpp[val]
+                        line <<= 2
+                        x += 2
                 line <<= -x % 8
                 x += -x % 8
                 lines.append('{line:0{fill}X}'.format(line=line, fill=x/4))
@@ -166,11 +173,12 @@ ENDCHAR
                 # height=height-2, x_ofs=x_ofs, y_ofs=y_ofs-2,
                 bitmap=glyph.bdf_bitmap(width))
 
-        bdf = """STARTFONT 2.1
+        bdf = """STARTFONT 2.3
 FONT -ppre-pokemon-native--16-160-75-75
 SIZE 16 75 75
 FONTBOUNDINGBOX 16 16 0 0
-STARTPROPERTIES 2
+BITS_PER_PIXEL 2
+STARTPROPERTIES 3
 FONT_ASCENT 16
 FONT_DESCENT 0
 ENDPROPERTIES
