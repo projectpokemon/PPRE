@@ -147,6 +147,13 @@ class Font(Editable):
             writer.writeUInt8(width)
         return writer
 
+    def resize(self, num):
+        self.glyphs.resize(num)
+        new_widths = [0]*num
+        old_num = len(self.widths)
+        self.widths = self.widths+new_widths[old_num:]
+        self.widths = self.widths[:num]
+
     def to_bdf(self):
         """Returns the contents of a BDF font file"""
         table = load_table()
@@ -156,12 +163,12 @@ class Font(Editable):
                 char = table[glyph_id+1].decode('unicode-escape')
                 if char[:2] == '\\x':
                     char = chr(int(char[2], 16))
+                ucode = ord(char)
             except:
-                ucode = 0
+                ucode = 0x8000+glyph_id
             # width, height, x_ofs, y_ofs = glyph.get_bbox()
             width = self.widths[glyph_id]
-            ucode = ord(char)
-            entries[ucode] = """STARTCHAR U+{ucode:04X}
+            entries[ucode] = """STARTCHAR U+{ucode:04X} ({glyph_id})
 ENCODING {ucode}
 SWIDTH 300 0
 DWIDTH {width} 0
@@ -169,7 +176,7 @@ BBX {width} 16 0 0
 BITMAP
 {bitmap}
 ENDCHAR
-""".format(ucode=ucode, width=width,
+""".format(ucode=ucode, width=width, glyph_id=glyph_id,
                 # height=height-2, x_ofs=x_ofs, y_ofs=y_ofs-2,
                 bitmap=glyph.bdf_bitmap(width))
 
