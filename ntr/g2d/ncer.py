@@ -88,6 +88,7 @@ class Cell(Editable):
             self.int16('minX')
             self.int16('minY')
         self.attrs = []
+        self.restrict('attrs')
 
     @property
     def chunks(self):
@@ -332,20 +333,22 @@ class NCER(Editable, ArchiveList):
 
             # build some new attrs
             cell.attrs = []
-            width, height = img.size
-            scr_x = cell.minX
+            height = img.size[1]
             scr_y = cell.minY
-            while width > 0 or height > 0:
-                # HACK: Currently using only 64x64 blocks
-                attr = CellAttributes()
-                attr.x = scr_x
-                attr.y = scr_y
-                attr.shape = 0
-                attr.size_ = 3
-                cell.attrs.append(attr)
-                scr_x += 64
+            while height > 0:
+                width = img.size[0]
+                scr_x = cell.minX
+                while width > 0:
+                    # HACK: Currently using only 64x64 blocks
+                    attr = CellAttributes()
+                    attr.x = scr_x
+                    attr.y = scr_y
+                    attr.shape = 0
+                    attr.size_ = 3
+                    cell.attrs.append(attr)
+                    scr_x += 64
+                    width -= 64
                 scr_y += 64
-                width -= 64
                 height -= 64
             cell.maxX = scr_x
             cell.maxY = scr_y
