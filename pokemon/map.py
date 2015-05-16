@@ -153,4 +153,5 @@ class Map(Editable):
         self.game.set_script(self.script_idx, self.script)
         self.game.set_script(self.script_condition_idx, self.script_conditions)
         self.game.set_event(self.event_idx, self.events)
-        # TODO: encounters
+        if self.encounter_idx != self.no_encounters:
+            self.game.set_encounter(self.encounter_idx, self.encounters)
