@@ -281,12 +281,7 @@ class Game(Editable, Version):
 
     def __getattr__(self, name):
         if name[-8:] == '_archive':
-            try:
-                fnames = getattr(self, name+'_files')
-                fname = fnames[self.game_name]
-            except (AttributeError, KeyError):
-                fname = getattr(self, name+'_file')
-            return self.archive(fname)
+            return self.archive(getattr(self, name+'_file'))
         elif name[:4] == 'get_':
             def get_wrapper(fileid):
                 return getattr(self, name[4:]+'_archive').files[fileid]
@@ -304,6 +299,9 @@ class Game(Editable, Version):
                 self.save_archive(archive,
                                   getattr(self, name[4:]+'_archive_file'))
             return set_wrapper
+        elif name[-5:] == '_file':
+            fnames = getattr(self, name+'s')
+            return fnames[self.game_name]
         return object.__getattribute__(self, name)
 
     def text(self, file_id):
