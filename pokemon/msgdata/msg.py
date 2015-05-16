@@ -21,7 +21,7 @@ def load_table():
     global table, rtable
 
     if table:
-        return table
+        return table, rtable
     fname = 'Table.tbl'
     """max_levels = 6
     while not os.path.exists(fname):
@@ -38,7 +38,7 @@ def load_table():
             key = int(key, 16)
             table[key] = value
             rtable[value] = key
-    return table
+    return table, rtable
 
 
 def decompress(string, incr=15):

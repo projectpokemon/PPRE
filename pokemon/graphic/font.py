@@ -155,8 +155,9 @@ class Font(Editable):
         self.num = len(self.glyphs)
         base_glyph = Glyph()
         self.footer_offset = base_glyph.get_size()*self.num+self.headersize
-        writer = Editable.save(writer)
+        writer = Editable.save(self, writer)
         writer = self.glyphs.save(writer)
+        self.widths = [0]*self.num
         for i, glyph in enumerate(self.glyphs):
             self.widths[i] = width = glyph.get_bbox()[0]
             writer.writeUInt8(width)
@@ -171,7 +172,7 @@ class Font(Editable):
 
     def to_bdf(self):
         """Returns the contents of a BDF font file"""
-        table = load_table()
+        table, rtable = load_table()
         entries = {}
         for glyph_id, glyph in enumerate(self.glyphs):
             try:
@@ -218,6 +219,7 @@ CHARS {num}
             assert reader.readline().split(' ')[0] == 'STARTFONT'
         except:
             raise ValueError('Expected BDF handle to be loaded')
+        table, rtable = load_table()
         # Skip everything up to the CHARS
         while True:
             line = reader.readline()
@@ -276,6 +278,18 @@ CHARS {num}
                         continue
                     break
             num -= 1
+        num = len(entries)
+        for ucode in entries:
+            if ucode & 0xF000 == 0x8000:
+                num = max(ucode-0x7FFF, num)
+        self.num = num
+        self.glyphs = SizedCollection(Glyph().base_struct, length=num)
+        for ucode in entries:
+            if ucode & 0xF000 == 0x8000:
+                glyph_id = ucode-0x8000
+            else:
+                glyph_id = rtable[unichr(ucode).encode('unicode-escape')]
+            self.glyphs[glyph_id] = entries[ucode]._data
 
 if __name__ == '__main__':
     import sys
