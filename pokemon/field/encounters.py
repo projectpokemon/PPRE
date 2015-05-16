@@ -38,6 +38,7 @@ class WaterEncouter(Editable):
 
 class Walking(Editable):
     def define(self, version):
+        self.game = version
         natid_only_s = WalkEncouter(version, False).base_struct
         num_pokemon = 12
         if version < game.Version(4, 3):
@@ -89,7 +90,8 @@ class Water(Editable):
 
 class Encounters(Editable):
     def define(self, version=game.Version(4, 0)):
-        if game.Version(4, 3) <= version < game.GEN_V:
+        self.game = version
+        if game.is_hgss():
             self.uint8('walkrate')
             self.uint8('surfrate')
             self.uint8('rocksmashrate')
@@ -97,7 +99,7 @@ class Encounters(Editable):
             self.uint8('goodroodrate')
             self.uint8('superrodrate')
             self.uint16('padding')
-        elif version in game.GEN_V:
+        elif game.is_gen(5):
             self.uint8('walkrate')
             self.uint8('doublesrate')
             self.uint8('walkspecialrate')
@@ -116,3 +118,26 @@ class Encounters(Editable):
         if game.Version(4, 3) <= version < game.GEN_V:
             self.array('radio', WalkEncouter(version, False).base_struct,
                        length=2)
+
+    def set_slot(self, slot, natid, level=None):
+        """Sets the same pokemon across all slots
+
+        TODO: water?
+        """
+        enc = {'natid': natid}
+        if self.game.is_dpp():
+            if level is not None:
+                enc['level'] = level
+            self.normal[slot].from_dict(enc)
+        if self.game.is_gen(4):
+            self.morning[slot].from_dict(enc)
+            self.day[slot].from_dict(enc)
+            self.night[slot].from_dict(enc)
+            # TODO: HGSS specials
+        else:
+            if level is not None:
+                enc['minlevel'] = enc['maxlevel'] = level
+            # TODO: BW specials
+            self.normal[slot].from_dict(enc)
+        if self.game.is_hgss() and level is not None:
+            self.levels[slot] = level
