@@ -91,7 +91,7 @@ class Water(Editable):
 class Encounters(Editable):
     def define(self, version=game.Version(4, 0)):
         self.game = version
-        if game.is_hgss():
+        if self.game.is_hgss():
             self.uint8('walkrate')
             self.uint8('surfrate')
             self.uint8('rocksmashrate')
@@ -99,7 +99,7 @@ class Encounters(Editable):
             self.uint8('goodroodrate')
             self.uint8('superrodrate')
             self.uint16('padding')
-        elif game.is_gen(5):
+        elif self.game.is_gen(5):
             self.uint8('walkrate')
             self.uint8('doublesrate')
             self.uint8('walkspecialrate')
@@ -128,16 +128,16 @@ class Encounters(Editable):
         if self.game.is_dpp():
             if level is not None:
                 enc['level'] = level
-            self.normal[slot].from_dict(enc)
+            self.walking.normal[slot].from_dict(enc)
         if self.game.is_gen(4):
-            self.morning[slot].from_dict(enc)
-            self.day[slot].from_dict(enc)
-            self.night[slot].from_dict(enc)
+            self.walking.morning[slot].from_dict(enc)
+            self.walking.day[slot].from_dict(enc)
+            self.walking.night[slot].from_dict(enc)
             # TODO: HGSS specials
         else:
             if level is not None:
                 enc['minlevel'] = enc['maxlevel'] = level
             # TODO: BW specials
-            self.normal[slot].from_dict(enc)
+            self.walking.normal[slot].from_dict(enc)
         if self.game.is_hgss() and level is not None:
-            self.levels[slot] = level
+            self.walking.levels[slot] = level
