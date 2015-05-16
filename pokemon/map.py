@@ -72,7 +72,7 @@ class Map(Editable):
         self.name = ''
         self.script = Script(game)
         self.script_conditions = ScriptConditions(game)
-        self.encounter = Encounters(game)
+        self.encounters = Encounters(game)
         self.events = ZoneEvents(game)
         self.text = Text(game)
         self.area_data = AreaData()
@@ -126,9 +126,9 @@ class Map(Editable):
 
     def full_load(self):
         if self.encounter_idx != self.no_encounters:
-            self.encounter.load(self.game.get_encounter(self.encounter_idx))
+            self.encounters.load(self.game.get_encounter(self.encounter_idx))
         else:
-            self.encounter.load('\x00'*self.encounter.get_size())
+            self.encounters.load('\x00'*self.encounters.get_size())
         self.text.load(self.game.get_text(self.text_idx))
         self.area_data.load(self.game.get_area_data(self.area_data_idx))
         self.script.load_text(self.text)
