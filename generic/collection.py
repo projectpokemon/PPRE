@@ -24,7 +24,35 @@ class Collection2d(Editable):
             idx = key[1]*self.width+key[0]
         except (IndexError, TypeError):
             raise KeyError('2d Collection expects a two-tuple index')
-        self.entries[idx] = value
+        try:
+            self.entries[idx] = value
+        except:
+            self.entries[idx].from_dict(value)
+
+    def fill(self, value, x, y, width, height):
+        """Sets a region to a particular value
+
+        Parameters
+        ----------
+        value : mixed
+            Value to set the region to
+        x : int
+        y : int
+        width : int
+        height : int
+        """
+        for sub_y in range(y, y+height):
+            for sub_x in range(x, x+width):
+                self[sub_x, sub_y] = value
+
+    def fill_rect(self, value, x1, y1, x2, y2):
+        """Sets a region to a particular value
+
+        See Also
+        --------
+        fill
+        """
+        self.fill(x1, y1, x2-x1, y2-y1)
 
 
 class SizedCollection(Editable):
