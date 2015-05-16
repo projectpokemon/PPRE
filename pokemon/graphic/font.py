@@ -78,16 +78,17 @@ class Glyph(Editable):
     def set_line(self, y, width, line):
         tile_y = y/8
         sub_y = y % 8
-        x = 2
+        x = (width*2)-2
         line >>= -(width*2) % 8
         for tile_x in range(2):
             tile = 0
             for sub_x in range(8)[::-1]:
-                if x > width*2:
+                if x < 0:
                     break
-                val = line & 0x3
-                line >>= 3
-                x += 2
+                val = palette_2bpp[(line >> x) & 0x3]
+                # line >>= 2
+                tile |= val << (sub_x*2)
+                x -= 2
             self.tiles[tile_y*2+tile_x][sub_y] = tile
 
     def get_bbox(self):
@@ -219,19 +220,27 @@ CHARS {num}
             assert reader.readline().split(' ')[0] == 'STARTFONT'
         except:
             raise ValueError('Expected BDF handle to be loaded')
+
         table, rtable = load_table()
-        # Skip everything up to the CHARS
+
+        startchar_re = re.compile('^STARTCHAR U?\+?([0-9A-F]+)')
+        bbox_re = re.compile('^BBX ([0-9]+) ([0-9]+) (-?[0-9]+) (-?[0-9]+)')
+        encoding_re = re.compile('^ENCODING (?:-1 )?([0-9]+)')
+        bits_re = re.compile('^BITS_?PER_?PIXEL_? (1|2|4|8|16|32)')
+        size_re = re.compile('^SIZE [0-9]+ [0-9]+ [0-9]+ ([0-9]+)')
+        bpp = 1
+
         while True:
             line = reader.readline()
             if line.startswith('CHARS'):
                 num = int(line.strip('\n').split(' ')[1])
                 break
-        startchar_re = re.compile('^STARTCHAR U?\+?([0-9A-F]+)')
-        bbox_re = re.compile('^BBX ([0-9]+) ([0-9]+) (-?[0-9]+) (-?[0-9]+)')
-        encoding_re = re.compile('^ENCODING (?:-1 )?([0-9]+)')
-        bits_re = re.compile('^BITS_?PER_?PIXEL_? (1|2|4|8|16|32)')
+            match = size_re.match(line)
+            if match:
+                bpp = int(match.group(1))
+                continue
+
         entries = {}
-        bpp = 1
         while num > 0:
             while True:
                 line = reader.readline()
@@ -243,6 +252,8 @@ CHARS {num}
             entries[ucode] = entry = Glyph()
             ecode = None
             width = height = None
+            x_ofs = 0
+            y_ofs = 0
             while True:
                 line = reader.readline()
                 if line.startswith('ENDCHAR'):
@@ -260,8 +271,10 @@ CHARS {num}
                     continue
                 match = bbox_re.match(line)
                 if match:
-                    width = int(match.group(1))-int(match.group(3))
-                    height = int(match.group(2))-int(match.group(4))
+                    width = int(match.group(1))
+                    x_ofs = int(match.group(3))
+                    height = int(match.group(2))
+                    y_ofs = int(match.group(4))
                 if line.startswith('BITMAP'):
                     if width is None:
                         # WARNING: BBX not set
@@ -269,7 +282,10 @@ CHARS {num}
                     if bpp != 2:
                         # WARNING: not 2bpp
                         continue
-                    for y in range(height):
+                    if x_ofs != 0:
+                        # ???
+                        pass
+                    for y in range(16-height-y_ofs, 16):
                         line = reader.readline()
                         if line.startswith('ENDCHAR'):
                             break
@@ -288,7 +304,7 @@ CHARS {num}
             if ucode & 0xF000 == 0x8000:
                 glyph_id = ucode-0x8000
             else:
-                glyph_id = rtable[unichr(ucode).encode('unicode-escape')]
+                glyph_id = rtable[unichr(ucode).encode('unicode-escape')]-1
             self.glyphs[glyph_id] = entries[ucode]._data
 
 if __name__ == '__main__':
