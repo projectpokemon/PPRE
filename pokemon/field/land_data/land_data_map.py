@@ -96,8 +96,7 @@ class LandDataMap(Editable):
             Editable.save(self, writer)
         return writer
 
-    def get_perm_image(self):
-        res = 8
+    def get_perm_image(self, res=8):
         image = Image.new('RGBA', (0x20*res, 0x20*res))
         pix = image.load()
         idx = 0
@@ -118,6 +117,17 @@ class LandDataMap(Editable):
                     for sub_x in range(res):
                         pix[x*res+sub_x, y*res+sub_y] = color
                 idx += 1
+        color = (0xaa, 0xaa, 0xaa, 255)
+        for y in range(0, 0x20, 4):
+            for x in range(0, 0x20, 4):
+                cross_iter = range(2-res/2, res/2, 2)
+                for sub_y in cross_iter:
+                    x_iter = [0] if sub_y else cross_iter
+                    for sub_x in x_iter:
+                        try:
+                            pix[x*res+sub_x, y*res+sub_y] = color
+                        except:
+                            pass
         for obj in self.objects.entries:
             color = (255, 255, 255, 255)
             x = obj.x + 0x10
