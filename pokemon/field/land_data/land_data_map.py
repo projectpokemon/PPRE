@@ -49,13 +49,15 @@ class LandDataMap(Editable):
         self.uint32('objects_size')
         self.uint32('bmd_size')
         self.uint32('bdhc_size')
-        self.uint16('magic', default=0x1234)
-        self.uint16('ublock1_size')
+        if game.is_hgss():
+            self.uint16('magic', default=0x1234)
+            self.uint16('ublock1_size')
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
         Editable.load(self, reader)
-        self.block1 = reader.read(self.ublock1_size)
+        if self.game.is_hgss():
+            self.block1 = reader.read(self.ublock1_size)
         """entry_size = Permission(self.game).get_size()
         # self.permissions = [Permission(self.game, reader=reader)
         #                     for i in range(self.permission_size/entry_size)]
@@ -82,8 +84,9 @@ class LandDataMap(Editable):
         writer = BinaryIO.writer(writer)
         start = writer.tell()
         writer = Editable.save(self, writer)
-        writer.write(self.block1)
-        self.ublock1_size = len(self.block1)
+        if self.game.is_hgss():
+            writer.write(self.block1)
+            self.ublock1_size = len(self.block1)
         writer = self.permissions.save(writer)
         self.permission_size = self.permissions.get_size()
         writer = self.objects.save(writer)
