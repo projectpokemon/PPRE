@@ -26,7 +26,7 @@ class Map(Editable):
         if game <= Game.from_string('Platinum'):
             self.uint16('u0_0', width=8)
             self.uint16('area_data_idx', width=8)
-            self.uint16('u2')
+            self.uint16('matrix_idx')
             self.uint16('script_idx')
             self.uint16('script_condition_idx')
             self.uint16('text_idx', default=0)
