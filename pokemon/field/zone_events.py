@@ -8,7 +8,7 @@ class Furniture(Editable):
     with the models placed on the map"""
     def define(self):
         self.uint16('script')
-        self.uint16('u2')
+        self.uint16('u2')  # 2 = dowse-able
         self.uint16('x')  # x
         self.uint16('pad_6', default=0)
         self.uint16('y')  # y
