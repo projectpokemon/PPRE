@@ -369,7 +369,7 @@ class DP(Game):
     mmodel_archive_file = 'data/mmodel/mmodel.narc'
 
     load_info = 0x2000b68
-    type_effectiveness_table = (11, 0x225e378-0x222d5c0)
+    type_effectiveness_table = (11, 0x225e378-0x222d5c0, 108)
     file_system_table = (-1, 0x021058a0-0x02000000)
     map_table = 0xeedbc
     commands_files = ('dp.json', )
@@ -433,7 +433,7 @@ class HGSS(Game):
     partner_appearance_archive_file = 'a/1/4/1'
 
     load_info = 0x02000ba0
-    type_effectiveness_table = (12, 0x226cc7c-0x22378c0)
+    type_effectiveness_table = (12, 0x226cc7c-0x22378c0, 108)
     file_system_table = (-1, 0x0210f210-0x02000000)
     map_table = 0xf6be0
     following_sprite_table = (-1, 0x020ff088-0x02000000, 993, 428)
