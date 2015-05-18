@@ -261,6 +261,10 @@ class TEX(ArchiveList):
             image.info['Comment'] = info['Comment']
         self._images.append(image)
 
+    def reset(self):
+        # HACK
+        return
+
     def flush(self):
         """Builds added images into binary archive
 
@@ -446,6 +450,9 @@ class TEX(ArchiveList):
         with writer.seek(self.palinfo._datasize_ofs):
             writer.writeUInt16(size >> 3)  # palinfo datasize
 
+        size = writer.tell()-start
+        with writer.seek(size_ofs):
+            writer.writeUInt32(size)
         return writer
 
 
