@@ -421,7 +421,7 @@ class TEX(ArchiveList):
             writer.writeUInt16(ofs)
         for i in xrange(self.paldict.num):
             param = self.palparams[i]
-            self.paldict.data[i] = struct.pack('HH', param.ofs, param.count4)
+            self.paldict.data[i] = struct.pack('HH', param.ofs >> 3, param.count4)
         writer = self.paldict.save(writer)
 
         writer.writeAlign(8)
