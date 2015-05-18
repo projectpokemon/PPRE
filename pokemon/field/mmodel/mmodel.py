@@ -31,7 +31,8 @@ class OverworldSprite(Editable):
 class OverworldSprites(Editable):
     def define(self, game):
         self.game = game
-        self.array('table', OverworldSprite(self).base_struct, length=993)
+        self.array('table', OverworldSprite(self).base_struct,
+                   length=game.overworld_sprite_table[2])
         self.map = {}
 
     def load(self):
@@ -56,9 +57,8 @@ class OverworldSprites(Editable):
         return self.map[key]
 
     def get_pokemon_sprite(self, natid, forme=0):
-        if forme:
-            raise NotImplementedError('Forme handling not enabled yet')
-        return self.table[natid+215]
+        # Uses following_sprite_table
+        raise NotImplementedError()
 
 
 class PartnerPokemon(Editable):
