@@ -1,12 +1,30 @@
 
-Project Pokemon RawDB
+Project Pokemon ROM Editor (PPRE)
 === 
 
-URL: http://projectpokemon.org/rawdb
+URL: http://projectpokemon.org/ppre
 
-Author: Alpha of projectpokemon.org
-
+History
 ---
+
+PPRE is a multi-purpose ROM editing tool for altering Nintendo DS Pokemon games.
+The project was started originally to edit Pokemon Diamond and Pearl by SCV
+based off of Treeki's Nitro Explorer and loadingNOW's thenewpoketext. pichu2000 
+created a strong basis for the scripting capabilities that PPRE will always 
+have. Alpha has added many new features to make PPRE as versatile as it is.
+PPRE is written in Python and makes use of PyQt for its GUI. Development was led
+by SCV and Alpha.
+
+PPRE2 included a change in the core.
+
+PPRE3 merged PPRE with RawDB for a more responsive rapid development. User interface is now automatically determined by its data structures.
+
+Current version is PPRE 5. PPRE 5 features a the new RawDB that does not suffer from some of the original speed drawbacks. Many new data structures are being added to this version to provide much more functionality. PPRE 5 will include a GUI, CLI, and web API version in its final release.
+
+To launch, run `python main5.py`
+
+RawDB
+=====
 
 RawDB is a flexible binary reader and parser built primary for Pokémon and other NDS/3DS games. The goal of this is to make development of those games easier and more robust.
 
