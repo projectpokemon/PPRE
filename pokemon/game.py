@@ -283,8 +283,13 @@ class Game(Editable, Version):
         if name[-8:] == '_archive':
             return self.archive(getattr(self, name+'_file'))
         elif name[:4] == 'get_':
+            try:
+                files = getattr(self, name[4:]+'_archive').files
+            except AttributeError:
+                raise AttributeError('Unknown archive: {0}'.format(name[4:]))
+
             def get_wrapper(fileid):
-                return getattr(self, name[4:]+'_archive').files[fileid]
+                return files[fileid]
             return get_wrapper
         elif name[:4] == 'set_':
             def set_wrapper(fileid, data):
