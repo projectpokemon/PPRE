@@ -59,3 +59,20 @@ class EffectivenessTable(object):
                     break
                 self.effectives.append(effect)
         self.length = len(self.effectives)
+
+
+class TypeIconTable(Editable):
+    def define(self, game):
+        self.game = game
+        self.array('file_ids', self.uint32,
+                   length=game.type_icon_table[2])
+        self.array('pal_ids', self.uint8,
+                   length=game.type_icon_table[2])
+
+    def load(self):
+        self.map = {}
+        with self.game.open('arm9.dec.bin') as handle:
+            reader = BinaryIO.reader(handle)
+            reader.seek(self.game.type_icon_table[1])
+            Editable.load(self, BinaryIO.reader(reader))
+        return self
