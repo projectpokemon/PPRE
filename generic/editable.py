@@ -506,6 +506,7 @@ class Editable(Emitter, AtomicStruct):
         if name is not SIMULATING_PLACEHOLDER:
             self.keys[name] = restriction
         return restriction
+    attribute = restrict
 
     def int8(self, name, **kwargs):
         params = {'default': 0, 'min_value': -0x80, 'max_value': 0x7F, 'type': int}
