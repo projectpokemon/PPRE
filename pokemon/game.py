@@ -381,6 +381,7 @@ class DP(Game):
 
     text_contents = {
         'US': {
+            'using_moves': 0,
             'map_names': 382,
             'type_names': 565,
             'ability_names': 552,
@@ -451,6 +452,7 @@ class HGSS(Game):
 
     text_contents = {
         'US': {
+            'using_moves': 3,
             'map_names': 279,
             'type_names': 735,
             'ability_names': 720,

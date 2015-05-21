@@ -10,6 +10,7 @@ class Move(Editable):
         self.restrict('waza')
         self.name = ''
         self.names = game.text(game.locale_text_id('move_names'))
+        self.using_moves = game.text(game.locale_text_id('using_moves'))
         self.restrict('name')
 
     def load_id(self, move_id):
@@ -29,3 +30,9 @@ class Move(Editable):
             self.names[move_id] = self.name
             self.game.set_text(self.game.locale_text_id('move_names'),
                                self.names)
+            # TODO: custom usage strings
+            self.using_moves[move_id*3] = 'VAR(257, 0, 0) used\n{0}!'.format(self.name)
+            self.using_moves[move_id*3+1] = 'The wild VAR(257, 0, 0) used\n{0}!'.format(self.name)
+            self.using_moves[move_id*3+2] = 'The foe\'s VAR(257, 0, 0) used\n{0}!'.format(self.name)
+            self.game.set_text(self.game.locale_text_id('using_moves'),
+                               self.using_moves)
