@@ -1,5 +1,6 @@
 """Sound Data Archive"""
 
+import array
 from itertools import izip
 
 from generic import Editable
@@ -19,7 +20,7 @@ class SYMB(Editable):
     def define(self, sdat):
         self.sdat = sdat
         self.string('magic', length=4, default='SYMB')
-        self.uint32('size_')
+        self.uint32('size')
         self.array('record_offsets', self.uint32, length=14)
         self.records = {}
 
@@ -61,6 +62,43 @@ class SYMB(Editable):
             reader.seek(base_offset+offset)
             entries.append(prefix+(reader.readString(),))
         return entries
+
+    def save(self, writer=None):
+        writer = BinaryIO.writer(writer)
+        start = writer.tell()
+        writer = Editable.save(self, writer)
+        for record_idx, record_name in enumerate(self.record_names):
+            self.record_offsets[record_idx] = writer.tell()-start
+            if record_name == 'SEQARC':
+                raise NotImplementedError()
+            else:
+                num, text_writer = self.save_entries(
+                    self.records[record_name], writer, writer.tell()-start+4,
+                    (record_name,))
+                writer.writeUInt32(num)
+                writer.write(text_writer.getvalue())
+            writer.writeAlign(8)
+        self.size = writer.tell()-start
+        with writer.seek(start):
+            writer = Editable.save(self, writer)
+        return writer
+
+    @staticmethod
+    def save_entries(entries, writer, base_offset, prefix):
+        entry_names = []
+        offsets = []
+        text_writer = BinaryIO()
+        for entry in entries:
+            if entry[:-1] == prefix:
+                entry_names.append(entry[-1])
+        for i in range(len(entry_names)):
+            text_writer.writeUInt32(0)
+        for entry in entry_names:
+            offsets.append(text_writer.tell()+base_offset)
+            text_writer.writeString(entry)
+        with text_writer.seek(0):
+            text_writer.write(array.array('I', offsets).tostring())
+        return len(entry_names), text_writer
 
 
 class InfoSEQ(Editable):
