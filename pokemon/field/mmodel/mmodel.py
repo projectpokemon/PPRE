@@ -43,7 +43,7 @@ class OverworldSprites(Editable):
             reader.seek(self.game.overworld_sprite_table[1])
             Editable.load(self, BinaryIO.reader(reader))
         for sprite in self.table:
-            self.map[sprite.sprite_id] = sprite.file_id
+            self.map[sprite.sprite_id] = sprite
         return self
 
     def save(self):
