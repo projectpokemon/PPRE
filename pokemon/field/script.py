@@ -281,8 +281,8 @@ class EndCommand(Command):
     _fields = Command._fields+('value', )
 
     def decompile_args(self, decompiler):
-        if self.value is not False:
-            self.value = True
+        if self.value is None:
+            return [decompiler.end()]
         return [decompiler.end(self.value)]
 
 
@@ -670,11 +670,14 @@ class Script(object):
                 func, count, func_id = self.func_map[offset]
                 if func_id is None:
                     func.indent = 0
-                    expr.set_target(func)
                 else:
-                    expr.set_target(script.end(script.func(
+                    end = func.lines[-1]
+                    func = script.func(
                         'call', 'func_{0}'.format(func_id),
-                        namespace='engine.')))
+                        namespace='engine.')
+                    if end.is_return() and end.args and end.args != (None, ):
+                        func = script.end(func)
+                expr.set_target(func)
 
     def save(self, writer=None):
         writer = BinaryIO(writer)

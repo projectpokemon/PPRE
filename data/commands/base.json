@@ -1,7 +1,8 @@
 {
   "2": {
     "class": "EndCommand", 
-    "name": "End"
+    "name": "End",
+    "value": true
   }, 
   "17": {
     "args": [
@@ -35,8 +36,8 @@
   },
   "27": {
     "class": "EndCommand", 
-    "name": "KillScript", 
-    "value": false
+    "name": "continue_script",
+    "value": null
   },
   "28": {
     "args": [
