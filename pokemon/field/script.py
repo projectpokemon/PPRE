@@ -345,10 +345,8 @@ class ConditionalJumpCommand(Command):
 
 
 class MovementCommand(Command):
-    def __call__(self, overworld_id):
-        if self.engine.state == self.engine.STATE_COMPILING:
-            self.engine.write_value(self.cmd_id, 2)
-            self.engine.write_value(overworld_id, 2)
+    def __call__(self, *args, **kwargs):
+        Command.__call__(self, *args, **kwargs)
         return self
 
     def decompile_args(self, decompiler):
@@ -363,7 +361,7 @@ class MovementCommand(Command):
         block.parse()
         block.lines.pop()  # 0xfe
         decompiler.seek(restore)
-        return [decompiler.context(decompiler.func('move', target, level=0),
+        return [decompiler.context(decompiler.func(self.name, target, level=0),
                                    'movement'), block]
 
     def __enter__(self):
