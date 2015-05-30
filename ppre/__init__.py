@@ -2,13 +2,15 @@
 import os
 import sys
 
+__all__ = ['PPRE_DIR', 'open_resource']
+
 try:
     PPRE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 except NameError:
     PPRE_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 
-def open(*path, **kwargs):
+def open_resource(*path, **kwargs):
     """Open a resource relative to PPRE's base directory
 
     *path : *string
