@@ -45,5 +45,5 @@ setup(console=[script], options={
     'py2exe': {
         'bundle_files': 1,
         'compressed': True,
-        'data_files': [('.', data_file_targets)],
-    }})
+    }},
+    data_files=[('.', data_file_targets)])
