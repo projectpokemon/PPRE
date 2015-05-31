@@ -44,7 +44,7 @@ try:
                 open(outname, 'wb') as out:
             xorpad_.xorstream(PyFile_AsFile(handle1), PyFile_AsFile(handle2),
                               PyFile_AsFile(out))
-except KeyError:
+except:
     pass
 
 
