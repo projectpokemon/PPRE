@@ -4,6 +4,22 @@ Project Pokemon ROM Editor (PPRE)
 
 URL: http://projectpokemon.org/ppre
 
+Source Installation (All Operating Systems)
+---
+Download System Dependencies. You will need:
+
+ * Git: https://git-scm.com/downloads
+ * Python 2.7: https://www.python.org/downloads/
+ * pip (if not included in Python installation)
+ * PyQt4: http://www.riverbankcomputing.com/software/pyqt/download
+
+Grab a copy of this repository. If you would like to clone it, do
+`git clone https://github.com/projectpokemon/PPRE.git`, otherwise, just download
+the zip/tarball and extract locally.
+
+Install pip dependencies by running `pip install -r requirements.txt` inside of
+PPRE's directory.
+
 History
 ---
 
