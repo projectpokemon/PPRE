@@ -10,7 +10,7 @@ include at the root of the packaged archive, eg
 """
 
 import glob
-import importlib
+import imp
 import os
 import sys
 
@@ -25,7 +25,7 @@ except:
     exit(1)
 
 data_file_targets = []
-module = importlib.import_module(script)
+module = imp.load_source('__script__', script)
 try:
     data_file_patterns = module.data_file_patterns
 except AttributeError:
