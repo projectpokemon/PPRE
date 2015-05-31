@@ -746,6 +746,11 @@ class Editable(Emitter, AtomicStruct):
         merge : Bool
             If true, this merges with the current data. Otherwise it
             resets missing fields
+
+        Returns
+        -------
+        self : Editable
+            For chaining
         """
         for key in self.keys:
             try:
@@ -779,6 +784,7 @@ class Editable(Emitter, AtomicStruct):
                     i += 1
                     while len(old_value) > i:
                         old_value.pop(i)
+        return self
 
     def to_json(self, **json_args):
         """Returns the JSON version of this instance
