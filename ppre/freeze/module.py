@@ -8,6 +8,8 @@ import sys
 
 from distutils.core import setup
 
+import py2exe
+
 try:
     script = sys.argv.pop(1)
 except:
