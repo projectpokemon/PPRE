@@ -1,3 +1,3 @@
--e git+http://github.com/Alphadelta14/newdispatch.git#egg=newdispatch
--e git+http://github.com/Alphadelta14/pressure-layout.git#egg=pressure-layout
--e git+http://github.com/Alphadelta14/python-compile-engine.git#egg=python-compile-engine
+-e git+https://github.com/Alphadelta14/python-newdispatch.git#egg=python=newdispatch
+-e git+https://github.com/Alphadelta14/python-pressure-layout.git#egg=python-pressure-layout
+-e git+https://github.com/Alphadelta14/python-compile-engine.git#egg=python-compile-engine
