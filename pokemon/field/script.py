@@ -871,3 +871,8 @@ class ScriptConditions(Editable):
             writer = cond.save(writer)
         writer.writeAlign(4)
         return writer
+
+
+data_file_patterns = ['data/commands/*.json']
+if __name__ == '__main__':
+    pass
