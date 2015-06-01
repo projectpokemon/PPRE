@@ -7,6 +7,7 @@ from atomic import AtomicStruct
 from generic.archive import Archive
 from generic.editable import XEditable as Editable
 from pokemon import game
+from ppre import get_resource_path
 from util.io import BinaryIO
 
 
@@ -22,15 +23,7 @@ def load_table():
 
     if table:
         return table, rtable
-    fname = 'Table.tbl'
-    """max_levels = 6
-    while not os.path.exists(fname):
-        max_levels -= 1
-        if not max_levels:
-            raise IOError('Could not find Table.tbl. Please place it in'
-                          ' the PPRE directory')
-        fname = os.path.join('../', fname)"""
-    fname = os.path.join(os.path.dirname(__file__), '..', '..', fname)
+    fname = get_resource_path('data', 'codepoints', 'poketext.tbl')
     with codecs.open(fname, encoding='utf-16') as handle:
         for line in handle:
             key, value = line.strip('\r\n').encode('unicode_escape')\

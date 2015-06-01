@@ -30,3 +30,12 @@ def open_resource(*path, **kwargs):
     """
     mode = kwargs.get('mode', 'r')
     return open(os.path.join(PPRE_DIR, *path), mode=mode)
+
+
+def get_resource_path(*path, **kwargs):
+    """Get the resource path relative to PPRE's base directory
+
+    *path : *string
+        path arguments
+    """
+    return os.path.join(PPRE_DIR, *path)

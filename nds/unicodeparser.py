@@ -1,7 +1,7 @@
 import codecs
 tb = {}
 d = {}
-f = codecs.open("Table.tbl",encoding="utf-16")
+f = codecs.open('data/codepoints/Table.tbl', encoding='utf-16')
 l = f.readlines()
 for q in l:
     r=q.split("=", 1)
