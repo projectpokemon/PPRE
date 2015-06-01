@@ -35,18 +35,19 @@ else:
             if os.path.isdir(match):
                 for base, dirs, files in os.walk(match):
                     for fname in files:
-                        data_file_targets.append(os.path.join(base, fname))
+                        data_file_targets.append((os.path.join(base, fname),
+                                                  os.path.join(base, fname)))
             elif os.path.isfile(match):
-                data_file_targets.append(match)
+                data_file_targets.append((match, match))
 
 
 setup(
-    executables=[Executable(script)],
+    name=os.path.split(script)[1],
+    executables=[Executable(script, icon='PPRE.ico')],
     options={
         'build_exe': {
-            'bundle_files': 1,
             'compressed': True,
+            'include_files': data_file_targets
         }
     },
-    include_files=[data_file_targets]
 )
