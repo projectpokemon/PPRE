@@ -1,6 +1,7 @@
 """ Setup script to freeze a module with a main() as a CLI application
 
-Invoke as `python -m ppre.freeze.module some/ppre/script.py py2exe`
+Invoke as `python -m ppre.freeze.module some/ppre/script.py <command>`
+For creating windows executable, <command> should be bdist_msi.
 
 Script should have a main() invoked when `__name__ == '__main__'`.
 The script can optionally define a data_file_patterns list of globbed files to
@@ -14,14 +15,12 @@ import imp
 import os
 import sys
 
-from distutils.core import setup
-
-import py2exe
+from cx_Freeze import setup, Executable
 
 try:
     script = sys.argv.pop(1)
 except:
-    print('Usage: python -m ppre.freeze.module some/ppre/script.py py2exe')
+    print('Usage: python -m ppre.freeze.module some/ppre/script.py <command>')
     exit(1)
 
 data_file_targets = []
@@ -41,9 +40,13 @@ else:
                 data_file_targets.append(match)
 
 
-setup(console=[script], options={
-    'py2exe': {
-        'bundle_files': 1,
-        'compressed': True,
-    }},
-    data_files=[('.', data_file_targets)])
+setup(
+    executables=[Executable(script)],
+    options={
+        'build_exe': {
+            'bundle_files': 1,
+            'compressed': True,
+        }
+    },
+    include_files=[data_file_targets]
+)
