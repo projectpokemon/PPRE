@@ -180,6 +180,12 @@ class InfoGROUP(Editable):
         self.entries = SizedCollection(InfoGROUPEntry().base_struct,
                                        length=self.num)
 
+    def save(self, writer=None):
+        self.num = len(self.entries)
+        writer = Editable.save(self, writer)
+        writer = self.entries.save(writer)
+        return writer
+
 
 class InfoPLAYER2(Editable):
     accelerated = True
