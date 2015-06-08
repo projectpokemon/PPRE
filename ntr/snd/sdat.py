@@ -2,6 +2,7 @@
 
 import array
 from itertools import izip
+import os
 
 from generic import Editable
 from generic.archive import Archive
@@ -307,10 +308,13 @@ class SDAT(Archive, Editable):
         self.info = INFO(self)
         self.fat = FAT(self)
         self.file = FILE(self)
+        self._files = None
 
     @property
     def files(self):
-        files = {}
+        if self._files is not None:
+            return self._files
+        self._files = files = {}
         for name in SYMB.record_names:
             try:
                 self.info.records[name][0].file_id
@@ -321,6 +325,9 @@ class SDAT(Archive, Editable):
                 data = self.file.files[entry.file_id]
                 files['/'.join(name_parts)+'.'+data[:4].lower()] = data
         return files
+
+    def reset(self):
+        self._files = {}
 
     def load(self, reader):
         reader = BinaryIO.reader(reader)
@@ -339,6 +346,13 @@ class SDAT(Archive, Editable):
             self.file.files.append(reader.read(entry.stop-entry.start))
 
     def save(self, writer=None):
+        for name, data in self.files.iteritems():
+            name = os.path.splitext(name)[0]
+            name_parts = name.split('/')
+            record_name = name_parts.pop(0)
+            if name_parts not in self.symb.records[record_name]:
+                self.symb.records[record_name].append(name_parts)
+                # TODO: handle new info entries?!
         writer = BinaryIO.writer(writer)
         start = writer.tell()
         writer = Editable.save(self, writer)
