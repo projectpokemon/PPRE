@@ -116,7 +116,7 @@ class Material(Editable):
             self.rot_sin_fx32 = reader.readInt32()
             self.rot_cos_fx32 = reader.readInt32()
 
-        if self.flag_ & self.FLAG_NO_ROTATE:
+        if self.flag_ & self.FLAG_NO_TRANSLATE:
             self.trans_s_fx32 = 0
             self.trans_t_fx32 = 0
         else:
@@ -127,7 +127,36 @@ class Material(Editable):
             self.effect = [reader.readInt32() for i in range(16)]
 
     def save(self, writer):
-        raise NotImplementedError()
+        self.flag_ = 0
+        if self.scale_s_fx32 == self.scale_t_fx32 == 4096:
+            self.flag_ |= self.FLAG_NO_SCALE
+        if self.rot_sin_fx32 == self.rot_cos_fx32 == 0:
+            self.flag_ |= self.FLAG_NO_ROTATE
+        if self.trans_s_fx32 == self.trans_t_fx32 == 0:
+            self.flag_ |= self.FLAG_NO_TRANSLATE
+        if self.effect:
+            if len(self.effect) != 16:
+                raise ValueError('Effect matrix must be 4x4 as 16 entries')
+            self.flag_ |= self.FLAG_EFFECT_MATRIX
+
+        writer = Editable.save(self, writer)
+
+        if not self.flag_ & self.FLAG_NO_SCALE:
+            writer.writeInt32(self.scale_s_fx32)
+            writer.writeInt32(self.scale_t_fx32)
+
+        if not self.flag_ & self.FLAG_NO_ROTATE:
+            writer.writeInt32(self.rot_sin_fx32)
+            writer.writeInt32(self.rot_cos_fx32)
+
+        if not self.flag_ & self.FLAG_NO_TRANSLATE:
+            writer.writeInt32(self.trans_s_fx32)
+            writer.writeInt32(self.trans_t_fx32)
+
+        if self.flag_ & self.FLAG_EFFECT_MATRIX:
+            for value in self.effect:
+                writer.writeInt32(value)
+
         return writer
 
 
