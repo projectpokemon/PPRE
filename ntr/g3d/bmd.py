@@ -18,15 +18,6 @@ class Shape(Editable):
         self.uint32('data_size')
         self.data = []
 
-    def load(self, reader):
-        start = reader.tell()
-        Editable.load(self, reader)
-        reader.seek(start+self.data_offset)
-        self.data = array.array('B', reader.read(self.data_size))
-
-    def save(self, writer):
-        raise NotImplementedError()
-
 
 class ShapeSet(object):
     def __init__(self):
@@ -37,19 +28,44 @@ class ShapeSet(object):
         start = reader.tell()
         self.shapedict.load(reader)
         self.shapes = []
+        self.data_offsets = []
         for i in range(self.shapedict.num):
             ofs, = struct.unpack('I', self.shapedict.data[i])
             reader.seek(start+ofs)
-            self.shapes.append(Shape(reader=reader))
+            shape = Shape(reader=reader)
+            self.data_offsets.append(start+ofs+shape.data_offset)
+            self.shapes.append(shape)
+        for shape, ofs in zip(self.shapes, self.data_offsets):
+            reader.seek(ofs)
+            shape.data = array.array('B', reader.read(shape.data_size))
 
     def save(self, writer):
         self.shapedict.num = len(self.shapes)
         self.shapedict.data = [chr(0)*4]*self.shapedict.num
         start = writer.tell()
         writer = self.shapedict.save(writer)
+        shape_offsets = []
         for i in range(self.shapedict.num):
+            shape_offsets.append(writer.tell())
             self.shapedict.data[i] = struct.pack('I', writer.tell()-start)
             writer = self.shapes[i].save(writer)
+            writer.writeAlign(4)
+        for shape_ofs, shape in zip(shape_offsets, self.shapes):
+            shape.data_offset = writer.tell()-shape_ofs
+            writer.write(shape.data.tostring())
+            writer.writeAlign(4)
+        try:
+            # Only if there are actually shapes
+            shape = self.shapes[0]
+        except:
+            pass
+        else:
+            # Write to exact location of the changed data_offset's with
+            # updated values
+            data_offset_relofs = shape.get_offset('data_offset')
+            for shape_ofs, shape in zip(shape_offsets, self.shapes):
+                writer.seek(shape_ofs+data_offset_relofs)
+                writer.writeUInt32(shape.data_offset)
         with writer.seek(start):
             writer = self.shapedict.save(writer)
         return writer
