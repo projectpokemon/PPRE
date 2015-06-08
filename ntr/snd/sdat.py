@@ -43,6 +43,7 @@ class SYMB(Editable):
                 for i, (offset, sub_offset) in enumerate(offsets):
                     reader.seek(start+offset)
                     name = reader.readString()
+                    reader.seek(start+sub_offset)
                     prefix = (record_name, name)
                     entries += self.load_entries(reader, start, prefix, num)
             else:
@@ -70,10 +71,29 @@ class SYMB(Editable):
         for record_idx, record_name in enumerate(self.record_names):
             self.record_offsets[record_idx] = writer.tell()-start
             if record_name == 'SEQARC':
-                raise NotImplementedError()
+                prefixes = set()
+                offsets = []
+                for entry in self.records[record_name]:
+                    if entry[0] == record_name:
+                        prefixes.add(entry[1])
+                ofs_ofs = writer.tell()
+                for i in range(len(prefixes)*2):
+                    writer.writeUInt32(0)
+                for name in prefixes:
+                    offsets.append(writer.tell()-start)
+                    writer.writeString(name)
+                    writer.writeAlign(8)
+                    offsets.append(writer.tell()-start)
+                    num, text_writer = self.save_entries(
+                        self.records[record_name], writer.tell()-start+4,
+                        (record_name, name))
+                    writer.writeUInt32(num)
+                    writer.write(text_writer.getvalue())
+                with writer.seek(ofs_ofs):
+                    writer.write(array.array('I', offsets).tostring())
             else:
                 num, text_writer = self.save_entries(
-                    self.records[record_name], writer, writer.tell()-start+4,
+                    self.records[record_name], writer.tell()-start+4,
                     (record_name,))
                 writer.writeUInt32(num)
                 writer.write(text_writer.getvalue())
@@ -84,7 +104,7 @@ class SYMB(Editable):
         return writer
 
     @staticmethod
-    def save_entries(entries, writer, base_offset, prefix):
+    def save_entries(entries, base_offset, prefix):
         entry_names = []
         offsets = []
         text_writer = BinaryIO()
