@@ -381,6 +381,7 @@ class Node(Editable):
                 and self.scale_z_fx32 == 4096:
             flag |= self.FLAG_NO_SCALE
             # TODO: make sure inv_scale match
+        return flag
 
     @flag.setter
     def flag(self, value):
