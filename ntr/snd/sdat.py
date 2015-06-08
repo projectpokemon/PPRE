@@ -38,7 +38,7 @@ class SYMB(Editable):
             if record_name == 'SEQARC':
                 offsets = []
                 for i in range(num):
-                    offsets.append(reader.readUInt32(), reader.readUInt32())
+                    offsets.append((reader.readUInt32(), reader.readUInt32()))
                 entries = []
                 for i, (offset, sub_offset) in enumerate(offsets):
                     reader.seek(start+offset)
@@ -76,6 +76,7 @@ class SYMB(Editable):
                 for entry in self.records[record_name]:
                     if entry[0] == record_name:
                         prefixes.add(entry[1])
+                writer.writeUInt32(len(prefixes))
                 ofs_ofs = writer.tell()
                 for i in range(len(prefixes)*2):
                     writer.writeUInt32(0)
