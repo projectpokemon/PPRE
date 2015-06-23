@@ -480,7 +480,8 @@ class Model(Editable):
 
         reader.seek(start+self.mat_offset)
         self.materials.load(reader)
-        assert self.materials.matdict.num == self.num_materials
+        assert self.materials.matdict.num == self.num_materials,\
+            (self.materials.matdict.num, self.num_materials)
 
         reader.seek(start+self.shp_offset)
         self.shapes.load(reader)
