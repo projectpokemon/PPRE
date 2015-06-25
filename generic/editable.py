@@ -773,6 +773,7 @@ class Editable(Emitter, AtomicStruct):
                     # TODO: handle dicts?
                     setattr(self, key, value)
                 else:
+                    i = -1
                     for i, subvalue in enumerate(value):
                         try:
                             try:

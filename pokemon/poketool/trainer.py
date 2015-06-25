@@ -33,7 +33,7 @@ class TrainerPokemon(Editable):
         return self
 
     def save(self, writer):
-        writer = Editable.save(writer)
+        writer = Editable.save(self, writer)
         if self.trainer.hold_items:
             writer.writeUInt16(self.item)
         if self.trainer.movesets:
@@ -64,11 +64,11 @@ class Trainer(Editable):
         for i in range(self.num_pokemon):
             self.pokemon.append(TrainerPokemon(self, reader=reader))
 
-    def save(self, writer):
+    def save(self, writer=None):
         self.update()
-        return Editable.save(writer)
+        return Editable.save(self, writer)
 
-    def save_pokemon(self, writer):
+    def save_pokemon(self, writer=None):
         self.update()
         for poke in self.pokemon:
             writer = poke.save(writer)
@@ -127,7 +127,7 @@ def main(argv):
             tr_dict['pokemon'] = [tr_poke.to_dict()
                                   for tr_poke in trainer.pokemon]
             out.append(tr_dict)
-        handle.write(json.dumps(out, sort_keys=True, indent=4))
+        handle.write(json.dumps(out, sort_keys=True, indent=2))
     else:
         data = json.load(handle)
         if trainer_id == 'all':
