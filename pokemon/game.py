@@ -436,6 +436,8 @@ class HGSS(Game):
     script_archive_file = 'a/0/1/2'
     text_archive_file = 'a/0/2/7'
     font_archive_file = 'a/0/1/6'
+    trainer_archive_file = 'a/0/5/5'
+    trainer_pokemon_archive_file = 'a/0/5/6'
     mmodel_archive_file = 'a/0/8/1'
     partner_appearance_archive_file = 'a/1/4/1'
 

@@ -7,7 +7,10 @@ class TrainerPokemon(Editable):
     def define(self, trainer):
         self.trainer = trainer
         self.uint8('ai')
-        self.uint8('flag')
+        self.uint8('pad0', width=1)
+        self.uint8('opposite_gender', width=1)
+        self.uint8('pad1', width=3)
+        self.uint8('ability', width=1)
         self.uint16('level')
         self.uint16('natid', width=10)
         self.uint16('forme', width=6)
@@ -15,14 +18,18 @@ class TrainerPokemon(Editable):
         self.attribute('moves')
         self.item = 0
         self.attribute('item')
+        if self.trainer.game.is_hgss():
+            self.seal_capsule = 0
+            self.attribute('seal_capsule')
 
     def load(self, reader):
-        reader = BinaryIO.reader(reader)
         Editable.load(self, reader)
         if self.trainer.hold_items:
             self.item = reader.readUInt16()
         if self.trainer.movesets:
             self.moves = [reader.readUInt16() for i in range(4)]
+        if self.trainer.game.is_hgss():
+            self.seal_capsule = reader.readUInt16()
         return self
 
     def save(self, writer):
@@ -32,6 +39,8 @@ class TrainerPokemon(Editable):
         if self.trainer.movesets:
             for move in self.moves:
                 writer.writeUInt16(move)
+        if self.trainer.game.is_hgss():
+            writer.writeUInt16(self.seal_capsule)
         return writer
 
 
@@ -50,6 +59,7 @@ class Trainer(Editable):
         self.pokemon = None
 
     def load_pokemon(self, reader):
+        reader = BinaryIO.reader(reader)
         self.pokemon = []
         for i in range(self.num_pokemon):
             self.pokemon.append(TrainerPokemon(self, reader=reader))
