@@ -1,5 +1,6 @@
 
 from generic import Editable
+from util import BinaryIO
 
 
 class TrainerPokemon(Editable):
@@ -16,6 +17,7 @@ class TrainerPokemon(Editable):
         self.attribute('item')
 
     def load(self, reader):
+        reader = BinaryIO.reader(reader)
         Editable.load(self, reader)
         if self.trainer.hold_items:
             self.item = reader.readUInt16()
@@ -77,3 +79,72 @@ class Trainer(Editable):
                     break
             else:
                 self.hold_items = 0
+
+
+def main(argv):
+    import json
+
+    from pokemon import Game
+
+    try:
+        game = Game.from_workspace(argv[1])
+        command = argv[2].lower()
+        if command == '--import':
+            handle = open(argv[4])
+        elif command == '--export':
+            handle = open(argv[4], 'w')
+        else:
+            raise ValueError
+        trainer_id = argv[3].lower()
+        if trainer_id != 'all':
+            trainer_id = int(trainer_id)
+    except Exception as e:
+        print('Usage: {0} <workspace> (--import|--export) <id|ALL> <file.json>'
+              .format(argv[0]))
+        return 1
+    trainer_archive = game.trainer_archive
+    trainer_pokemon_archive = game.trainer_pokemon_archive
+    if command == '--export':
+        if trainer_id == 'all':
+            trainer_ids = range(trainer_archive.fatb.num)
+        else:
+            trainer_ids = [trainer_id]
+        out = []
+        for trainer_id in trainer_ids:
+            trainer = Trainer(game, reader=trainer_archive.files[trainer_id])
+            trainer.load_pokemon(trainer_pokemon_archive.files[trainer_id])
+            tr_dict = trainer.to_dict()
+            tr_dict['pokemon'] = [tr_poke.to_dict()
+                                  for tr_poke in trainer.pokemon]
+            out.append(tr_dict)
+        handle.write(json.dumps(out, sort_keys=True, indent=4))
+    else:
+        data = json.load(handle)
+        if trainer_id == 'all':
+            trainer_ids = len(data)
+        else:
+            trainer_ids = [trainer_id]
+        for trainer_id in trainer_ids:
+            tr_dict = data.pop(0)
+            trainer = Trainer(game)
+            trainer.from_dict(tr_dict)
+            trainer.pokemon = [TrainerPokemon(trainer).from_dict(poke_dict)
+                               for poke_dict in tr_dict['pokemon']]
+            tr_writer = trainer.save()
+            p_writer = trainer.save_pokemon()
+            try:
+                trainer_archive.files[trainer_id] = tr_writer.getvalue()
+                trainer_pokemon_archive.files[trainer_id] = p_writer.getvalue()
+            except:
+                trainer_archive.add(data=tr_writer.getvalue())
+                trainer_pokemon_archive.add(data=p_writer.getvalue())
+        game.save_archive(trainer_archive, game.trainer_archive_file)
+        game.save_archive(trainer_pokemon_archive,
+                          game.trainer_pokemon_archive_file)
+    handle.close()
+
+
+if __name__ == '__main__':
+    import sys
+
+    exit(main(sys.argv))
