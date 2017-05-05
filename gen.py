@@ -47,9 +47,9 @@ fs = getFSHTML(FEXT)
 
 for game in games:
     if not os.path.exists(STATIC_DIR+game):
-        os.mkdir(STATIC_DIR+game)
+        os.makedirs(STATIC_DIR+game)
     if not os.path.exists(STATIC_DIR+game+"/formats"):
-        os.mkdir(STATIC_DIR+game+"/formats")
+        os.makedirs(STATIC_DIR+game+"/formats")
     if genindex:
         template.idxfile(STATIC_DIR+game+"/index"+FEXT, "w", "Pokemon "+game.title()).close()
         template.idxfile(STATIC_DIR+game+"/formats/index"+FEXT, "w", "Pokemon "+game.title()+" Formats").close()
